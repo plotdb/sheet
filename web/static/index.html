@@ -1,0 +1,181 @@
+<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap/main/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldiconfont/main/ldif.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldcover/main/ldcv.min.css"><link rel="stylesheet" type="text/css" href="css/index.css"><style type="text/css">html,
+body {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+.sheet {
+  position: relative;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #999;
+  width: fit-content;
+/*.srow
+    display: flex
+    flex-wrap: nowrap
+    width: fit-content
+  */
+}
+.sheet .srow {
+  display: grid;
+  grid-template-columns: repeat(28, 48px);
+  width: fit-content;
+}
+.sheet .scell {
+  border-width: 0 1px 1px 0;
+  border-style: solid;
+  border-color: #ddd;
+/* use em may lead to nondeterminstic behavior in border rendering, due to rounding */
+  padding: 1px;
+  min-width: 48px;
+  min-height: 26px;
+  line-height: 26px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+.sheet .scell:last-child {
+  border-right-width: 0;
+}
+.sheet .srow:last-child .scell {
+  border-bottom-width: 0;
+}
+.sheet .srow.idx,
+.sheet .srow .scell:first-child {
+  position: sticky;
+  background: #f1f2f3;
+  color: #919293;
+  font-size: 0.85em;
+  text-align: center;
+}
+.sheet .srow.idx {
+  z-index: 101;
+  top: 0;
+}
+.sheet .srow .scell:first-child {
+  z-index: 100;
+  left: 0;
+}
+.sheet .scell.idx {
+  user-select: none;
+}
+.sel {
+  z-index: 10;
+  border: 1px solid #27f;
+  position: absolute;
+  display: none;
+  user-select: none;
+  pointer-events: none;
+}
+.sel-main {
+  z-index: 11;
+  border: 2px solid #27f;
+  position: absolute;
+  display: none;
+  user-select: none;
+  pointer-events: none;
+}
+.edit {
+  z-index: 21;
+  border: 2px solid #27f;
+  position: absolute;
+  display: none;
+}
+.edit textarea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+}
+</style></head><body><div class="w-1024 rwd mx-auto my-4"><div class="aspect-ratio ratio-2by1"><div class="sheet w-100 h-100" style="overflow:scroll"><div class="edit"><textarea></textarea></div><div class="sel"></div><div class="sel-main"></div><div class="sel-main"></div><div class="srow idx"><div class="scell idx"> </div><div class="scell idx">A</div><div class="scell idx">B</div><div class="scell idx">C</div><div class="scell idx">D</div><div class="scell idx">C</div><div class="scell idx">E</div><div class="scell idx">F</div><div class="scell idx">G</div><div class="scell idx">H</div><div class="scell idx">I</div><div class="scell idx">J</div><div class="scell idx">K</div><div class="scell idx">L</div><div class="scell idx">M</div><div class="scell idx">N</div><div class="scell idx">O</div><div class="scell idx">P</div><div class="scell idx">Q</div><div class="scell idx">R</div><div class="scell idx">S</div><div class="scell idx">T</div><div class="scell idx">U</div><div class="scell idx">V</div><div class="scell idx">W</div><div class="scell idx">X</div><div class="scell idx">Y</div><div class="scell idx">Z</div></div><div class="srow"><div class="scell idx">1</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">2</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">3</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">4</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">5</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">6</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">7</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">8</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">9</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">10</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">11</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">12</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">13</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">14</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">15</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">16</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">17</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">18</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">19</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">20</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">21</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">22</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">23</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">24</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">25</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">26</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">27</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">28</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">29</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">30</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">31</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">32</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">33</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">34</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">35</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div><div class="srow"><div class="scell idx">36</div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div><div class="scell"></div></div></div></div></div><script type="text/javascript" src="assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="assets/lib/dompurify/main/purify.min.js"></script><script>(function(it){
+  return it.apply({});
+})(function(){
+  var sheet, sel, selMain, edit, input, updateText, render, this$ = this;
+  sheet = ld$.find('.sheet', 0);
+  sel = ld$.find(sheet, '.sel', 0);
+  selMain = ld$.find(sheet, '.sel-main', 0);
+  edit = ld$.find(sheet, '.edit', 0);
+  input = ld$.find(sheet, '.edit textarea', 0);
+  this.sel = {};
+  input.addEventListener('keydown', function(e){
+    if (e.keyCode === 13) {
+      console.log(e.altKey || e.metaKey);
+      if (!(e.altKey || e.metaKey)) {
+        return updateText();
+      }
+      return input.setAttribute('rows', 2);
+    }
+  });
+  updateText = function(){
+    if (!this$.sel.node) {
+      return;
+    }
+    this$.sel.node.textContent = input.value || '';
+    edit.style.display = 'none';
+    selMain.style.display = 'none';
+    sel.style.display = 'none';
+    return this$.sel.node = null;
+  };
+  sheet.addEventListener('dblclick', function(e){
+    var n, p, box, rbox, ref$;
+    n = e.target;
+    if (!(p = ld$.parent(n, '.scell', sheet))) {
+      return;
+    }
+    this$.sel.node = p;
+    box = p.getBoundingClientRect();
+    rbox = sheet.getBoundingClientRect();
+    ref$ = edit.style;
+    ref$.left = (box.x - rbox.x + sheet.scrollLeft - 2) + "px";
+    ref$.top = (box.y - rbox.y + sheet.scrollTop - 2) + "px";
+    ref$.width = (box.width + 1) + "px";
+    ref$.height = (box.height + 1) + "px";
+    ref$.display = 'block';
+    input.value = p.textContent || '';
+    return input.focus();
+  });
+  sheet.addEventListener('mousedown', function(e){
+    var n, p;
+    updateText();
+    n = e.target;
+    if (!(p = ld$.parent(n, '.scell', sheet))) {
+      return;
+    }
+    this$.sel.start = p;
+    this$.sel.end = p;
+    return render();
+  });
+  sheet.addEventListener('mousemove', function(e){
+    var n, p;
+    if (!e.buttons) {
+      return;
+    }
+    n = e.target;
+    if (!(p = ld$.parent(n, '.scell', sheet))) {
+      return;
+    }
+    this$.sel.end = p;
+    return render();
+  });
+  return render = function(){
+    var sbox, ebox, rbox, x1, y1, x2, y2, w, h, ref$;
+    sbox = this$.sel.start.getBoundingClientRect();
+    ebox = this$.sel.end.getBoundingClientRect();
+    rbox = sheet.getBoundingClientRect();
+    x1 = Math.min(sbox.x, ebox.x) - rbox.x + sheet.scrollLeft - 2;
+    y1 = Math.min(sbox.y, ebox.y) - rbox.y + sheet.scrollTop - 2;
+    x2 = Math.max(sbox.x + sbox.width, ebox.x + ebox.width) - rbox.x + sheet.scrollLeft - 2;
+    y2 = Math.max(sbox.y + ebox.height, ebox.y + ebox.height) - rbox.y + sheet.scrollTop - 2;
+    w = x2 - x1 + 1;
+    h = y2 - y1 + 1;
+    ref$ = sel.style;
+    ref$.left = x1 + "px";
+    ref$.top = y1 + "px";
+    ref$.width = w + "px";
+    ref$.height = h + "px";
+    ref$.display = 'block';
+    return ref$ = selMain.style, ref$.left = (sbox.x - rbox.x + sheet.scrollLeft - 2) + "px", ref$.top = (sbox.y - rbox.y + sheet.scrollTop - 2) + "px", ref$.width = (sbox.width + 1) + "px", ref$.height = (sbox.height + 1) + "px", ref$.display = 'block', ref$;
+  };
+});</script></body></html>
