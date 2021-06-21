@@ -61,26 +61,32 @@ body {
 }
 .sheet .range {
   z-index: 10;
-  position: absolute;
   border: 1px solid #27f;
   user-select: none;
   opacity: 0;
   pointer-events: none;
+  top: 0;
+  left: 0;
+  position: absolute;
 }
 .sheet .caret {
   z-index: 11;
-  position: absolute;
   border: 2px solid #27f;
   user-select: none;
   opacity: 0;
   pointer-events: none;
+  top: 0;
+  left: 0;
+  position: absolute;
 }
 .sheet .edit {
   z-index: 21;
   border: 2px solid #27f;
-  position: absolute;
   opacity: 0;
   pointer-events: none;
+  top: 0;
+  left: 0;
+  position: absolute;
 }
 .sheet .edit textarea {
   display: block /* eliminate small gap between .edit and textarea */;
@@ -89,6 +95,8 @@ body {
 }
 .sheet .layout {
   display: inline-block;
+  top: 0;
+  left: 0;
   position: absolute;
   z-index: 0;
   opacity: 1;
