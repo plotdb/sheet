@@ -7,11 +7,58 @@ edit = ld$.find sheet, '.edit', 0
 input = ld$.find sheet, '.edit textarea', 0
 @sel = {}
 
+get-by-idx = (opt = {}) ->
+  base = if opt.node => index(opt.node) else {row: 0, col: 0}
+  if !base => throw new Error("node not found in sheet")
+  row = base.row + (opt.row or 0)
+  col = base.col + (opt.col or 0)
+  row = ld$.find sheet, '.srow', row
+  col = ld$.find row, '.scell', col
+  return col
+
+index = (c) ->
+  if !(r = ld$.parent(c, '.srow', sheet)) => return
+  col = Array.from(r.childNodes)
+    .filter -> it.classList.contains \scell
+    .indexOf c
+  row = Array.from(r.parentNode.childNodes)
+    .filter -> it.classList.contains \srow
+    .indexOf r
+  return {col, row}
+
+document.body.addEventListener \keydown, (e) ~>
+  code = e.keyCode
+  opt = switch code
+  | 37 => {row: 0, col: -1}
+  | 38 => {row: -1, col: 0}
+  | 39 => {row: 0, col: 1}
+  | 40 => {row: 1, col: 0}
+  | otherwise => null
+  if !opt => return
+  if @sel.node => update-text!
+  node = @sel.start
+  opt.node = node
+  if !node => return
+  node = get-by-idx opt
+  if !node => return
+  @sel.start = node
+  @sel.end = node
+  render!
+  e.stopPropagation!
+  e.preventDefault!
+
+
+
+document.body.addEventListener \keypress, (e) ~>
+  if @sel.start and !@sel.node => enter-edit @sel.start
+
 input.addEventListener \keydown, (e) ~>
   if e.keyCode == 13 =>
-    console.log (e.altKey or e.metaKey)
     if !(e.altKey or e.metaKey) => return update-text!
     input.setAttribute \rows, 2
+
+input.addEventListener \mousedown, (e) ->
+  e.stopPropagation!
 
 
 update-text = ~>
@@ -22,10 +69,9 @@ update-text = ~>
   sel.style.display = \none
   @sel.node = null
 
-sheet.addEventListener \dblclick, (e) ~>
-  n = e.target
-  if !(p = ld$.parent n, '.scell', sheet) => return
+enter-edit = (p) ~>
   @sel.node = p
+  console.log index(p)
   box = p.getBoundingClientRect!
   rbox = sheet.getBoundingClientRect!
   edit.style <<< 
@@ -36,6 +82,11 @@ sheet.addEventListener \dblclick, (e) ~>
     display: \block
   input.value = p.textContent or ''
   input.focus!
+
+sheet.addEventListener \dblclick, (e) ~>
+  n = e.target
+  if !(p = ld$.parent n, '.scell', sheet) => return
+  enter-edit p
 
 sheet.addEventListener \mousedown, (e) ~>
   update-text!

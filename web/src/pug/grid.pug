@@ -1,0 +1,95 @@
+extends /base.pug
+block head
+  style(type="text/css"): :stylus
+    html, body { width: 100%; height: 100%; background: #fff }
+    hide()
+      opacity: 0
+      pointer-events: none
+
+    .sheet
+      position: relative
+      border-width: 1px
+      border-style: solid
+      border-color: #999
+      width: 100%
+      height: 100%
+      overflow: scroll
+      .inner
+        position: relative
+        z-index: 1
+        display: grid
+        width: fit-content
+        height: fit-content
+      .cell
+        user-select: none
+        border-width: 0 1px 1px 0
+        border-style: solid
+        border-color: #ddd
+        /* use em may lead to nondeterminstic behavior in border rendering, due to rounding */
+        padding: 1px
+        min-width: 48px
+        min-height: 26px
+        line-height: 26px
+        flex: 0 0 auto
+        box-sizing: border-box
+        white-space: pre
+        overflow: hidden
+      .cell.idx
+        position: sticky
+        background: #f1f2f3
+        color: #919293
+        font-size: .85em
+        text-align: center
+        user-select: none
+      .cell.idx.x
+        z-index: 100
+        left: 0
+      .cell.idx.y
+        z-index: 101
+        top: 0
+      .cell.idx.xy
+        z-index: 102
+        top: 0
+        left: 0
+      .cell.debug
+        background: #f00
+      .range
+        z-index: 10
+        position: absolute
+        border: 1px solid #27f
+        user-select: none
+        hide()
+      .caret
+        z-index: 11
+        position: absolute
+        border: 2px solid #27f
+        user-select: none
+        hide()
+      .edit
+        z-index: 21
+        border: 2px solid #27f
+        position: absolute
+        hide()
+        textarea
+          display: block /* eliminate small gap between .edit and textarea */
+          border: none
+          outline: none
+      .layout
+        display: inline-block
+        position: absolute
+        z-index: 0
+        opacity: 1
+        pointer-events: none
+        user-select: none
+        white-space: pre
+        padding-bottom: 1.5em
+      .show
+        opacity: 1!important
+
+block body
+  .w-1024.rwd.mx-auto.my-4: .aspect-ratio.ratio-2by1
+    .container
+
+
+block script
+  script: include:lsc grid.ls

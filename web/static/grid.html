@@ -1,0 +1,494 @@
+<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap/main/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldiconfont/main/ldif.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldcover/main/ldcv.min.css"><link rel="stylesheet" type="text/css" href="css/index.css"><style type="text/css">html,
+body {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+.sheet {
+  position: relative;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #999;
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+}
+.sheet .inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: fit-content;
+  height: fit-content;
+}
+.sheet .cell {
+  user-select: none;
+  border-width: 0 1px 1px 0;
+  border-style: solid;
+  border-color: #ddd;
+/* use em may lead to nondeterminstic behavior in border rendering, due to rounding */
+  padding: 1px;
+  min-width: 48px;
+  min-height: 26px;
+  line-height: 26px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  white-space: pre;
+  overflow: hidden;
+}
+.sheet .cell.idx {
+  position: sticky;
+  background: #f1f2f3;
+  color: #919293;
+  font-size: 0.85em;
+  text-align: center;
+  user-select: none;
+}
+.sheet .cell.idx.x {
+  z-index: 100;
+  left: 0;
+}
+.sheet .cell.idx.y {
+  z-index: 101;
+  top: 0;
+}
+.sheet .cell.idx.xy {
+  z-index: 102;
+  top: 0;
+  left: 0;
+}
+.sheet .cell.debug {
+  background: #f00;
+}
+.sheet .range {
+  z-index: 10;
+  position: absolute;
+  border: 1px solid #27f;
+  user-select: none;
+  opacity: 0;
+  pointer-events: none;
+}
+.sheet .caret {
+  z-index: 11;
+  position: absolute;
+  border: 2px solid #27f;
+  user-select: none;
+  opacity: 0;
+  pointer-events: none;
+}
+.sheet .edit {
+  z-index: 21;
+  border: 2px solid #27f;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.sheet .edit textarea {
+  display: block /* eliminate small gap between .edit and textarea */;
+  border: none;
+  outline: none;
+}
+.sheet .layout {
+  display: inline-block;
+  position: absolute;
+  z-index: 0;
+  opacity: 1;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre;
+  padding-bottom: 1.5em;
+}
+.sheet .show {
+  opacity: 1 !important;
+}
+</style></head><body><div class="w-1024 rwd mx-auto my-4"><div class="aspect-ratio ratio-2by1"><div class="container"></div></div></div><script type="text/javascript" src="assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="assets/lib/dompurify/main/purify.min.js"></script><script>(function(it){
+  return it.apply({});
+})(function(){
+  var numToIdx, sheet, s;
+  numToIdx = function(v){
+    var ret, u;
+    if (v < 0) {
+      return "";
+    }
+    ret = "";
+    do {
+      u = v % 26;
+      ret = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(u) + ret;
+      v = (v - u) / 26;
+    } while (v > 0);
+    return ret;
+  };
+  sheet = function(opt){
+    var this$ = this;
+    opt == null && (opt = {});
+    this.root = typeof opt.root === 'string'
+      ? document.querySelector(opt.root)
+      : opt.root;
+    this.col = opt.col || 100;
+    this.row = opt.row || 100;
+    this.sel = {};
+    this.editing = {};
+    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
+      var x$, n;
+      x$ = n = document.createElement('div');
+      x$.classList.add(it);
+      return [it, n];
+    }));
+    this.dom.textarea = document.createElement('textarea');
+    this.root.appendChild(this.dom.sheet);
+    ['inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
+      return this$.dom.sheet.appendChild(this$.dom[it]);
+    });
+    this.dom.edit.appendChild(this.dom.textarea);
+    this._init();
+    return this;
+  };
+  sheet.prototype = import$(Object.create(Object.prototype), {
+    _init: function(){
+      var dom, i$, to$, r, j$, to1$, c, this$ = this;
+      this.regrid();
+      dom = this.dom.sheet;
+      for (i$ = 0, to$ = this.row; i$ < to$; ++i$) {
+        r = i$;
+        for (j$ = 0, to1$ = this.col; j$ < to1$; ++j$) {
+          c = j$;
+          this.addCell({
+            r: r,
+            c: c
+          });
+        }
+      }
+      dom.addEventListener('mousedown', function(e){
+        var p;
+        this$.edited();
+        if (!(p = ld$.parent(e.target, '.cell', dom))) {
+          return;
+        }
+        this$.sel.start = this$.sel.end = p;
+        return this$.renderSelection();
+      });
+      dom.addEventListener('mousemove', function(e){
+        var p;
+        if (this$.editing.on || !(e.buttons && (p = ld$.parent(e.target, '.cell', dom)))) {
+          return;
+        }
+        this$.sel.end = p;
+        return this$.renderSelection();
+      });
+      dom.addEventListener('dblclick', function(e){
+        var p;
+        if (!(p = ld$.parent(e.target, '.cell', dom))) {
+          return;
+        }
+        return this$.edit({
+          node: p,
+          quick: false
+        });
+      });
+      document.body.addEventListener('keydown', function(e){
+        var code, p1, p2, r1, r2, c1, c2, i$, r, j$, c, n, opt;
+        code = e.keyCode;
+        if (code === 8) {
+          if (!this$.sel.start) {
+            return;
+          }
+          p1 = this$.index(this$.sel.start);
+          p2 = this$.index(this$.sel.end);
+          r1 = Math.min(p1.row, p2.row);
+          r2 = Math.max(p1.row, p2.row);
+          c1 = Math.min(p1.col, p2.col);
+          c2 = Math.max(p1.col, p2.col);
+          for (i$ = r1; i$ <= r2; ++i$) {
+            r = i$;
+            for (j$ = c1; j$ <= c2; ++j$) {
+              c = j$;
+              n = this$.cell({
+                row: r,
+                col: c
+              });
+              if (n) {
+                n.textContent = "";
+              }
+            }
+          }
+          this$.renderSelection();
+        }
+        opt = (function(){
+          switch (code) {
+          case 37:
+            return {
+              row: 0,
+              col: -1
+            };
+          case 38:
+            return {
+              row: -1,
+              col: 0
+            };
+          case 39:
+            return {
+              row: 0,
+              col: 1
+            };
+          case 40:
+            return {
+              row: 1,
+              col: 0
+            };
+          default:
+            return null;
+          }
+        }());
+        if (!opt) {
+          return;
+        }
+        if (this$.editing.on && !this$.editing.quick) {
+          return;
+        }
+        this$.move(opt);
+        e.stopPropagation();
+        return e.preventDefault();
+      });
+      document.body.addEventListener('keypress', function(e){
+        if (this$.sel.start && !this$.editing.on) {
+          return this$.edit({
+            node: this$.sel.start,
+            quick: true
+          });
+        }
+      });
+      this.dom.textarea.addEventListener('keydown', function(e){
+        var lbox, box, ref$;
+        if (e.keyCode === 27 || (e.keyCode === 13 && !(e.altKey || e.metaKey))) {
+          this$.move({
+            row: 1,
+            col: 0
+          });
+          e.stopPropagation();
+          e.preventDefault();
+          return;
+        }
+        if (e.keyCode === 13 && (e.altKey || e.metaKey)) {
+          this$.dom.textarea.value += '\n';
+          this$.dom.layout.textContent = this$.dom.textarea.value;
+          lbox = this$.dom.layout.getBoundingClientRect();
+          box = this$.editing.node.getBoundingClientRect();
+          return ref$ = this$.dom.textarea.style, ref$.width = Math.max(lbox.width, box.width + 1) + "px", ref$.height = Math.max(lbox.height, box.height + 1) + "px", ref$;
+        }
+      });
+      return this.dom.textarea.addEventListener('mousedown', function(e){
+        return e.stopPropagation();
+      });
+    },
+    move: function(opt){
+      var node;
+      opt == null && (opt = {});
+      if (this.editing.on) {
+        this.edited();
+      }
+      node = this.sel.start;
+      opt.node = node;
+      if (!node) {
+        return;
+      }
+      node = this.cell(opt);
+      if (!node) {
+        return;
+      }
+      this.sel.start = node;
+      this.sel.end = node;
+      return this.renderSelection();
+    },
+    edit: function(arg$){
+      var node, quick, ref$, lbox, box, rbox, sx, sy;
+      node = arg$.node, quick = arg$.quick;
+      ref$ = this.editing;
+      ref$.node = node;
+      ref$.quick = quick;
+      ref$.on = true;
+      this.dom.layout.textContent = node.textContent;
+      lbox = this.dom.layout.getBoundingClientRect();
+      box = node.getBoundingClientRect();
+      rbox = this.dom.sheet.getBoundingClientRect();
+      ref$ = [this.dom.sheet.scrollLeft, this.dom.sheet.scrollTop], sx = ref$[0], sy = ref$[1];
+      ref$ = this.dom.edit.style;
+      ref$.left = (box.x - rbox.x + sx - 2) + "px";
+      ref$.top = (box.y - rbox.y + sy - 2) + "px";
+      ref$.width = "fit-content";
+      ref$.height = "fit-content";
+      this.dom.edit.classList.toggle('show', true);
+      ref$ = this.dom.textarea.style;
+      ref$.width = Math.max(lbox.width, box.width + 1) + "px";
+      ref$.height = Math.max(lbox.height, box.height + 1) + "px";
+      this.dom.textarea.value = quick
+        ? ''
+        : node.textContent || '';
+      return this.dom.textarea.focus();
+    },
+    edited: function(){
+      var ref$, this$ = this;
+      if (!this.editing.on) {
+        return;
+      }
+      this.editing.node.textContent = this.dom.textarea.value || '';
+      ['edit', 'caret', 'range'].map(function(it){
+        return this$.dom[it].classList.toggle('show', false);
+      });
+      return ref$ = this.editing, ref$.node = null, ref$.on = false, ref$;
+    },
+    regrid: function(){
+      return this.dom.inner.style.gridTemplateColumns = "repeat(" + this.col + ", max-content)";
+    },
+    addCell: function(arg$){
+      var r, c, div;
+      r = arg$.r, c = arg$.c;
+      div = document.createElement('div');
+      div.classList.add.apply(div.classList, !(c || r)
+        ? ['cell', 'idx', 'xy']
+        : !c
+          ? ['cell', 'idx', 'x']
+          : !r
+            ? ['cell', 'idx', 'y']
+            : ['cell']);
+      div.textContent = !(c || r)
+        ? ''
+        : !c
+          ? r
+          : !r ? numToIdx(c - 1) : '';
+      return this.dom.inner.insertBefore(div, this.dom.inner.childNodes[r * this.col + c]);
+    },
+    insertCol: function(c){
+      var i$, r;
+      for (i$ = this.row - 1; i$ >= 0; --i$) {
+        r = i$;
+        this.addCell({
+          r: r,
+          c: c
+        });
+      }
+      this.col = this.col + 1;
+      this.regrid();
+      return this.reidx();
+    },
+    insertRow: function(r){
+      var i$, to$, c;
+      for (i$ = 0, to$ = this.col; i$ < to$; ++i$) {
+        c = i$;
+        this.addCell({
+          r: r,
+          c: c
+        });
+      }
+      this.row = this.row + 1;
+      return this.reidx();
+    },
+    deleteCol: function(c){
+      var i$, r;
+      for (i$ = this.row - 1; i$ >= 0; --i$) {
+        r = i$;
+        this.dom.inner.removeChild(this.dom.inner.childNodes[r * this.col + c]);
+      }
+      this.col = this.col - 1;
+      this.regrid();
+      return this.reidx();
+    },
+    deleteRow: function(r){
+      var i$, to$, c;
+      for (i$ = 0, to$ = this.col; i$ < to$; ++i$) {
+        c = i$;
+        this.dom.inner.removeChild(this.dom.inner.childNodes[r * this.col]);
+      }
+      this.row = this.row - 1;
+      return this.reidx();
+    },
+    reidx: function(){
+      var i$, to$, r, c, results$ = [];
+      for (i$ = 0, to$ = this.row; i$ < to$; ++i$) {
+        r = i$;
+        this.dom.inner.childNodes[r * this.col].textContent = r;
+      }
+      for (i$ = 0, to$ = this.col; i$ < to$; ++i$) {
+        c = i$;
+        results$.push(this.dom.inner.childNodes[c].textContent = numToIdx(c - 1));
+      }
+      return results$;
+    },
+    setContent: function(arg$){
+      var row, col, content, node;
+      row = arg$.row, col = arg$.col, content = arg$.content;
+      node = this.dom.inner.childNodes[row * this.col + col];
+      return node.textContent = content;
+    },
+    index: function(node){
+      var idx, col, row;
+      idx = Array.from(this.dom.inner.childNodes).indexOf(node);
+      if (idx < 0) {
+        return null;
+      }
+      col = idx % this.col;
+      row = (idx - col) / this.col;
+      return {
+        row: row,
+        col: col
+      };
+    },
+    cell: function(opt){
+      var base, row, col;
+      opt == null && (opt = {});
+      base = opt.node
+        ? this.index(opt.node)
+        : {
+          row: 0,
+          col: 0
+        };
+      if (!base) {
+        throw new Error("node not found in sheet");
+      }
+      row = base.row + (opt.row || 0);
+      col = base.col + (opt.col || 0);
+      return this.dom.inner.childNodes[row * this.col + col];
+    },
+    renderSelection: function(){
+      var sbox, ebox, rbox, sx, sy, x1, y1, x2, y2, w, h, ref$;
+      sbox = this.sel.start.getBoundingClientRect();
+      ebox = this.sel.end.getBoundingClientRect();
+      rbox = this.dom.sheet.getBoundingClientRect();
+      sx = this.dom.sheet.scrollLeft;
+      sy = this.dom.sheet.scrollTop;
+      x1 = Math.min(sbox.x, ebox.x) - rbox.x + sx - 2;
+      y1 = Math.min(sbox.y, ebox.y) - rbox.y + sy - 2;
+      x2 = Math.max(sbox.x + sbox.width, ebox.x + ebox.width) - rbox.x + sx - 2;
+      y2 = Math.max(sbox.y + ebox.height, ebox.y + ebox.height) - rbox.y + sy - 2;
+      w = x2 - x1 + 1;
+      h = y2 - y1 + 1;
+      ref$ = this.dom.range.style;
+      ref$.left = x1 + "px";
+      ref$.top = y1 + "px";
+      ref$.width = w + "px";
+      ref$.height = h + "px";
+      ref$ = this.dom.caret.style;
+      ref$.left = (sbox.x - rbox.x + sx - 2) + "px";
+      ref$.top = (sbox.y - rbox.y + sy - 2) + "px";
+      ref$.width = (sbox.width + 1) + "px";
+      ref$.height = (sbox.height + 1) + "px";
+      this.dom.range.classList.toggle('show', true);
+      return this.dom.caret.classList.toggle('show', true);
+    }
+  });
+  s = new sheet({
+    root: '.container'
+  });
+  s.insertCol(3);
+  s.insertRow(2);
+  s.deleteRow(2);
+  s.deleteCol(3);
+  return s.setContent({
+    row: 3,
+    col: 4,
+    content: "this is a very long word.\nhello world!"
+  });
+});
+function import$(obj, src){
+  var own = {}.hasOwnProperty;
+  for (var key in src) if (own.call(src, key)) obj[key] = src[key];
+  return obj;
+}</script></body></html>
