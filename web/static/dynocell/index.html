@@ -1,0 +1,368 @@
+<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/main/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/ldiconfont/main/ldif.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/ldcover/main/ldcv.min.css"><link rel="stylesheet" type="text/css" href="/css/index.css"><style type="text/css">html,
+body {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+}
+.sheet {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.sheet .inner {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.sheet .cell {
+  position: relative;
+  user-select: none;
+  border-width: 0 1px 1px 0;
+  border-style: solid;
+  border-color: #ddd;
+/* use em may lead to nondeterminstic behavior in border rendering, due to rounding */
+  padding: 1px;
+  min-width: 48px;
+  min-height: 26px;
+  line-height: 26px;
+  box-sizing: border-box;
+  white-space: pre;
+  overflow: hidden;
+}
+.sheet .cell.idx {
+  z-index: 100;
+  background: #f1f2f3;
+  color: #919293;
+  font-size: 0.85em;
+  text-align: center;
+  user-select: none;
+}
+.sheet .range {
+  z-index: 10;
+  border: 1px solid #27f;
+  user-select: none;
+  opacity: 0;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+.sheet .caret {
+  z-index: 11;
+  border: 2px solid #27f;
+  user-select: none;
+  opacity: 0;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+.sheet .edit {
+  z-index: 21;
+  border: 2px solid #27f;
+  opacity: 0;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+.sheet .edit textarea {
+  display: block /* eliminate small gap between .edit and textarea */;
+  border: none;
+  outline: none;
+}
+.sheet .layout {
+  display: inline-block;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 0;
+  opacity: 1;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre;
+  padding-bottom: 1.5em;
+}
+.sheet .show {
+  opacity: 1 !important;
+}
+</style><style type="text/css"></style></head><body><div class="p-4"><div class="mx-auto rwd w-640"><div class="aspect-ratio ratio-1by1"><div class="shadow-sm border border-secondary rounded" id="root"></div></div></div></div><script type="text/javascript" src="/assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="/assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="/assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="/assets/lib/dompurify/main/purify.min.js"></script><script>var numToIdx, sheet, s;
+numToIdx = function(v){
+  var ret, u;
+  if (v < 0) {
+    return "";
+  }
+  ret = "";
+  u = v % 26;
+  ret = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(u) + ret;
+  v = (v - u) / 26;
+  while (v > 0) {
+    u = v % 26;
+    ret = " ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(u) + ret;
+    v = (v - u) / 26;
+  }
+  return ret;
+};
+sheet = function(opt){
+  var this$ = this;
+  opt == null && (opt = {});
+  this.root = typeof opt.root === 'string'
+    ? document.querySelector(opt.root)
+    : opt.root;
+  this.data = opt.data || [];
+  this.col = opt.col || 100;
+  this.row = opt.row || 100;
+  this.dim = {
+    col: (opt.dim || (opt.dim = {})).col || 30,
+    row: (opt.dim || (opt.dim = {})).row || 30
+  };
+  this.fix = {
+    col: 1,
+    row: 1
+  };
+  this.pos = {
+    col: 0,
+    row: 0,
+    x: 0,
+    y: 0
+  };
+  this.sel = {};
+  this.editing = {};
+  this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
+    var x$, n;
+    x$ = n = document.createElement('div');
+    x$.classList.add(it);
+    return [it, n];
+  }));
+  this.dom.textarea = document.createElement('textarea');
+  this.root.appendChild(this.dom.sheet);
+  ['inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
+    return this$.dom.sheet.appendChild(this$.dom[it]);
+  });
+  this.dom.edit.appendChild(this.dom.textarea);
+  this._init();
+  return this;
+};
+sheet.prototype = import$(Object.create(Object.prototype), {
+  _init: function(){
+    var i$, to$, r, j$, to1$, c, this$ = this;
+    for (i$ = 0, to$ = this.dim.row; i$ < to$; ++i$) {
+      r = i$;
+      for (j$ = 0, to1$ = this.dim.col; j$ < to1$; ++j$) {
+        c = j$;
+        this.addCell(c, r);
+      }
+    }
+    this.regrid();
+    document.body.addEventListener('keydown', function(e){
+      var delta;
+      return delta = (function(){
+        switch (e.keyCode) {
+        case 37:
+          return this._ml(1);
+        case 38:
+          return this._mu(1);
+        case 39:
+          return this._mr(1);
+        case 40:
+          return this._md(1);
+        default:
+          return null;
+        }
+      }.call(this$));
+    });
+    return document.body.addEventListener('wheel', function(e){
+      var ref$, dx, dy, ox, oy;
+      ref$ = [e.deltaX, e.deltaY], dx = ref$[0], dy = ref$[1];
+      ref$ = Math.abs(dx) > Math.abs(dy)
+        ? [dx, 0]
+        : [0, dy], dx = ref$[0], dy = ref$[1];
+      ref$ = [this$.pos.x, this$.pos.y], ox = ref$[0], oy = ref$[1];
+      this$.pos.x += dx / 30;
+      this$.pos.y += dy / 30;
+      dx = Math.round(this$.pos.x) - Math.round(ox);
+      dy = Math.round(this$.pos.y) - Math.round(oy);
+      if (dy > 0) {
+        this$._md(dy);
+      } else if (dy < 0) {
+        this$._mu(dy);
+      } else if (dx > 0) {
+        this$._mr(dx);
+      } else if (dx < 0) {
+        this$._ml(dx);
+      }
+      return e.preventDefault();
+    }, {
+      passive: false
+    });
+  },
+  regrid: function(){
+    return this.dom.inner.style.gridTemplateColumns = "repeat(" + this.dim.col + ", max-content)";
+  },
+  addCell: function(x, y){
+    var div;
+    div = document.createElement('div');
+    div.classList.add.apply(div.classList, !(x && y)
+      ? ['cell', 'idx']
+      : ['cell']);
+    div.textContent = !(x || y)
+      ? ''
+      : !x
+        ? y
+        : !y ? numToIdx(x - 1) : '';
+    return this.dom.inner.insertBefore(div, this.dom.inner.childNodes[y * this.dim.col + x]);
+  },
+  _content: function(arg$){
+    var x, y, n, ref$, key$, textContent, className;
+    x = arg$.x, y = arg$.y, n = arg$.n;
+    if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
+      return;
+    }
+    ref$ = !(x || y)
+      ? ["", "cell idx"]
+      : !x
+        ? [y + this.pos.row, "cell idx"]
+        : !y
+          ? [numToIdx(x - 1 + this.pos.col), "cell idx"]
+          : [((ref$ = this.data)[key$ = this.pos.row + y - 1] || (ref$[key$] = []))[this.pos.col + x - 1] || '', "cell"], textContent = ref$[0], className = ref$[1];
+    return n.textContent = textContent, n.className = className, n;
+  },
+  _md: function(mag){
+    var inner, start, ref$, i$, j, j$, to$, i, idx, n;
+    mag == null && (mag = 1);
+    inner = this.dom.inner;
+    mag = Math.round(Math.abs(mag));
+    start = (ref$ = mag - (this.dim.row - this.fix.row)) > 0 ? ref$ : 0;
+    for (i$ = start; i$ < mag; ++i$) {
+      j = i$;
+      for (j$ = 0, to$ = this.dim.col; j$ < to$; ++j$) {
+        i = j$;
+        idx = this.dim.col * this.fix.row;
+        if (!inner.childNodes[idx]) {
+          break;
+        }
+        inner.removeChild(inner.childNodes[idx]);
+      }
+    }
+    for (i$ = start; i$ < mag; ++i$) {
+      j = i$;
+      for (j$ = 0, to$ = this.dim.col; j$ < to$; ++j$) {
+        i = j$;
+        n = document.createElement('div');
+        this._content({
+          x: i,
+          y: this.dim.row + j,
+          n: n
+        });
+        inner.appendChild(n);
+      }
+    }
+    return this.pos.row += mag;
+  },
+  _mu: function(mag){
+    var inner, start, ref$, i$, j, j$, to$, i, lresult$, n, results$ = [];
+    mag == null && (mag = 1);
+    inner = this.dom.inner;
+    if (this.pos.row <= 0) {
+      return;
+    }
+    mag = Math.round(Math.abs(mag));
+    if (mag >= this.pos.row) {
+      mag = this.pos.row;
+    }
+    start = (ref$ = mag - (this.dim.row - this.fix.row)) > 0 ? ref$ : 0;
+    for (i$ = start; i$ < mag; ++i$) {
+      j = i$;
+      for (j$ = 0, to$ = this.dim.col; j$ < to$; ++j$) {
+        i = j$;
+        if (!inner.childNodes.length) {
+          break;
+        }
+        inner.removeChild(inner.childNodes[inner.childNodes.length - 1]);
+      }
+    }
+    this.pos.row -= mag;
+    for (i$ = start; i$ < mag; ++i$) {
+      j = i$;
+      lresult$ = [];
+      for (j$ = 0, to$ = this.dim.col; j$ < to$; ++j$) {
+        i = j$;
+        n = document.createElement('div');
+        this._content({
+          x: i,
+          y: j + 1,
+          n: n
+        });
+        lresult$.push(inner.insertBefore(n, inner.childNodes[i + (j - start) * this.dim.col + this.dim.col * this.fix.row]));
+      }
+      results$.push(lresult$);
+    }
+    return results$;
+  },
+  _mr: function(mag){
+    var inner, start, ref$, i$, j, j$, to$, i, n;
+    mag == null && (mag = 1);
+    inner = this.dom.inner;
+    mag = Math.round(Math.abs(mag));
+    start = (ref$ = mag - (this.dim.col - this.fix.col)) > 0 ? ref$ : 0;
+    for (i$ = start; i$ < mag; ++i$) {
+      j = i$;
+      for (j$ = 0, to$ = this.dim.row; j$ < to$; ++j$) {
+        i = j$;
+        inner.removeChild(inner.childNodes[i * this.dim.col + this.fix.col]);
+        n = document.createElement('div');
+        this._content({
+          x: this.dim.col + j,
+          y: i,
+          n: n
+        });
+        inner.insertBefore(n, inner.childNodes[(i + 1) * this.dim.col - 1]);
+      }
+    }
+    this.pos.col += mag;
+    return this.regrid();
+  },
+  _ml: function(mag){
+    var inner, start, ref$, i$, j, j$, to$, i, n;
+    mag == null && (mag = 1);
+    inner = this.dom.inner;
+    mag = Math.round(Math.abs(mag));
+    if (mag >= this.pos.col) {
+      mag = this.pos.col;
+    }
+    if (this.pos.col <= 0 || mag <= 0) {
+      return;
+    }
+    start = (ref$ = mag - (this.dim.col - this.fix.col)) > 0 ? ref$ : 0;
+    this.pos.col -= mag;
+    for (i$ = start; i$ < mag; ++i$) {
+      j = i$;
+      for (j$ = 0, to$ = this.dim.row; j$ < to$; ++j$) {
+        i = j$;
+        inner.removeChild(inner.childNodes[(i + 1) * this.dim.col - 1]);
+        n = document.createElement('div');
+        this._content({
+          x: j + 1,
+          y: i,
+          n: n
+        });
+        inner.insertBefore(n, inner.childNodes[i * this.dim.col + this.fix.col + j - start]);
+      }
+    }
+    return this.regrid();
+  }
+});
+s = new sheet({
+  root: '#root'
+});
+function import$(obj, src){
+  var own = {}.hasOwnProperty;
+  for (var key in src) if (own.call(src, key)) obj[key] = src[key];
+  return obj;
+}</script></body></html>

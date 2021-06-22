@@ -1,0 +1,15 @@
+extends /base.pug
+block head
+  style(type="text/css"): include:stylus index.styl
+  style(type="text/css"): :stylus
+
+
+block body
+  .p-4: .mx-auto.rwd.w-640
+    .aspect-ratio.ratio-1by1
+      #root.shadow-sm.border.border-secondary.rounded
+
+
+block script
+  script: include:lsc index.ls
+
