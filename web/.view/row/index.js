@@ -112,53 +112,53 @@ var loremtext = {
 pug_html = pug_html + "\u003Chead\u003E";
 ;pug_debug_line = 7;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
 ;pug_debug_line = 8;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["css"]("assets/lib/bootstrap/main/css/bootstrap.min.css");
+pug_mixins["css"]("/assets/lib/bootstrap/main/css/bootstrap.min.css");
 ;pug_debug_line = 9;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["css"]("assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css");
+pug_mixins["css"]("/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css");
 ;pug_debug_line = 10;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["css"]("assets/lib/ldiconfont/main/ldif.min.css");
+pug_mixins["css"]("/assets/lib/ldiconfont/main/ldif.min.css");
 ;pug_debug_line = 12;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["css"]("assets/lib/ldcover/main/ldcv.min.css");
+pug_mixins["css"]("/assets/lib/ldcover/main/ldcv.min.css");
 ;pug_debug_line = 14;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["css"]("css/index.css");
+pug_mixins["css"]("/css/index.css");
 ;pug_debug_line = 15;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-;pug_debug_line = 3;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 3;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cstyle type=\"text\u002Fcss\"\u003E";
-;pug_debug_line = 3;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 3;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "html,\nbody {\n  width: 100%;\n  height: 100%;\n  background: #fff;\n}\n.sheet {\n  position: relative;\n  border-width: 1px;\n  border-style: solid;\n  border-color: #999;\n  width: fit-content;\n\u002F*.srow\n    display: flex\n    flex-wrap: nowrap\n    width: fit-content\n  *\u002F\n}\n.sheet .srow {\n  display: grid;\n  grid-template-columns: repeat(28, 48px);\n  width: fit-content;\n}\n.sheet .scell {\n  user-select: none;\n  border-width: 0 1px 1px 0;\n  border-style: solid;\n  border-color: #ddd;\n\u002F* use em may lead to nondeterminstic behavior in border rendering, due to rounding *\u002F\n  padding: 1px;\n  min-width: 48px;\n  min-height: 26px;\n  line-height: 26px;\n  flex: 0 0 auto;\n  box-sizing: border-box;\n}\n.sheet .scell:last-child {\n  border-right-width: 0;\n}\n.sheet .srow:last-child .scell {\n  border-bottom-width: 0;\n}\n.sheet .srow.idx,\n.sheet .srow .scell:first-child {\n  position: sticky;\n  background: #f1f2f3;\n  color: #919293;\n  font-size: 0.85em;\n  text-align: center;\n}\n.sheet .srow.idx {\n  z-index: 101;\n  top: 0;\n}\n.sheet .srow .scell:first-child {\n  z-index: 100;\n  left: 0;\n}\n.sheet .scell.idx {\n  user-select: none;\n}\n.sel {\n  z-index: 10;\n  border: 1px solid #27f;\n  position: absolute;\n  display: none;\n  user-select: none;\n  pointer-events: none;\n}\n.sel-main {\n  z-index: 11;\n  border: 2px solid #27f;\n  position: absolute;\n  display: none;\n  user-select: none;\n  pointer-events: none;\n}\n.edit {\n  z-index: 21;\n  border: 2px solid #27f;\n  position: absolute;\n  display: none;\n}\n.edit textarea {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  border: none;\n  outline: none;\n}\n\u003C\u002Fstyle\u003E\u003C\u002Fhead\u003E";
 ;pug_debug_line = 16;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
 pug_html = pug_html + "\u003Cbody\u003E";
 ;pug_debug_line = 18;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-;pug_debug_line = 79;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 79;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"w-1024 rwd mx-auto my-4\"\u003E";
-;pug_debug_line = 79;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 79;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"aspect-ratio ratio-2by1\"\u003E";
-;pug_debug_line = 80;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 80;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"sheet w-100 h-100\" style=\"overflow:scroll\"\u003E";
-;pug_debug_line = 81;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 81;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"edit\"\u003E";
-;pug_debug_line = 81;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 81;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Ctextarea\u003E\u003C\u002Ftextarea\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 82;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 82;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"sel\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 83;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 83;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"sel-main\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 84;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 84;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"sel-main\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 85;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 85;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"srow idx\"\u003E";
-;pug_debug_line = 86;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 86;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 var cols = " ABCDCEFGHIJKLMNOPQRSTUVWXYZ".split('')
-;pug_debug_line = 87;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 87;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate cols
 ;(function(){
   var $$obj = cols;
   if ('number' == typeof $$obj.length) {
       for (var pug_index0 = 0, $$l = $$obj.length; pug_index0 < $$l; pug_index0++) {
         var i = $$obj[pug_index0];
-;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell idx\"\u003E";
-;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + (pug_escape(null == (pug_interp = i) ? "" : pug_interp)) + "\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -166,54 +166,54 @@ pug_html = pug_html + (pug_escape(null == (pug_interp = i) ? "" : pug_interp)) +
     for (var pug_index0 in $$obj) {
       $$l++;
       var i = $$obj[pug_index0];
-;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell idx\"\u003E";
-;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 88;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + (pug_escape(null == (pug_interp = i) ? "" : pug_interp)) + "\u003C\u002Fdiv\u003E";
     }
   }
 }).call(this);
 
 pug_html = pug_html + "\u003C\u002Fdiv\u003E";
-;pug_debug_line = 89;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 89;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5,6]
 ;(function(){
   var $$obj = [1,2,3,4,5,6];
   if ('number' == typeof $$obj.length) {
       for (var pug_index1 = 0, $$l = $$obj.length; pug_index1 < $$l; pug_index1++) {
         var k = $$obj[pug_index1];
-;pug_debug_line = 90;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 90;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5,6]
 ;(function(){
   var $$obj = [1,2,3,4,5,6];
   if ('number' == typeof $$obj.length) {
       for (var pug_index2 = 0, $$l = $$obj.length; pug_index2 < $$l; pug_index2++) {
         var m = $$obj[pug_index2];
-;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"srow\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell idx\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + (pug_escape(null == (pug_interp = m + ( k - 1 ) * 6) ? "" : pug_interp)) + "\u003C\u002Fdiv\u003E";
-;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index3 = 0, $$l = $$obj.length; pug_index3 < $$l; pug_index3++) {
         var i = $$obj[pug_index3];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index4 = 0, $$l = $$obj.length; pug_index4 < $$l; pug_index4++) {
         var j = $$obj[pug_index4];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -221,7 +221,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index4 in $$obj) {
       $$l++;
       var j = $$obj[pug_index4];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -233,14 +233,14 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index3 in $$obj) {
       $$l++;
       var i = $$obj[pug_index3];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index5 = 0, $$l = $$obj.length; pug_index5 < $$l; pug_index5++) {
         var j = $$obj[pug_index5];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -248,7 +248,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index5 in $$obj) {
       $$l++;
       var j = $$obj[pug_index5];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -265,31 +265,31 @@ pug_html = pug_html + "\u003C\u002Fdiv\u003E";
     for (var pug_index2 in $$obj) {
       $$l++;
       var m = $$obj[pug_index2];
-;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"srow\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell idx\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + (pug_escape(null == (pug_interp = m + ( k - 1 ) * 6) ? "" : pug_interp)) + "\u003C\u002Fdiv\u003E";
-;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index6 = 0, $$l = $$obj.length; pug_index6 < $$l; pug_index6++) {
         var i = $$obj[pug_index6];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index7 = 0, $$l = $$obj.length; pug_index7 < $$l; pug_index7++) {
         var j = $$obj[pug_index7];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -297,7 +297,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index7 in $$obj) {
       $$l++;
       var j = $$obj[pug_index7];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -309,14 +309,14 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index6 in $$obj) {
       $$l++;
       var i = $$obj[pug_index6];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index8 = 0, $$l = $$obj.length; pug_index8 < $$l; pug_index8++) {
         var j = $$obj[pug_index8];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -324,7 +324,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index8 in $$obj) {
       $$l++;
       var j = $$obj[pug_index8];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -345,38 +345,38 @@ pug_html = pug_html + "\u003C\u002Fdiv\u003E";
     for (var pug_index1 in $$obj) {
       $$l++;
       var k = $$obj[pug_index1];
-;pug_debug_line = 90;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 90;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5,6]
 ;(function(){
   var $$obj = [1,2,3,4,5,6];
   if ('number' == typeof $$obj.length) {
       for (var pug_index9 = 0, $$l = $$obj.length; pug_index9 < $$l; pug_index9++) {
         var m = $$obj[pug_index9];
-;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"srow\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell idx\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + (pug_escape(null == (pug_interp = m + ( k - 1 ) * 6) ? "" : pug_interp)) + "\u003C\u002Fdiv\u003E";
-;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index10 = 0, $$l = $$obj.length; pug_index10 < $$l; pug_index10++) {
         var i = $$obj[pug_index10];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index11 = 0, $$l = $$obj.length; pug_index11 < $$l; pug_index11++) {
         var j = $$obj[pug_index11];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -384,7 +384,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index11 in $$obj) {
       $$l++;
       var j = $$obj[pug_index11];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -396,14 +396,14 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index10 in $$obj) {
       $$l++;
       var i = $$obj[pug_index10];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index12 = 0, $$l = $$obj.length; pug_index12 < $$l; pug_index12++) {
         var j = $$obj[pug_index12];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -411,7 +411,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index12 in $$obj) {
       $$l++;
       var j = $$obj[pug_index12];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -428,31 +428,31 @@ pug_html = pug_html + "\u003C\u002Fdiv\u003E";
     for (var pug_index9 in $$obj) {
       $$l++;
       var m = $$obj[pug_index9];
-;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 91;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"srow\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell idx\"\u003E";
-;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 92;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + (pug_escape(null == (pug_interp = m + ( k - 1 ) * 6) ? "" : pug_interp)) + "\u003C\u002Fdiv\u003E";
-;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 93;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 94;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
-;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 95;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index13 = 0, $$l = $$obj.length; pug_index13 < $$l; pug_index13++) {
         var i = $$obj[pug_index13];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index14 = 0, $$l = $$obj.length; pug_index14 < $$l; pug_index14++) {
         var j = $$obj[pug_index14];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -460,7 +460,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index14 in $$obj) {
       $$l++;
       var j = $$obj[pug_index14];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -472,14 +472,14 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index13 in $$obj) {
       $$l++;
       var i = $$obj[pug_index13];
-;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 96;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 // iterate [1,2,3,4,5]
 ;(function(){
   var $$obj = [1,2,3,4,5];
   if ('number' == typeof $$obj.length) {
       for (var pug_index15 = 0, $$l = $$obj.length; pug_index15 < $$l; pug_index15++) {
         var j = $$obj[pug_index15];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
       }
   } else {
@@ -487,7 +487,7 @@ pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     for (var pug_index15 in $$obj) {
       $$l++;
       var j = $$obj[pug_index15];
-;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 97;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cdiv class=\"scell\"\u003E\u003C\u002Fdiv\u003E";
     }
   }
@@ -508,33 +508,33 @@ pug_html = pug_html + "\u003C\u002Fdiv\u003E";
 
 pug_html = pug_html + "\u003C\u002Fdiv\u003E\u003C\u002Fdiv\u003E\u003C\u002Fdiv\u003E";
 ;pug_debug_line = 19;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/proxise/main/proxise.min.js");
+pug_mixins["script"]("/assets/lib/proxise/main/proxise.min.js");
 ;pug_debug_line = 20;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/@plotdb/json0/main/json0.min.js");
+pug_mixins["script"]("/assets/lib/@plotdb/json0/main/json0.min.js");
 ;pug_debug_line = 21;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/bootstrap.native/main/bootstrap-native.min.js");
+pug_mixins["script"]("/assets/lib/bootstrap.native/main/bootstrap-native.min.js");
 ;pug_debug_line = 22;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js");
+pug_mixins["script"]("/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js");
 ;pug_debug_line = 23;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/@loadingio/ldquery/main/ldq.min.js");
+pug_mixins["script"]("/assets/lib/@loadingio/ldquery/main/ldq.min.js");
 ;pug_debug_line = 24;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/@loadingio/debounce.js/main/debounce.min.js");
+pug_mixins["script"]("/assets/lib/@loadingio/debounce.js/main/debounce.min.js");
 ;pug_debug_line = 25;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/ldcover/main/ldcv.min.js");
+pug_mixins["script"]("/assets/lib/ldcover/main/ldcv.min.js");
 ;pug_debug_line = 26;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/ldview/main/index.min.js");
+pug_mixins["script"]("/assets/lib/ldview/main/index.min.js");
 ;pug_debug_line = 27;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/@plotdb/datadom/main/datadom.min.js");
+pug_mixins["script"]("/assets/lib/@plotdb/datadom/main/datadom.min.js");
 ;pug_debug_line = 28;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/@plotdb/csscope/main/csscope.min.js");
+pug_mixins["script"]("/assets/lib/@plotdb/csscope/main/csscope.min.js");
 ;pug_debug_line = 29;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/@plotdb/rescope/main/rescope.min.js");
+pug_mixins["script"]("/assets/lib/@plotdb/rescope/main/rescope.min.js");
 ;pug_debug_line = 30;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-pug_mixins["script"]("assets/lib/dompurify/main/purify.min.js");
+pug_mixins["script"]("/assets/lib/dompurify/main/purify.min.js");
 ;pug_debug_line = 31;pug_debug_filename = "\u002FUsers\u002Ftkirby\u002Fworkspace\u002Fzbryikt\u002Fplotdb\u002Fprojects\u002Fsheet\u002Fweb\u002Fsrc\u002Fpug\u002Fbase.pug";
-;pug_debug_line = 100;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 100;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "\u003Cscript\u003E";
-;pug_debug_line = 100;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
+;pug_debug_line = 100;pug_debug_filename = "src\u002Fpug\u002Frow\u002Findex.pug";
 pug_html = pug_html + "(function(it){\n  return it.apply({});\n})(function(){\n  var sheet, sel, selMain, edit, input, getByIdx, index, updateText, enterEdit, render, this$ = this;\n  sheet = ld$.find('.sheet', 0);\n  sel = ld$.find(sheet, '.sel', 0);\n  selMain = ld$.find(sheet, '.sel-main', 0);\n  edit = ld$.find(sheet, '.edit', 0);\n  input = ld$.find(sheet, '.edit textarea', 0);\n  this.sel = {};\n  getByIdx = function(opt){\n    var base, row, col;\n    opt == null && (opt = {});\n    base = opt.node\n      ? index(opt.node)\n      : {\n        row: 0,\n        col: 0\n      };\n    if (!base) {\n      throw new Error(\"node not found in sheet\");\n    }\n    row = base.row + (opt.row || 0);\n    col = base.col + (opt.col || 0);\n    row = ld$.find(sheet, '.srow', row);\n    col = ld$.find(row, '.scell', col);\n    return col;\n  };\n  index = function(c){\n    var r, col, row;\n    if (!(r = ld$.parent(c, '.srow', sheet))) {\n      return;\n    }\n    col = Array.from(r.childNodes).filter(function(it){\n      return it.classList.contains('scell');\n    }).indexOf(c);\n    row = Array.from(r.parentNode.childNodes).filter(function(it){\n      return it.classList.contains('srow');\n    }).indexOf(r);\n    return {\n      col: col,\n      row: row\n    };\n  };\n  document.body.addEventListener('keydown', function(e){\n    var code, opt, node;\n    code = e.keyCode;\n    opt = (function(){\n      switch (code) {\n      case 37:\n        return {\n          row: 0,\n          col: -1\n        };\n      case 38:\n        return {\n          row: -1,\n          col: 0\n        };\n      case 39:\n        return {\n          row: 0,\n          col: 1\n        };\n      case 40:\n        return {\n          row: 1,\n          col: 0\n        };\n      default:\n        return null;\n      }\n    }());\n    if (!opt) {\n      return;\n    }\n    if (this$.sel.node) {\n      updateText();\n    }\n    node = this$.sel.start;\n    opt.node = node;\n    if (!node) {\n      return;\n    }\n    node = getByIdx(opt);\n    if (!node) {\n      return;\n    }\n    this$.sel.start = node;\n    this$.sel.end = node;\n    render();\n    e.stopPropagation();\n    return e.preventDefault();\n  });\n  document.body.addEventListener('keypress', function(e){\n    if (this$.sel.start && !this$.sel.node) {\n      return enterEdit(this$.sel.start);\n    }\n  });\n  input.addEventListener('keydown', function(e){\n    if (e.keyCode === 13) {\n      if (!(e.altKey || e.metaKey)) {\n        return updateText();\n      }\n      return input.setAttribute('rows', 2);\n    }\n  });\n  input.addEventListener('mousedown', function(e){\n    return e.stopPropagation();\n  });\n  updateText = function(){\n    if (!this$.sel.node) {\n      return;\n    }\n    this$.sel.node.textContent = input.value || '';\n    edit.style.display = 'none';\n    selMain.style.display = 'none';\n    sel.style.display = 'none';\n    return this$.sel.node = null;\n  };\n  enterEdit = function(p){\n    var box, rbox, ref$;\n    this$.sel.node = p;\n    console.log(index(p));\n    box = p.getBoundingClientRect();\n    rbox = sheet.getBoundingClientRect();\n    ref$ = edit.style;\n    ref$.left = (box.x - rbox.x + sheet.scrollLeft - 2) + \"px\";\n    ref$.top = (box.y - rbox.y + sheet.scrollTop - 2) + \"px\";\n    ref$.width = (box.width + 1) + \"px\";\n    ref$.height = (box.height + 1) + \"px\";\n    ref$.display = 'block';\n    input.value = p.textContent || '';\n    return input.focus();\n  };\n  sheet.addEventListener('dblclick', function(e){\n    var n, p;\n    n = e.target;\n    if (!(p = ld$.parent(n, '.scell', sheet))) {\n      return;\n    }\n    return enterEdit(p);\n  });\n  sheet.addEventListener('mousedown', function(e){\n    var n, p;\n    updateText();\n    n = e.target;\n    if (!(p = ld$.parent(n, '.scell', sheet))) {\n      return;\n    }\n    this$.sel.start = p;\n    this$.sel.end = p;\n    return render();\n  });\n  sheet.addEventListener('mousemove', function(e){\n    var n, p;\n    if (!e.buttons) {\n      return;\n    }\n    n = e.target;\n    if (!(p = ld$.parent(n, '.scell', sheet))) {\n      return;\n    }\n    this$.sel.end = p;\n    return render();\n  });\n  return render = function(){\n    var sbox, ebox, rbox, x1, y1, x2, y2, w, h, ref$;\n    sbox = this$.sel.start.getBoundingClientRect();\n    ebox = this$.sel.end.getBoundingClientRect();\n    rbox = sheet.getBoundingClientRect();\n    x1 = Math.min(sbox.x, ebox.x) - rbox.x + sheet.scrollLeft - 2;\n    y1 = Math.min(sbox.y, ebox.y) - rbox.y + sheet.scrollTop - 2;\n    x2 = Math.max(sbox.x + sbox.width, ebox.x + ebox.width) - rbox.x + sheet.scrollLeft - 2;\n    y2 = Math.max(sbox.y + ebox.height, ebox.y + ebox.height) - rbox.y + sheet.scrollTop - 2;\n    w = x2 - x1 + 1;\n    h = y2 - y1 + 1;\n    ref$ = sel.style;\n    ref$.left = x1 + \"px\";\n    ref$.top = y1 + \"px\";\n    ref$.width = w + \"px\";\n    ref$.height = h + \"px\";\n    ref$.display = 'block';\n    return ref$ = selMain.style, ref$.left = (sbox.x - rbox.x + sheet.scrollLeft - 2) + \"px\", ref$.top = (sbox.y - rbox.y + sheet.scrollTop - 2) + \"px\", ref$.width = (sbox.width + 1) + \"px\", ref$.height = (sbox.height + 1) + \"px\", ref$.display = 'block', ref$;\n  };\n});\u003C\u002Fscript\u003E\u003C\u002Fbody\u003E\u003C\u002Fhtml\u003E";
     }.call(this, "JSON" in locals_for_with ?
         locals_for_with.JSON :

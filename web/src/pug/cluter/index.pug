@@ -1,0 +1,55 @@
+extends /base.pug
+block head
+  style(type="text/css"): :stylus
+    html, body { width: 100%; height: 100%; background: #fff }
+    .frame
+      border: 1px solid #ccc
+      overflow: scroll
+    .sheet
+      position: absolute
+      display: grid
+      grid-template-columns: repeat(20,100px)
+      top: 0
+      left: 0
+    .cell
+      border: 1px solid #ccc
+      height: 2em
+    .s1
+      background: #f00
+    .s2
+      background: #ff0
+    .s3
+      background: #0f0
+    .s4
+      background: #00f
+      
+      
+
+block body
+  .mx-auto.rwd.w-1024.my-4
+    .aspect-ratio.ratio-3by2
+      .frame
+        .content
+          .sheet.s1
+            for c in [0,1,2,3,4,5,6,7]
+              for d in [0,1,2,3,4,5,6,7]
+                for e in [0,1,2,3,4,5,6,7]
+                  .cell
+          .sheet.s2
+            for c in [0,1,2,3,4,5,6,7]
+              for d in [0,1,2,3,4,5,6,7]
+                for e in [0,1,2,3,4,5,6,7]
+                  .cell
+          .sheet.s3
+            for c in [0,1,2,3,4,5,6,7]
+              for d in [0,1,2,3,4,5,6,7]
+                for e in [0,1,2,3,4,5,6,7]
+                  .cell
+          .sheet.s4
+            for c in [0,1,2,3,4,5,6,7]
+              for d in [0,1,2,3,4,5,6,7]
+                for e in [0,1,2,3,4,5,6,7]
+                  .cell
+
+block script
+  script: include:lsc index.ls
