@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+echo "prepare..."
+rm -rf dist
+mkdir -p dist
+
+echo "building index.ls -> index.js ..."
+./node_modules/.bin/lsc -cp src/index.ls > dist/index.js
+echo "minify index.js -> indeindex.min.js ..."
+./node_modules/.bin/uglifyjs dist/index.js > dist/index.min.js
+
+echo "build src/index.styl -> dist/index.css ..."
+./node_modules/.bin/stylus -p src/index.styl > dist/index.css
+echo "minifying index.css ..."
+./node_modules/.bin/uglifycss dist/index.css > dist/index.min.css
+
+echo "copy dist to web ..."
+rm -rf web/static/assets/lib/@plotdb/sheet/dev/
+mkdir -p web/static/assets/lib/@plotdb/sheet/dev/
+cp -R dist/* web/static/assets/lib/@plotdb/sheet/dev/
+
+

@@ -1,5 +1,17 @@
 parse-csv = (txt) -> Papa.parse(txt).data
 
+parent = (n, s, e = document) ->
+  m = n
+  while n and n != e => n = n.parentNode # must under e
+  if n != e => return null
+  # if no selector - we are testing if s is under e.
+  if !s => return n
+  # must match s selector
+  n = m
+  while n and n != e and (!n.matches or (n.matches and !n.matches(s))) => n = n.parentNode
+  if n == e and (!e.matches or !e.matches(s)) => return null
+  return n
+
 num-to-idx = (v) ->
   if v < 0 => return ""
   ret = ""
@@ -16,8 +28,6 @@ num-to-idx = (v) ->
 sheet = (opt={}) ->
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @data = opt.data or []
-  @col = opt.col or 100
-  @row = opt.row or 100
   @dim = col: (opt.{}dim.col or 30), row: (opt.{}dim.row or 30)
   @fix = col: 1, row: 1
   @pos = col: 0, row: 0
@@ -48,16 +58,17 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     dom = @dom.sheet
     dom.addEventListener \mousedown, (e) ~>
       @edited!
-      if !(p = ld$.parent (e.target), '.cell', dom) => return
+      if !(p = parent (e.target), '.cell', dom) => return
+
       @les.start = @les.end = @index(p){row, col}
       @les.node = p
       @render-selection!
     dom.addEventListener \mousemove, (e) ~>
-      if @editing.on or !(e.buttons and (p = ld$.parent (e.target), '.cell', dom)) => return
+      if @editing.on or !(e.buttons and (p = parent (e.target), '.cell', dom)) => return
       @les.end = @index(p){row, col}
       @render-selection!
     dom.addEventListener \dblclick, (e) ~>
-      if !(p = ld$.parent (e.target), '.cell', dom) => return
+      if !(p = parent (e.target), '.cell', dom) => return
       @edit {node: p, quick: false}
 
     document.body.addEventListener \paste, (e) ~>
@@ -214,6 +225,12 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         inner.insertBefore(n, inner.childNodes[i * @dim.col + @fix.col + j - start])
     @regrid!
 
+  goto: (opt={row: 0, col: 0}) ->
+    @pos <<< opt
+    @render!
+  render:  ->
+    for y from 0 til @dim.row => for x from 0 til @dim.col => @_content {x, y}
+
   move: (opt = {}) ->
     if @editing.on => @edited!
     if !(opt.node = @les.node) => return
@@ -274,22 +291,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     x = base.x + (opt.x or 0)
     return @dom.inner.childNodes[y * @dim.col + x]
 
-  render-selection2: ->
-
-    @dom.range.style <<< 
-      left: "#{x1}px"
-      top: "#{y1}px"
-      width: "#{w}px"
-      height: "#{h}px"
-    @dom.caret.style <<< 
-      left: "#{sbox.x - rbox.x + sx - 2}px"
-      top: "#{sbox.y - rbox.y + sy - 2}px"
-      width: "#{sbox.width + 1}px"
-      height: "#{sbox.height + 1}px"
-    @dom.range.classList.toggle \show, true
-    @dom.caret.classList.toggle \show, true
-
   render-selection: ->
+    if !@les.start => return
     sx = @les.start.col - @pos.col
     sy = @les.start.row - @pos.row
 

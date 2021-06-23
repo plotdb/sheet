@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/main/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/ldiconfont/main/ldif.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/ldcover/main/ldcv.min.css"><link rel="stylesheet" type="text/css" href="/css/index.css"><style type="text/css">html,
+<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/main/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/ldiconfont/main/ldif.min.css"><link rel="stylesheet" type="text/css" href="/assets/lib/ldcover/main/ldcv.min.css"><link rel="stylesheet" type="text/css" href="/css/index.css"><link rel="stylesheet" type="text/css" href="/assets/lib/@plotdb/sheet/dev/index.min.css"><style type="text/css">html,
 body {
   width: 100%;
   height: 100%;
@@ -13,7 +13,6 @@ body {
   overflow: hidden;
 }
 .sheet .inner {
-  position: absolute;
   z-index: 1;
   display: grid;
   width: 100%;
@@ -92,7 +91,10 @@ body {
   opacity: 1 !important;
   display: block;
 }
-</style><style type="text/css"></style></head><body><div class="p-4"><div class="mx-auto rwd w-640"><div class="aspect-ratio ratio-1by1"><div class="shadow-sm border border-secondary rounded" id="root"></div></div></div></div><script type="text/javascript" src="/assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="/assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="/assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="/assets/lib/dompurify/main/purify.min.js"></script><script>var numToIdx, sheet, s;
+</style><style type="text/css"></style></head><body><div class="p-4"><div class="mx-auto rwd w-640"><div class="aspect-ratio ratio-1by1"><div class="shadow-sm border border-secondary rounded" id="root"></div></div></div></div><script type="text/javascript" src="/assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="/assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="/assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="/assets/lib/dompurify/main/purify.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script><script>var parseCsv, numToIdx, sheet;
+parseCsv = function(txt){
+  return Papa.parse(txt).data;
+};
 numToIdx = function(v){
   var ret, u;
   if (v < 0) {
@@ -200,6 +202,28 @@ sheet.prototype = import$(Object.create(Object.prototype), {
         node: p,
         quick: false
       });
+    });
+    document.body.addEventListener('paste', function(e){
+      var data, i$, to$, r, lresult$, j$, to1$, c, results$ = [];
+      if (!this$.les.start) {
+        return;
+      }
+      data = e.clipboardData.getData('text');
+      data = parseCsv(data);
+      for (i$ = 0, to$ = data.length; i$ < to$; ++i$) {
+        r = i$;
+        lresult$ = [];
+        for (j$ = 0, to1$ = data[r].length; j$ < to1$; ++j$) {
+          c = j$;
+          lresult$.push(this$.set({
+            row: r + this$.les.start.row,
+            col: c + this$.les.start.col,
+            data: data[r][c]
+          }));
+        }
+        results$.push(lresult$);
+      }
+      return results$;
     });
     document.body.addEventListener('keydown', function(e){
       var code, ref$, p1, p2, c1, c2, r1, r2, i$, row, j$, col, x, y, opt;
@@ -333,6 +357,15 @@ sheet.prototype = import$(Object.create(Object.prototype), {
         ? y
         : !y ? numToIdx(x - 1) : '';
     return this.dom.inner.insertBefore(div, this.dom.inner.childNodes[y * this.dim.col + x]);
+  },
+  set: function(arg$){
+    var row, col, data, ref$;
+    row = arg$.row, col = arg$.col, data = arg$.data;
+    ((ref$ = this.data)[row] || (ref$[row] = []))[col] = data;
+    return this._content({
+      y: row - this.pos.row + 1,
+      x: col - this.pos.col + 1
+    });
   },
   _content: function(arg$){
     var x, y, n, ref$, key$, textContent, className;
@@ -606,17 +639,41 @@ sheet.prototype = import$(Object.create(Object.prototype), {
     return this.dom.caret.classList.toggle('show', true);
   },
   renderSelection: function(){
-    var sx, sy, ex, ey, rbox, xbox, ref$, ref1$, ybox, x1, x2, y1, y2, w, h, snode, sbox;
+    var sx, sy, ex, ey, rbox, xbox, ybox, x1, x2, y1, y2, w, h, snode, sbox, ref$, this$ = this;
     sx = this.les.start.col - this.pos.col;
     sy = this.les.start.row - this.pos.row;
     ex = this.les.end.col - this.pos.col;
     ey = this.les.end.row - this.pos.row;
     rbox = this.dom.inner.getBoundingClientRect();
-    xbox = [this.dom.inner.childNodes[((ref$ = sx > 0 ? sx : 0) < (ref1$ = this.dim.col - 1) ? ref$ : ref1$) + 1], this.dom.inner.childNodes[((ref$ = ex > 0 ? ex : 0) < (ref1$ = this.dim.col - 1) ? ref$ : ref1$) + 1]].map(function(it){
-      return it.getBoundingClientRect();
+    xbox = [sx, ex].map(function(x){
+      if (x < 0) {
+        return {
+          x: rbox.x - 10,
+          width: 0
+        };
+      } else if (x > this$.dim.col - 1) {
+        return {
+          x: rbox.x + rbox.width + 10,
+          width: 0
+        };
+      } else {
+        return this$.dom.inner.childNodes[x + 1].getBoundingClientRect();
+      }
     });
-    ybox = [this.dom.inner.childNodes[(((ref$ = sy > 0 ? sy : 0) < (ref1$ = this.dim.row - 1) ? ref$ : ref1$) + 1) * this.dim.col], this.dom.inner.childNodes[(((ref$ = ey > 0 ? ey : 0) < (ref1$ = this.dim.row - 1) ? ref$ : ref1$) + 1) * this.dim.col]].map(function(it){
-      return it.getBoundingClientRect();
+    ybox = [sy, ey].map(function(y){
+      if (y < 0) {
+        return {
+          y: rbox.y - 10,
+          height: 0
+        };
+      } else if (y > this$.dim.row - 1) {
+        return {
+          y: rbox.y + rbox.height + 10,
+          height: 0
+        };
+      } else {
+        return this$.dom.inner.childNodes[this$.dim.col * (y + 1)].getBoundingClientRect();
+      }
     });
     x1 = Math.min.apply(Math, xbox.map(function(it){
       return it.x - rbox.x;
@@ -654,11 +711,16 @@ sheet.prototype = import$(Object.create(Object.prototype), {
     return this.dom.caret.classList.toggle('show', !!sbox);
   }
 });
-s = new sheet({
-  root: '#root'
-});
+if (typeof module != 'undefined' && module !== null) {
+  module.exports = sheet;
+} else if (typeof window != 'undefined' && window !== null) {
+  window.sheet = sheet;
+}
 function import$(obj, src){
   var own = {}.hasOwnProperty;
   for (var key in src) if (own.call(src, key)) obj[key] = src[key];
   return obj;
-}</script></body></html>
+}</script><script>var s;
+s = new sheet({
+  root: '#root'
+});</script></body></html>

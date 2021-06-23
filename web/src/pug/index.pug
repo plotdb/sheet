@@ -1,8 +1,6 @@
 extends /base.pug
 block head
   +css("/assets/lib/@plotdb/sheet/dev/index.min.css")
-  style(type="text/css"): include:stylus index.styl
-  style(type="text/css"): :stylus
 
 block body
   .p-4: .mx-auto.rwd.w-640
@@ -12,6 +10,7 @@ block body
 
 block script
   +script("https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js")
-  script: include:lsc index.ls
+  +script("/assets/lib/@plotdb/sheet/dev/index.min.js")
   script: :lsc
     s = new sheet root: '#root'
+

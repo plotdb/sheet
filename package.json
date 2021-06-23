@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "spreadsheet",
   "version": "0.0.1",
-  "main": "dist/sheet.js",
+  "main": "dist/index.js",
   "homepage": "https://github.com/plotdb/sheet",
   "files": [
     "dist/**/*"
@@ -44,12 +44,6 @@
     "template": "github:zbryikt/template#v2.3.13",
     "uglify-js": "=3.2.0",
     "uglifycss": "^0.0.29"
-  },
-  "peerDependencies": {
-    "@plotdb/csscope": "^0.4.0",
-    "@plotdb/rescope": "^1.1.8",
-    "dompurify": "^2.2.6",
-    "proxise": "^0.1.2"
   },
   "frontendDependencies": {
     "root": "web/static/assets/lib",
