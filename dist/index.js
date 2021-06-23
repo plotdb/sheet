@@ -532,13 +532,12 @@
       return this.dom.textarea.setSelectionRange(v.length, v.length);
     },
     edited: function(){
-      var v, p, ref$, key$, this$ = this;
+      var v, ref$, key$, this$ = this;
       if (!this.editing.on) {
         return;
       }
       this.editing.node.textContent = v = this.dom.textarea.value || '';
-      p = this.index(this.editing.node);
-      ((ref$ = this.data)[key$ = this.pos.row + p.y - 1] || (ref$[key$] = []))[this.pos.col + p.x - 1] = v;
+      ((ref$ = this.data)[key$ = this.les.start.row] || (ref$[key$] = []))[this.les.start.col] = v;
       ['edit', 'caret', 'range'].map(function(it){
         return this$.dom[it].classList.toggle('show', false);
       });

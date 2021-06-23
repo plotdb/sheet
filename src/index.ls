@@ -271,8 +271,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   edited: ->
     if !@editing.on => return
     @editing.node.textContent = v = ( @dom.textarea.value or '' )
-    p = @index(@editing.node)
-    @data[][@pos.row + p.y - 1][@pos.col + p.x - 1] = v
+    @data[][@les.start.row][@les.start.col] = v
     <[edit caret range]>.map ~> @dom[it].classList.toggle \show, false
     @editing <<< node: null, on: false
 
