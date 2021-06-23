@@ -79,7 +79,6 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @dom.textarea.addEventListener \keydown, (e) ~>
       if e.keyCode == 27 or (e.keyCode == 13 and !(e.altKey or e.metaKey)) =>
         @move {row: 1, col: 0}
-        #@edited!
         e.stopPropagation!
         e.preventDefault!
         return

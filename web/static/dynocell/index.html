@@ -27,13 +27,11 @@ body {
   border-style: solid;
   border-color: #ddd;
 /* use em may lead to nondeterminstic behavior in border rendering, due to rounding */
-  padding: 1px;
+  padding: 1px 3px;
   min-width: 48px;
-  min-height: 26px;
   line-height: 26px;
   box-sizing: border-box;
   white-space: pre;
-  overflow: hidden;
 }
 .sheet .cell.idx {
   z-index: 100;
@@ -47,8 +45,9 @@ body {
   z-index: 10;
   border: 1px solid #27f;
   user-select: none;
-  opacity: 0;
   pointer-events: none;
+  opacity: 0;
+  display: none;
   top: 0;
   left: 0;
   position: absolute;
@@ -57,8 +56,9 @@ body {
   z-index: 11;
   border: 2px solid #27f;
   user-select: none;
-  opacity: 0;
   pointer-events: none;
+  opacity: 0;
+  display: none;
   top: 0;
   left: 0;
   position: absolute;
@@ -67,7 +67,7 @@ body {
   z-index: 21;
   border: 2px solid #27f;
   opacity: 0;
-  pointer-events: none;
+  display: none;
   top: 0;
   left: 0;
   position: absolute;
@@ -83,14 +83,14 @@ body {
   left: 0;
   position: absolute;
   z-index: 0;
-  opacity: 1;
+  opacity: 0;
   pointer-events: none;
   user-select: none;
   white-space: pre;
-  padding-bottom: 1.5em;
 }
 .sheet .show {
   opacity: 1 !important;
+  display: block;
 }
 </style><style type="text/css"></style></head><body><div class="p-4"><div class="mx-auto rwd w-640"><div class="aspect-ratio ratio-1by1"><div class="shadow-sm border border-secondary rounded" id="root"></div></div></div></div><script type="text/javascript" src="/assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="/assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="/assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="/assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="/assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="/assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="/assets/lib/dompurify/main/purify.min.js"></script><script>var numToIdx, sheet, s;
 numToIdx = function(v){
@@ -128,11 +128,14 @@ sheet = function(opt){
   };
   this.pos = {
     col: 0,
-    row: 0,
+    row: 0
+  };
+  this.scrollPos = {
     x: 0,
     y: 0
   };
   this.sel = {};
+  this.les = {};
   this.editing = {};
   this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
     var x$, n;
@@ -151,7 +154,7 @@ sheet = function(opt){
 };
 sheet.prototype = import$(Object.create(Object.prototype), {
   _init: function(){
-    var i$, to$, r, j$, to1$, c, this$ = this;
+    var i$, to$, r, j$, to1$, c, dom, this$ = this;
     for (i$ = 0, to$ = this.dim.row; i$ < to$; ++i$) {
       r = i$;
       for (j$ = 0, to1$ = this.dim.col; j$ < to1$; ++j$) {
@@ -160,34 +163,146 @@ sheet.prototype = import$(Object.create(Object.prototype), {
       }
     }
     this.regrid();
+    this.dom.textarea.addEventListener('mousedown', function(e){
+      return e.stopPropagation();
+    });
+    dom = this.dom.sheet;
+    dom.addEventListener('mousedown', function(e){
+      var p, ref$;
+      this$.edited();
+      if (!(p = ld$.parent(e.target, '.cell', dom))) {
+        return;
+      }
+      this$.les.start = this$.les.end = {
+        row: (ref$ = this$.index(p)).row,
+        col: ref$.col
+      };
+      this$.les.node = p;
+      return this$.renderSelection();
+    });
+    dom.addEventListener('mousemove', function(e){
+      var p, ref$;
+      if (this$.editing.on || !(e.buttons && (p = ld$.parent(e.target, '.cell', dom)))) {
+        return;
+      }
+      this$.les.end = {
+        row: (ref$ = this$.index(p)).row,
+        col: ref$.col
+      };
+      return this$.renderSelection();
+    });
+    dom.addEventListener('dblclick', function(e){
+      var p;
+      if (!(p = ld$.parent(e.target, '.cell', dom))) {
+        return;
+      }
+      return this$.edit({
+        node: p,
+        quick: false
+      });
+    });
     document.body.addEventListener('keydown', function(e){
-      var delta;
-      return delta = (function(){
-        switch (e.keyCode) {
+      var code, ref$, p1, p2, c1, c2, r1, r2, i$, row, j$, col, x, y, opt;
+      code = e.keyCode;
+      if (code === 8) {
+        if (!this$.les.node) {
+          return;
+        }
+        ref$ = [this$.les.start, this$.les.end], p1 = ref$[0], p2 = ref$[1];
+        ref$ = p1.col < p2.col
+          ? [p1.col, p2.col]
+          : [p2.col, p1.col], c1 = ref$[0], c2 = ref$[1];
+        ref$ = p1.row < p2.row
+          ? [p1.row, p2.row]
+          : [p2.row, p1.row], r1 = ref$[0], r2 = ref$[1];
+        for (i$ = r1; i$ <= r2; ++i$) {
+          row = i$;
+          for (j$ = c1; j$ <= c2; ++j$) {
+            col = j$;
+            ((ref$ = this$.data)[row] || (ref$[row] = []))[col] = "";
+            ref$ = [col - this$.pos.col + 1, row - this$.pos.row + 1], x = ref$[0], y = ref$[1];
+            this$._content({
+              x: x,
+              y: y
+            });
+          }
+        }
+      }
+      opt = (function(){
+        switch (code) {
         case 37:
-          return this._ml(1);
+          return {
+            y: 0,
+            x: -1
+          };
         case 38:
-          return this._mu(1);
+          return {
+            y: -1,
+            x: 0
+          };
         case 39:
-          return this._mr(1);
+          return {
+            y: 0,
+            x: 1
+          };
         case 40:
-          return this._md(1);
+          return {
+            y: 1,
+            x: 0
+          };
         default:
           return null;
         }
-      }.call(this$));
+      }());
+      if (!opt) {
+        return;
+      }
+      if (this$.editing.on && !this$.editing.quick) {
+        return;
+      }
+      this$.move(opt);
+      e.stopPropagation();
+      return e.preventDefault();
+    });
+    document.body.addEventListener('keypress', function(e){
+      if (this$.les.node && !this$.editing.on) {
+        return this$.edit({
+          node: this$.les.node,
+          quick: e.keyCode === 13 ? false : true
+        });
+      }
+    });
+    this.dom.textarea.addEventListener('keydown', function(e){
+      var lbox, box, ref$;
+      if (e.keyCode === 27 || (e.keyCode === 13 && !(e.altKey || e.metaKey))) {
+        this$.move({
+          row: 1,
+          col: 0
+        });
+        e.stopPropagation();
+        e.preventDefault();
+        return;
+      }
+      if (e.keyCode === 13 && (e.altKey || e.metaKey)) {
+        this$.dom.textarea.value += '\n';
+        this$.dom.layout.textContent = this$.dom.textarea.value + " ";
+        lbox = this$.dom.layout.getBoundingClientRect();
+        box = this$.editing.node.getBoundingClientRect();
+        return ref$ = this$.dom.textarea.style, ref$.width = Math.max(lbox.width, box.width + 1) + "px", ref$.height = Math.max(lbox.height, box.height + 1) + "px", ref$;
+      }
     });
     return document.body.addEventListener('wheel', function(e){
-      var ref$, dx, dy, ox, oy;
+      var spos, ref$, dx, dy, ox, oy;
+      spos = this$.scrollPos;
       ref$ = [e.deltaX, e.deltaY], dx = ref$[0], dy = ref$[1];
       ref$ = Math.abs(dx) > Math.abs(dy)
         ? [dx, 0]
         : [0, dy], dx = ref$[0], dy = ref$[1];
-      ref$ = [this$.pos.x, this$.pos.y], ox = ref$[0], oy = ref$[1];
-      this$.pos.x += dx / 30;
-      this$.pos.y += dy / 30;
-      dx = Math.round(this$.pos.x) - Math.round(ox);
-      dy = Math.round(this$.pos.y) - Math.round(oy);
+      ref$ = [spos.x, spos.y], ox = ref$[0], oy = ref$[1];
+      spos.x += dx / 30;
+      spos.y += dy / 30;
+      dx = Math.round(spos.x) - Math.round(ox);
+      dy = Math.round(spos.y) - Math.round(oy);
       if (dy > 0) {
         this$._md(dy);
       } else if (dy < 0) {
@@ -197,6 +312,7 @@ sheet.prototype = import$(Object.create(Object.prototype), {
       } else if (dx < 0) {
         this$._ml(dx);
       }
+      this$.renderSelection();
       return e.preventDefault();
     }, {
       passive: false
@@ -356,6 +472,186 @@ sheet.prototype = import$(Object.create(Object.prototype), {
       }
     }
     return this.regrid();
+  },
+  move: function(opt){
+    var node, idx, box, sbox, ref$;
+    opt == null && (opt = {});
+    if (this.editing.on) {
+      this.edited();
+    }
+    if (!(opt.node = this.les.node)) {
+      return;
+    }
+    if (!(node = this.cell(opt))) {
+      return;
+    }
+    idx = this.index(node);
+    box = node.getBoundingClientRect();
+    sbox = this.dom.sheet.getBoundingClientRect();
+    if (box.x + box.width > sbox.x + sbox.width) {
+      this._mr(1);
+    }
+    if (box.y + box.height > sbox.y + sbox.height) {
+      this._md(1);
+    }
+    if (idx.x === 0) {
+      if (this.pos.col === 0) {
+        return;
+      } else {
+        this._ml(1);
+      }
+    }
+    if (idx.y === 0) {
+      if (this.pos.row === 0) {
+        return;
+      } else {
+        this._mu(1);
+      }
+    }
+    if (!(node = this.cell(opt))) {
+      return;
+    }
+    this.les.node = node;
+    this.les.start = this.les.end = {
+      col: (ref$ = this.index(node)).col,
+      row: ref$.row
+    };
+    return this.renderSelection();
+  },
+  edit: function(arg$){
+    var node, quick, ref$, lbox, box, rbox, sx, sy, v;
+    node = arg$.node, quick = arg$.quick;
+    ref$ = this.editing;
+    ref$.node = node;
+    ref$.quick = quick;
+    ref$.on = true;
+    this.dom.layout.textContent = node.textContent;
+    lbox = this.dom.layout.getBoundingClientRect();
+    box = node.getBoundingClientRect();
+    rbox = this.dom.sheet.getBoundingClientRect();
+    ref$ = [this.dom.sheet.scrollLeft, this.dom.sheet.scrollTop], sx = ref$[0], sy = ref$[1];
+    ref$ = this.dom.edit.style;
+    ref$.left = (box.x - rbox.x + sx - 2) + "px";
+    ref$.top = (box.y - rbox.y + sy - 2) + "px";
+    ref$.width = "fit-content";
+    ref$.height = "fit-content";
+    this.dom.edit.classList.toggle('show', true);
+    ref$ = this.dom.textarea.style;
+    ref$.width = Math.max(lbox.width, box.width + 1) + "px";
+    ref$.height = Math.max(lbox.height, box.height + 1) + "px";
+    this.dom.textarea.value = v = quick
+      ? ''
+      : node.textContent || '';
+    this.dom.textarea.focus();
+    return this.dom.textarea.setSelectionRange(v.length, v.length);
+  },
+  edited: function(){
+    var v, p, ref$, key$, this$ = this;
+    if (!this.editing.on) {
+      return;
+    }
+    this.editing.node.textContent = v = this.dom.textarea.value || '';
+    p = this.index(this.editing.node);
+    ((ref$ = this.data)[key$ = this.pos.row + p.y - 1] || (ref$[key$] = []))[this.pos.col + p.x - 1] = v;
+    ['edit', 'caret', 'range'].map(function(it){
+      return this$.dom[it].classList.toggle('show', false);
+    });
+    return ref$ = this.editing, ref$.node = null, ref$.on = false, ref$;
+  },
+  index: function(node){
+    var idx, x, y, ref$, col, row;
+    idx = Array.from(this.dom.inner.childNodes).indexOf(node);
+    if (idx < 0) {
+      return null;
+    }
+    x = idx % this.dim.col;
+    y = (idx - x) / this.dim.col;
+    ref$ = [x + this.pos.col - 1, y + this.pos.row - 1], col = ref$[0], row = ref$[1];
+    return {
+      x: x,
+      y: y,
+      col: col,
+      row: row
+    };
+  },
+  cell: function(opt){
+    var base, y, x;
+    opt == null && (opt = {});
+    base = opt.node
+      ? this.index(opt.node)
+      : {
+        y: 0,
+        x: 0
+      };
+    if (!base) {
+      throw new Error("node not found in sheet");
+    }
+    y = base.y + (opt.y || 0);
+    x = base.x + (opt.x || 0);
+    return this.dom.inner.childNodes[y * this.dim.col + x];
+  },
+  renderSelection2: function(){
+    var ref$;
+    ref$ = this.dom.range.style;
+    ref$.left = x1 + "px";
+    ref$.top = y1 + "px";
+    ref$.width = w + "px";
+    ref$.height = h + "px";
+    ref$ = this.dom.caret.style;
+    ref$.left = (sbox.x - rbox.x + sx - 2) + "px";
+    ref$.top = (sbox.y - rbox.y + sy - 2) + "px";
+    ref$.width = (sbox.width + 1) + "px";
+    ref$.height = (sbox.height + 1) + "px";
+    this.dom.range.classList.toggle('show', true);
+    return this.dom.caret.classList.toggle('show', true);
+  },
+  renderSelection: function(){
+    var sx, sy, ex, ey, rbox, xbox, ref$, ref1$, ybox, x1, x2, y1, y2, w, h, snode, sbox;
+    sx = this.les.start.col - this.pos.col;
+    sy = this.les.start.row - this.pos.row;
+    ex = this.les.end.col - this.pos.col;
+    ey = this.les.end.row - this.pos.row;
+    rbox = this.dom.inner.getBoundingClientRect();
+    xbox = [this.dom.inner.childNodes[((ref$ = sx > 0 ? sx : 0) < (ref1$ = this.dim.col - 1) ? ref$ : ref1$) + 1], this.dom.inner.childNodes[((ref$ = ex > 0 ? ex : 0) < (ref1$ = this.dim.col - 1) ? ref$ : ref1$) + 1]].map(function(it){
+      return it.getBoundingClientRect();
+    });
+    ybox = [this.dom.inner.childNodes[(((ref$ = sy > 0 ? sy : 0) < (ref1$ = this.dim.row - 1) ? ref$ : ref1$) + 1) * this.dim.col], this.dom.inner.childNodes[(((ref$ = ey > 0 ? ey : 0) < (ref1$ = this.dim.row - 1) ? ref$ : ref1$) + 1) * this.dim.col]].map(function(it){
+      return it.getBoundingClientRect();
+    });
+    x1 = Math.min.apply(Math, xbox.map(function(it){
+      return it.x - rbox.x;
+    }));
+    x2 = Math.max.apply(Math, xbox.map(function(it){
+      return it.x - rbox.x + it.width;
+    }));
+    y1 = Math.min.apply(Math, ybox.map(function(it){
+      return it.y - rbox.y;
+    }));
+    y2 = Math.max.apply(Math, ybox.map(function(it){
+      return it.y - rbox.y + it.height;
+    }));
+    w = x2 - x1 + 1;
+    h = y2 - y1 + 1;
+    snode = !(sx >= 0 && sy >= 0 && sx < this.dim.col && sy < this.dim.row)
+      ? null
+      : this.dom.inner.childNodes[(sx + 1) + (sy + 1) * this.dim.col];
+    sbox = !snode
+      ? null
+      : snode.getBoundingClientRect();
+    ref$ = this.dom.range.style;
+    ref$.left = x1 + "px";
+    ref$.top = y1 + "px";
+    ref$.width = w + "px";
+    ref$.height = h + "px";
+    this.dom.range.classList.toggle('show', true);
+    if (sbox) {
+      ref$ = this.dom.caret.style;
+      ref$.left = (sbox.x - rbox.x - 1) + "px";
+      ref$.top = (sbox.y - rbox.y - 1) + "px";
+      ref$.width = (sbox.width + 2) + "px";
+      ref$.height = (sbox.height + 2) + "px";
+    }
+    return this.dom.caret.classList.toggle('show', !!sbox);
   }
 });
 s = new sheet({
