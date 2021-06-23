@@ -43,7 +43,7 @@
     return ret;
   };
   sheet = function(opt){
-    var this$ = this;
+    var ref$, this$ = this;
     opt == null && (opt = {});
     this.root = typeof opt.root === 'string'
       ? document.querySelector(opt.root)
@@ -53,9 +53,38 @@
       col: (opt.dim || (opt.dim = {})).col || 30,
       row: (opt.dim || (opt.dim = {})).row || 30
     };
+    this.frozen = {
+      col: (ref$ = import$({
+        col: 0,
+        row: 0
+      }, opt.frozen || {})).col,
+      row: ref$.row
+    };
+    this.idx = {
+      col: (ref$ = import$({
+        row: true,
+        col: true
+      }, opt.idx || {})).col,
+      row: ref$.row
+    };
+    this.fixed = {
+      col: (ref$ = import$({
+        col: 0,
+        row: 0
+      }, opt.fixed || {})).col,
+      row: ref$.row
+    };
+    this.xif = {
+      row: [this.idx.row ? 1 : 0, 0, 0],
+      col: [this.idx.col ? 1 : 0, 0, 0]
+    };
+    ['row', 'col'].map(function(t){
+      this$.xif[t][1] = this$.xif[t][0] + this$.fixed[t];
+      return this$.xif[t][2] = this$.xif[t][1] + this$.frozen[t];
+    });
     this.fix = {
-      col: 1,
-      row: 1
+      row: this.xif.row[2],
+      col: this.xif.col[2]
     };
     this.pos = {
       col: 0,
@@ -99,15 +128,19 @@
       });
       dom = this.dom.sheet;
       dom.addEventListener('mousedown', function(e){
-        var p, ref$;
+        var p, ref$, idx;
         this$.edited();
         if (!(p = parent(e.target, '.cell', dom))) {
           return;
         }
-        this$.les.start = this$.les.end = {
+        idx = {
           row: (ref$ = this$.index(p)).row,
           col: ref$.col
         };
+        if (idx.col < 0 || idx.row < 0) {
+          return;
+        }
+        this$.les.start = this$.les.end = idx;
         this$.les.node = p;
         return this$.renderSelection();
       });
@@ -277,15 +310,12 @@
     addCell: function(x, y){
       var div;
       div = document.createElement('div');
-      div.classList.add.apply(div.classList, !(x && y)
-        ? ['cell', 'idx']
-        : ['cell']);
-      div.textContent = !(x || y)
-        ? ''
-        : !x
-          ? y
-          : !y ? numToIdx(x - 1) : '';
-      return this.dom.inner.insertBefore(div, this.dom.inner.childNodes[y * this.dim.col + x]);
+      this.dom.inner.insertBefore(div, this.dom.inner.childNodes[y * this.dim.col + x]);
+      return this._content({
+        x: x,
+        y: y,
+        n: div
+      });
     },
     set: function(arg$){
       var row, col, data, ref$;
@@ -297,19 +327,40 @@
       });
     },
     _content: function(arg$){
-      var x, y, n, ref$, key$, textContent, className;
+      var x, y, n, v, ref$, key$, textContent, className;
       x = arg$.x, y = arg$.y, n = arg$.n;
       if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
         return;
       }
-      ref$ = !(x || y)
+      ref$ = x < this.xif.col[0] && y < this.xif.col[0]
         ? ["", "cell idx"]
-        : !x
-          ? [y + this.pos.row, "cell idx"]
-          : !y
-            ? [numToIdx(x - 1 + this.pos.col), "cell idx"]
-            : [((ref$ = this.data)[key$ = this.pos.row + y - 1] || (ref$[key$] = []))[this.pos.col + x - 1] || '', "cell"], textContent = ref$[0], className = ref$[1];
-      return n.textContent = textContent, n.className = className, n;
+        : x < this.xif.col[0]
+          ? (v = y < this.xif.row[1]
+            ? " "
+            : y < this.xif.row[2]
+              ? y - this.xif.row[1] + 1
+              : y - this.xif.row[1] + this.pos.row + 1, [v, "cell idx"])
+          : y < this.xif.row[0]
+            ? (v = x < this.xif.col[1]
+              ? " "
+              : x < this.xif.col[2]
+                ? numToIdx(x - this.xif.col[1])
+                : numToIdx(x - this.xif.col[1] + this.pos.col), [v, "cell idx"])
+            : x < this.xif.col[1]
+              ? [null, "cell fixed"]
+              : y < this.xif.row[1]
+                ? [null, "cell fixed"]
+                : x < this.xif.col[2] && y < this.xif.row[2]
+                  ? [((ref$ = this.data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen fixed"]
+                  : x < this.xif.col[2]
+                    ? [((ref$ = this.data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen"]
+                    : y < this.xif.row[2]
+                      ? [((ref$ = this.data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell frozen"]
+                      : [((ref$ = this.data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell"], textContent = ref$[0], className = ref$[1];
+      n.className = className;
+      if (textContent !== null) {
+        return n.textContent = textContent;
+      }
     },
     _md: function(mag){
       var inner, start, ref$, i$, j, j$, to$, i, idx, n;
@@ -354,7 +405,7 @@
       if (mag >= this.pos.row) {
         mag = this.pos.row;
       }
-      start = (ref$ = mag - (this.dim.row - this.fix.row)) > 0 ? ref$ : 0;
+      start = (ref$ = mag - (this.dim.row - this.xif.row[2])) > 0 ? ref$ : 0;
       for (i$ = start; i$ < mag; ++i$) {
         j = i$;
         for (j$ = 0, to$ = this.dim.col; j$ < to$; ++j$) {
@@ -374,10 +425,10 @@
           n = document.createElement('div');
           this._content({
             x: i,
-            y: j + 1,
+            y: j + this.xif.row[2],
             n: n
           });
-          lresult$.push(inner.insertBefore(n, inner.childNodes[i + (j - start) * this.dim.col + this.dim.col * this.fix.row]));
+          lresult$.push(inner.insertBefore(n, inner.childNodes[i + (j - start) * this.dim.col + this.dim.col * this.xif.row[2]]));
         }
         results$.push(lresult$);
       }
@@ -417,7 +468,7 @@
       if (this.pos.col <= 0 || mag <= 0) {
         return;
       }
-      start = (ref$ = mag - (this.dim.col - this.fix.col)) > 0 ? ref$ : 0;
+      start = (ref$ = mag - (this.dim.col - this.xif.col[2])) > 0 ? ref$ : 0;
       this.pos.col -= mag;
       for (i$ = start; i$ < mag; ++i$) {
         j = i$;
@@ -426,11 +477,11 @@
           inner.removeChild(inner.childNodes[(i + 1) * this.dim.col - 1]);
           n = document.createElement('div');
           this._content({
-            x: j + 1,
+            x: j + this.xif.col[2],
             y: i,
             n: n
           });
-          inner.insertBefore(n, inner.childNodes[i * this.dim.col + this.fix.col + j - start]);
+          inner.insertBefore(n, inner.childNodes[i * this.dim.col + this.xif.col[2] + j - start]);
         }
       }
       return this.regrid();
@@ -544,14 +595,27 @@
       return ref$ = this.editing, ref$.node = null, ref$.on = false, ref$;
     },
     index: function(node){
-      var idx, x, y, ref$, col, row;
+      var idx, x, y, col, row;
       idx = Array.from(this.dom.inner.childNodes).indexOf(node);
       if (idx < 0) {
         return null;
       }
       x = idx % this.dim.col;
       y = (idx - x) / this.dim.col;
-      ref$ = [x + this.pos.col - 1, y + this.pos.row - 1], col = ref$[0], row = ref$[1];
+      if (x < this.xif.col[1]) {
+        col = -1;
+      } else if (x < this.xif.col[2]) {
+        col = x - this.xif.col[1];
+      } else {
+        col = x - this.xif.col[1] + this.pos.col;
+      }
+      if (y < this.xif.row[1]) {
+        row = -1;
+      } else if (y < this.xif.row[2]) {
+        row = y - this.xif.row[1];
+      } else {
+        row = y - this.xif.row[1] + this.pos.row;
+      }
       return {
         x: x,
         y: y,
@@ -580,10 +644,18 @@
       if (!this.les.start) {
         return;
       }
-      sx = this.les.start.col - this.pos.col;
-      sy = this.les.start.row - this.pos.row;
-      ex = this.les.end.col - this.pos.col;
-      ey = this.les.end.row - this.pos.row;
+      sx = this.les.start.col < this.frozen.col
+        ? this.les.start.col
+        : this.les.start.col - this.pos.col;
+      sy = this.les.start.row < this.frozen.row
+        ? this.les.start.row
+        : this.les.start.row - this.pos.row;
+      ex = this.les.end.col < this.frozen.col
+        ? this.les.end.col
+        : this.les.end.col - this.pos.col;
+      ey = this.les.end.row < this.frozen.row
+        ? this.les.end.row
+        : this.les.end.row - this.pos.row;
       rbox = this.dom.inner.getBoundingClientRect();
       xbox = [sx, ex].map(function(x){
         if (x < 0) {
@@ -597,7 +669,7 @@
             width: 0
           };
         } else {
-          return this$.dom.inner.childNodes[x + 1].getBoundingClientRect();
+          return this$.dom.inner.childNodes[x + this$.xif.col[1]].getBoundingClientRect();
         }
       });
       ybox = [sy, ey].map(function(y){
@@ -612,7 +684,7 @@
             height: 0
           };
         } else {
-          return this$.dom.inner.childNodes[this$.dim.col * (y + 1)].getBoundingClientRect();
+          return this$.dom.inner.childNodes[this$.dim.col * (y + this$.xif.row[1])].getBoundingClientRect();
         }
       });
       x1 = Math.min.apply(Math, xbox.map(function(it){
@@ -631,7 +703,7 @@
       h = y2 - y1 + 1;
       snode = !(sx >= 0 && sy >= 0 && sx < this.dim.col && sy < this.dim.row)
         ? null
-        : this.dom.inner.childNodes[(sx + 1) + (sy + 1) * this.dim.col];
+        : this.dom.inner.childNodes[(sx + this.xif.col[1]) + (sy + this.xif.row[1]) * this.dim.col];
       sbox = !snode
         ? null
         : snode.getBoundingClientRect();
@@ -647,6 +719,9 @@
         ref$.top = (sbox.y - rbox.y - 1) + "px";
         ref$.width = (sbox.width + 2) + "px";
         ref$.height = (sbox.height + 2) + "px";
+        ref$.zIndex = this.les.start.row + this.xif.row[1] < this.xif.row[2] && this.les.start.col + this.xif.col[1] < this.xif.col[2]
+          ? 101
+          : this.les.start.row + this.xif.row[1] < this.xif.row[2] || this.les.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 10;
       }
       return this.dom.caret.classList.toggle('show', !!sbox);
     }

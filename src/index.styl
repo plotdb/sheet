@@ -38,6 +38,13 @@ initabs()
     font-size: .85em
     text-align: center
     user-select: none
+  .cell.fixed, .cell.fixed.frozen
+    z-index: 100
+  .cell.fixed
+    background: #fafbfc
+  .cell.frozen
+    z-index: 12
+    background: #fdfeff
   .range
     z-index: 10
     border: 1px solid #27f
@@ -46,14 +53,14 @@ initabs()
     hide()
     initabs()
   .caret
-    z-index: 11
+    z-index: 15
     border: 2px solid #27f
     user-select: none
     pointer-events: none
     hide()
     initabs()
   .edit
-    z-index: 21
+    z-index: 121
     border: 2px solid #27f
     hide()
     initabs()

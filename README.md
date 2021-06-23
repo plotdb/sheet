@@ -26,6 +26,14 @@ initialize:
     })
 
 
+## Constructor Options
+
+ - `root`: container element or selector.
+ - `fixed`: {row, col}. default {row: 0, col: 0}
+ - `frozen`: {row, col}. default {row: 0, col: 0}
+ - `idx`: {row, col}. default {row: true, col: true}
+
+
 ## API
 
  - `set({row, col, content})` - set content to `content` for cells in row `row` and col `col`.

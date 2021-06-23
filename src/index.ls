@@ -29,7 +29,15 @@ sheet = (opt={}) ->
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @data = opt.data or []
   @dim = col: (opt.{}dim.col or 30), row: (opt.{}dim.row or 30)
-  @fix = col: 1, row: 1
+  @frozen = ({col: 0, row: 0} <<< (opt.frozen or {})){col, row}
+  @idx = ({row: true, col: true} <<< (opt.idx or {})){col, row}
+  @fixed = ({col: 0, row: 0} <<< (opt.fixed or {})){col, row}
+  @xif = {row: [(if @idx.row => 1 else 0),0,0], col: [(if @idx.col => 1 else 0),0,0]}
+  <[row col]>.map (t) ~>
+    @xif[t].1 = @xif[t].0 + @fixed[t]
+    @xif[t].2 = @xif[t].1 + @frozen[t]
+  @fix = {row: @xif.row.2, col: @xif.col.2}
+
   @pos = col: 0, row: 0
   @scroll-pos = x: 0, y: 0
 
@@ -59,8 +67,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     dom.addEventListener \mousedown, (e) ~>
       @edited!
       if !(p = parent (e.target), '.cell', dom) => return
-
-      @les.start = @les.end = @index(p){row, col}
+      idx = @index(p){row, col}
+      if idx.col < 0 or idx.row < 0 => return
+      @les.start = @les.end = idx
       @les.node = p
       @render-selection!
     dom.addEventListener \mousemove, (e) ~>
@@ -143,14 +152,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   add-cell: (x, y) ->
     div = document.createElement \div
-    div.classList.add.apply div.classList, if !(x and y) => <[cell idx]> else <[cell]>
-    div.textContent = (
-      if !(x or y) => ''
-      else if !x => (y)
-      else if !y => num-to-idx(x - 1)
-      else  ''
-    )
     @dom.inner.insertBefore div, @dom.inner.childNodes[y * @dim.col + x]
+    @_content {x, y, n: div}
 
   set: ({row, col, data}) ->
     @data[][row][col] = data
@@ -159,11 +162,29 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   # re-render cell with the content they suppose to have
   _content: ({x, y, n}) ->
     if !n and !(n = @dom.inner.childNodes[x + y * @dim.col]) => return
-    [textContent, className] = if !(x or y) => ["","cell idx"]
-    else if !x => [y + @pos.row, "cell idx"]
-    else if !y => [num-to-idx(x - 1 + @pos.col), "cell idx"]
-    else [@data[][@pos.row + y - 1][@pos.col + x - 1] or '', "cell"]
-    n <<< {textContent, className}
+    [textContent, className] = if x < @xif.col.0 and y < @xif.col.0 => ["","cell idx"]
+    else if x < @xif.col.0 =>
+      v = if y < @xif.row.1 => " "
+      else if y < @xif.row.2 => y - @xif.row.1 + 1
+      else y - @xif.row.1 + @pos.row + 1
+      [v,"cell idx"]
+    else if y < @xif.row.0 =>
+      v = if x < @xif.col.1 => " "
+      else if x < @xif.col.2 => num-to-idx(x - @xif.col.1)
+      else num-to-idx(x - @xif.col.1 + @pos.col)
+      [v,"cell idx"]
+    else if x < @xif.col.1 => [null, "cell fixed"]
+    else if y < @xif.row.1 => [null, "cell fixed"]
+    else if x < @xif.col.2 and y < @xif.row.2 =>
+      [@data[][y - @xif.row.1][x - @xif.col.1] or '', "cell frozen fixed"]
+    else if x < @xif.col.2 =>
+      [@data[][@pos.row + y - @xif.row.1][x - @xif.col.1] or '', "cell frozen"]
+    else if y < @xif.row.2 =>
+      [@data[][y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell frozen"]
+    else [@data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell"]
+
+    n.className = className
+    if textContent != null => n.textContent = textContent
 
   # move down
   _md: (mag = 1) ->
@@ -186,7 +207,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if @pos.row <= 0 => return
     mag = Math.round Math.abs mag
     if mag >= @pos.row => mag = @pos.row
-    start = (mag - (@dim.row - @fix.row)) >? 0
+    start = (mag - (@dim.row - @xif.row.2)) >? 0
     for j from start til mag => for i from 0 til @dim.col =>
       if !inner.childNodes.length => break
       inner.removeChild(inner.childNodes[inner.childNodes.length - 1])
@@ -194,8 +215,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     for j from start til mag =>
       for i from 0 til @dim.col =>
         n = document.createElement \div
-        @_content {x: i, y: j + 1, n}
-        inner.insertBefore(n, inner.childNodes[i + (j - start) * @dim.col + (@dim.col * @fix.row)])
+        @_content {x: i, y: j + @xif.row.2, n}
+        inner.insertBefore(n, inner.childNodes[i + (j - start) * @dim.col + (@dim.col * @xif.row.2)])
 
   _mr: (mag = 1) ->
     inner = @dom.inner
@@ -215,14 +236,14 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     mag = Math.round Math.abs mag
     if mag >= @pos.col => mag = @pos.col
     if @pos.col <= 0 or mag <= 0 => return
-    start = (mag - (@dim.col - @fix.col)) >? 0
+    start = (mag - (@dim.col - @xif.col.2)) >? 0
     @pos.col -= mag
     for j from start til mag =>
       for i from 0 til @dim.row =>
         inner.removeChild(inner.childNodes[(i + 1) * @dim.col - 1])
         n = document.createElement \div
-        @_content {x: j + 1, y: i, n}
-        inner.insertBefore(n, inner.childNodes[i * @dim.col + @fix.col + j - start])
+        @_content {x: j + @xif.col.2, y: i, n}
+        inner.insertBefore(n, inner.childNodes[i * @dim.col + @xif.col.2 + j - start])
     @regrid!
 
   goto: (opt={row: 0, col: 0}) ->
@@ -280,7 +301,15 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if idx < 0 => return null
     x = idx % @dim.col
     y = (idx - x) / @dim.col
-    [col,row] = [x + @pos.col - 1, y + @pos.row - 1]
+
+    if x < @xif.col.1 => col = -1
+    else if x < @xif.col.2 => col = x - @xif.col.1
+    else col = x - @xif.col.1 + @pos.col
+
+    if y < @xif.row.1 => row = -1
+    else if y < @xif.row.2 => row = y - @xif.row.1
+    else row = y - @xif.row.1 + @pos.row
+
     return {x, y, col, row}
 
   cell: (opt = {}) ->
@@ -292,23 +321,22 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   render-selection: ->
     if !@les.start => return
-    sx = @les.start.col - @pos.col
-    sy = @les.start.row - @pos.row
-
-    ex = @les.end.col - @pos.col
-    ey = @les.end.row - @pos.row
+    sx = if @les.start.col < @frozen.col => @les.start.col else @les.start.col - @pos.col
+    sy = if @les.start.row < @frozen.row => @les.start.row else @les.start.row - @pos.row
+    ex = if @les.end.col < @frozen.col => @les.end.col else @les.end.col - @pos.col
+    ey = if @les.end.row < @frozen.row => @les.end.row else @les.end.row - @pos.row
 
     rbox = @dom.inner.getBoundingClientRect!
 
     xbox = [sx, ex].map (x) ~>
       if x < 0 => {x: rbox.x - 10, width: 0}
       else if x > (@dim.col - 1) => {x: rbox.x + rbox.width + 10, width: 0}
-      else @dom.inner.childNodes[x + 1].getBoundingClientRect!
+      else @dom.inner.childNodes[x + @xif.col.1].getBoundingClientRect!
 
     ybox = [sy, ey].map (y) ~>
       if y < 0 => {y: rbox.y - 10, height: 0}
       else if y > (@dim.row - 1) => {y: rbox.y + rbox.height + 10, height: 0}
-      else @dom.inner.childNodes[@dim.col * (y + 1)].getBoundingClientRect!
+      else @dom.inner.childNodes[@dim.col * (y + @xif.row.1)].getBoundingClientRect!
 
     x1 = Math.min.apply Math, xbox.map -> it.x - rbox.x
     x2 = Math.max.apply Math, xbox.map -> it.x - rbox.x + it.width
@@ -318,7 +346,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     h = y2 - y1 + 1
 
     snode = if !(sx >= 0 and sy >= 0 and sx < @dim.col and sy < @dim.row) => null
-    else @dom.inner.childNodes[(sx + 1) + (sy + 1) * @dim.col]
+    else @dom.inner.childNodes[(sx + @xif.col.1) + (sy + @xif.row.1) * @dim.col]
     sbox = if !snode => null else snode.getBoundingClientRect!
 
     @dom.range.style <<< 
@@ -333,6 +361,11 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         top: "#{sbox.y - rbox.y - 1}px"
         width: "#{sbox.width + 2}px"
         height: "#{sbox.height + 2}px"
+        zIndex: (
+          if @les.start.row + @xif.row.1 < @xif.row.2 and @les.start.col + @xif.col.1 < @xif.col.2 => 101
+          else if @les.start.row + @xif.row.1 < @xif.row.2 or @les.start.col + @xif.col.1 < @xif.col.2 => 20
+          else 10
+        )
     @dom.caret.classList.toggle \show, !!sbox
 
 
