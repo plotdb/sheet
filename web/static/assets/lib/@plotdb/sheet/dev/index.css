@@ -38,6 +38,8 @@
 }
 .sheet .cell.fixed {
   background: #fafbfc;
+  white-space: initial;
+  padding: 0;
 }
 .sheet .cell.frozen {
   z-index: 12;
