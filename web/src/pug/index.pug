@@ -1,7 +1,8 @@
 extends /base.pug
+block prehead
+  base(href=".")
 block head
   +css("/assets/lib/@plotdb/sheet/dev/index.min.css")
-
 block body
   .p-4: .mx-auto.rwd.w-640
     .aspect-ratio.ratio-1by1
