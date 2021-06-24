@@ -2,7 +2,7 @@ extends /base.pug
 block prehead
   base(href=".")
 block head
-  +css("/assets/lib/@plotdb/sheet/dev/index.min.css")
+  +css("assets/lib/@plotdb/sheet/dev/index.min.css")
 block body
   .p-4: .mx-auto.rwd.w-640
     .aspect-ratio.ratio-1by1
@@ -11,7 +11,7 @@ block body
 
 block script
   +script("https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js")
-  +script("/assets/lib/@plotdb/sheet/dev/index.min.js")
+  +script("assets/lib/@plotdb/sheet/dev/index.min.js")
   script: :lsc
     s = new sheet do
       root: '#root'
