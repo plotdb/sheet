@@ -48,6 +48,7 @@ sheet = (opt={}) ->
     n = document.createElement(\div)
       ..classList.add it
     [it, n]
+  @dom.sheet.setAttribute \tabindex, -1
   @dom.textarea = document.createElement \textarea
   @root.appendChild(@dom.sheet)
   <[inner caret range edit layout]>.map ~> @dom.sheet.appendChild @dom[it]
@@ -81,13 +82,15 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @edit {node: p, quick: false}
 
     document.body.addEventListener \paste, (e) ~>
+      # TODO we need to find some way to ensure sheet gets users' focus before handling paste event
       if !@les.start => return
       data = e.clipboardData.getData('text')
       data = parse-csv data
       for r from 0 til data.length => for c from 0 til data[r].length =>
         @set {row: r + @les.start.row, col: c + @les.start.col, data: data[r][c]}
 
-    document.body.addEventListener \keydown, (e) ~>
+    dom.addEventListener \keydown, (e) ~>
+      if !@event-in-scope(e) => return
       code = e.keyCode
       if code == 8 =>
         if !@les.node => return
@@ -111,7 +114,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       e.stopPropagation!
       e.preventDefault!
 
-    document.body.addEventListener \keypress, (e) ~>
+    dom.addEventListener \keypress, (e) ~>
       if @les.node and !@editing.on => @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
 
     @dom.textarea.addEventListener \keydown, (e) ~>
@@ -130,6 +133,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
           height: "#{Math.max(lbox.height, box.height + 1)}px"
 
     document.body.addEventListener \wheel, ((e) ~>
+      if !@event-in-scope(e) => return
       spos = @scroll-pos
       [dx, dy] = [e.deltaX, e.deltaY]
       [dx, dy] = if Math.abs(dx) > Math.abs(dy) => [dx, 0] else [0, dy]
@@ -147,6 +151,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     ), {passive: false}
 
 
+  event-in-scope: (e) -> (parent e.target, '.sheet', @dom.sheet) == @dom.sheet
   regrid: ->
     @dom.inner.style.gridTemplateColumns = "repeat(#{@dim.col}, max-content)"
 

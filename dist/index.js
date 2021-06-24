@@ -103,6 +103,7 @@
       x$.classList.add(it);
       return [it, n];
     }));
+    this.dom.sheet.setAttribute('tabindex', -1);
     this.dom.textarea = document.createElement('textarea');
     this.root.appendChild(this.dom.sheet);
     ['inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
@@ -187,8 +188,11 @@
         }
         return results$;
       });
-      document.body.addEventListener('keydown', function(e){
+      dom.addEventListener('keydown', function(e){
         var code, ref$, p1, p2, c1, c2, r1, r2, i$, row, j$, col, x, y, opt;
+        if (!this$.eventInScope(e)) {
+          return;
+        }
         code = e.keyCode;
         if (code === 8) {
           if (!this$.les.node) {
@@ -250,7 +254,7 @@
         e.stopPropagation();
         return e.preventDefault();
       });
-      document.body.addEventListener('keypress', function(e){
+      dom.addEventListener('keypress', function(e){
         if (this$.les.node && !this$.editing.on) {
           return this$.edit({
             node: this$.les.node,
@@ -279,6 +283,9 @@
       });
       return document.body.addEventListener('wheel', function(e){
         var spos, ref$, dx, dy, ox, oy;
+        if (!this$.eventInScope(e)) {
+          return;
+        }
         spos = this$.scrollPos;
         ref$ = [e.deltaX, e.deltaY], dx = ref$[0], dy = ref$[1];
         ref$ = Math.abs(dx) > Math.abs(dy)
@@ -303,6 +310,9 @@
       }, {
         passive: false
       });
+    },
+    eventInScope: function(e){
+      return parent(e.target, '.sheet', this.dom.sheet) === this.dom.sheet;
     },
     regrid: function(){
       return this.dom.inner.style.gridTemplateColumns = "repeat(" + this.dim.col + ", max-content)";

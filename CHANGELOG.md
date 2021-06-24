@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.0.5
+
+ - add `tabindex` in root element to make it possible to capture key events.
+ - check some events for event source.
+
+
 ## v0.0.4
 
  - tweak fixed cell style
