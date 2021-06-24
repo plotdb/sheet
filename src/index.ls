@@ -270,6 +270,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @render-selection!
 
   edit: ({node, quick}) ->
+    idx = @index node
+    if !idx or idx.col < 0 or idx.row < 0 => return
+
     @editing <<< {node, quick, on: true}
     @dom.layout.textContent = node.textContent
     lbox = @dom.layout.getBoundingClientRect!

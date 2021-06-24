@@ -556,8 +556,12 @@
       return this.renderSelection();
     },
     edit: function(arg$){
-      var node, quick, ref$, lbox, box, rbox, sx, sy, v;
+      var node, quick, idx, ref$, lbox, box, rbox, sx, sy, v;
       node = arg$.node, quick = arg$.quick;
+      idx = this.index(node);
+      if (!idx || idx.col < 0 || idx.row < 0) {
+        return;
+      }
       ref$ = this.editing;
       ref$.node = node;
       ref$.quick = quick;

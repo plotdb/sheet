@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.0.4
+
+ - tweak fixed cell style
+ - prevent fixed cell from being edited
+
+
 ## v0.0.3
 
  - support fixed rows / columns, frozen rows / columns and idx cells toggling

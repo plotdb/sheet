@@ -168,7 +168,7 @@ pug_mixins["script"]("/assets/lib/@plotdb/sheet/dev/index.min.js");
 ;pug_debug_line = 14;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
 pug_html = pug_html + "\u003Cscript\u003E";
 ;pug_debug_line = 14;pug_debug_filename = "src\u002Fpug\u002Findex.pug";
-pug_html = pug_html + "var s;\ns = new sheet({\n  root: '#root',\n  data: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],\n  idx: {\n    row: true,\n    col: true\n  },\n  fixed: {\n    row: 2,\n    col: 2\n  },\n  frozen: {\n    row: 2,\n    col: 2\n  }\n});\u003C\u002Fscript\u003E\u003C\u002Fbody\u003E\u003C\u002Fhtml\u003E";
+pug_html = pug_html + "var s, c;\ns = new sheet({\n  root: '#root',\n  data: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],\n  idx: {\n    row: true,\n    col: true\n  },\n  fixed: {\n    row: 2,\n    col: 2\n  },\n  frozen: {\n    row: 2,\n    col: 2\n  }\n});\nc = s.cell({\n  x: 1,\n  y: 1\n});\nconsole.log(c);\nc.innerHTML = \"\u003Cdiv class=\\\"dropdown\\\"\u003E\\n\u003Cdiv class=\\\"btn btn-sm btn-primary dropdown-toggle\\\" data-toggle=\\\"dropdown\\\"\u003E點我\u003C\u002Fdiv\u003E\\n\u003C\u002Fdiv\u003E\";\u003C\u002Fscript\u003E\u003C\u002Fbody\u003E\u003C\u002Fhtml\u003E";
     }.call(this, "JSON" in locals_for_with ?
         locals_for_with.JSON :
         typeof JSON !== 'undefined' ? JSON : undefined, "b64img" in locals_for_with ?
