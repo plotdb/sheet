@@ -18,7 +18,8 @@
     "npm": ">=6.4.1"
   },
   "scripts": {
-    "start": "npx server -r web -o true"
+    "start": "npx server -r web -o true",
+    "deploy": "npx deploy web/static"
   },
   "devDependencies": {
     "@loadingio/debounce.js": "0.0.1",
