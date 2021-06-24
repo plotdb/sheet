@@ -15,6 +15,9 @@ s = new sheet({
     col: 2
   }
 });
+s.on('update', function(it){
+  return console.log(it);
+});
 c = s.cell({
   x: 1,
   y: 1

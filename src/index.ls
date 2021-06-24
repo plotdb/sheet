@@ -27,6 +27,7 @@ num-to-idx = (v) ->
 
 sheet = (opt={}) ->
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
+  @evt-handler = {}
   @data = opt.data or []
   @dim = col: (opt.{}dim.col or 30), row: (opt.{}dim.row or 30)
   @frozen = ({col: 0, row: 0} <<< (opt.frozen or {})){col, row}
@@ -57,6 +58,8 @@ sheet = (opt={}) ->
   @
 
 sheet.prototype = Object.create(Object.prototype) <<< do
+  on: (n, cb) -> @evt-handler.[][n].push cb
+  fire: (n, ...v) -> for cb in (@evt-handler[n] or []) => cb.apply @, v
   _init: ->
     for r from 0 til @dim.row => for c from 0 til @dim.col => @add-cell c, r
     @regrid!
@@ -86,8 +89,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       if !@les.start => return
       data = e.clipboardData.getData('text')
       data = parse-csv data
-      for r from 0 til data.length => for c from 0 til data[r].length =>
-        @set {row: r + @les.start.row, col: c + @les.start.col, data: data[r][c]}
+      @set {row: @les.start.row, col: @les.start.col, data: data, range: true}
 
     dom.addEventListener \keydown, (e) ~>
       if !@event-in-scope(e) => return
@@ -97,10 +99,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         [p1, p2] = [@les.start, @les.end]
         [c1, c2] = if p1.col < p2.col => [p1.col, p2.col] else [p2.col, p1.col]
         [r1, r2] = if p1.row < p2.row => [p1.row, p2.row] else [p2.row, p1.row]
-        for row from r1 to r2 => for col from c1 to c2 =>
-          @data[][row][col] = ""
-          [x, y] = [col - @pos.col + 1, row - @pos.row + 1]
-          @_content {x, y}
+        for row from r1 to r2 => for col from c1 to c2 => @set {row, col, data: ""}
 
       opt = switch code
       | 37 => {y:  0, x: -1}
@@ -113,6 +112,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @move opt
       e.stopPropagation!
       e.preventDefault!
+      @dom.sheet.focus!
 
     dom.addEventListener \keypress, (e) ~>
       if @les.node and !@editing.on => @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
@@ -160,9 +160,15 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @dom.inner.insertBefore div, @dom.inner.childNodes[y * @dim.col + x]
     @_content {x, y, n: div}
 
-  set: ({row, col, data}) ->
-    @data[][row][col] = data
-    @_content {y: row - @pos.row + 1, x: col - @pos.col + 1}
+  set: ({row, col, data, range}) ->
+    if !range =>
+      @data[][row][col] = data
+      @_content {y: row - @pos.row + @xif.row.1, x: col - @pos.col + @xif.col.1}
+    else
+      for r from 0 til data.length => for c from 0 til data[r].length =>
+        @data[][r + row][c + col] = data[r][c]
+        @_content {y: r + row - @pos.row + @xif.row.1, x: c + col - @pos.col + @xif.col.1}
+    @fire \update, {row, col, data, range: !!range}
 
   # re-render cell with the content they suppose to have
   _content: ({x, y, n}) ->
@@ -299,8 +305,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   edited: ->
     if !@editing.on => return
-    @editing.node.textContent = v = ( @dom.textarea.value or '' )
-    @data[][@les.start.row][@les.start.col] = v
+    @set {row: @les.start.row, col: @les.start.col, data: (v = (@dom.textarea.value or ''))}
+
     <[edit caret range]>.map ~> @dom[it].classList.toggle \show, false
     @editing <<< node: null, on: false
 

@@ -48,6 +48,7 @@
     this.root = typeof opt.root === 'string'
       ? document.querySelector(opt.root)
       : opt.root;
+    this.evtHandler = {};
     this.data = opt.data || [];
     this.dim = {
       col: (opt.dim || (opt.dim = {})).col || 30,
@@ -114,6 +115,23 @@
     return this;
   };
   sheet.prototype = import$(Object.create(Object.prototype), {
+    on: function(n, cb){
+      var ref$;
+      return ((ref$ = this.evtHandler)[n] || (ref$[n] = [])).push(cb);
+    },
+    fire: function(n){
+      var v, res$, i$, to$, ref$, len$, cb, results$ = [];
+      res$ = [];
+      for (i$ = 1, to$ = arguments.length; i$ < to$; ++i$) {
+        res$.push(arguments[i$]);
+      }
+      v = res$;
+      for (i$ = 0, len$ = (ref$ = this.evtHandler[n] || []).length; i$ < len$; ++i$) {
+        cb = ref$[i$];
+        results$.push(cb.apply(this, v));
+      }
+      return results$;
+    },
     _init: function(){
       var i$, to$, r, j$, to1$, c, dom, this$ = this;
       for (i$ = 0, to$ = this.dim.row; i$ < to$; ++i$) {
@@ -167,29 +185,21 @@
         });
       });
       document.body.addEventListener('paste', function(e){
-        var data, i$, to$, r, lresult$, j$, to1$, c, results$ = [];
+        var data;
         if (!this$.les.start) {
           return;
         }
         data = e.clipboardData.getData('text');
         data = parseCsv(data);
-        for (i$ = 0, to$ = data.length; i$ < to$; ++i$) {
-          r = i$;
-          lresult$ = [];
-          for (j$ = 0, to1$ = data[r].length; j$ < to1$; ++j$) {
-            c = j$;
-            lresult$.push(this$.set({
-              row: r + this$.les.start.row,
-              col: c + this$.les.start.col,
-              data: data[r][c]
-            }));
-          }
-          results$.push(lresult$);
-        }
-        return results$;
+        return this$.set({
+          row: this$.les.start.row,
+          col: this$.les.start.col,
+          data: data,
+          range: true
+        });
       });
       dom.addEventListener('keydown', function(e){
-        var code, ref$, p1, p2, c1, c2, r1, r2, i$, row, j$, col, x, y, opt;
+        var code, ref$, p1, p2, c1, c2, r1, r2, i$, row, j$, col, opt;
         if (!this$.eventInScope(e)) {
           return;
         }
@@ -209,11 +219,10 @@
             row = i$;
             for (j$ = c1; j$ <= c2; ++j$) {
               col = j$;
-              ((ref$ = this$.data)[row] || (ref$[row] = []))[col] = "";
-              ref$ = [col - this$.pos.col + 1, row - this$.pos.row + 1], x = ref$[0], y = ref$[1];
-              this$._content({
-                x: x,
-                y: y
+              this$.set({
+                row: row,
+                col: col,
+                data: ""
               });
             }
           }
@@ -252,7 +261,8 @@
         }
         this$.move(opt);
         e.stopPropagation();
-        return e.preventDefault();
+        e.preventDefault();
+        return this$.dom.sheet.focus();
       });
       dom.addEventListener('keypress', function(e){
         if (this$.les.node && !this$.editing.on) {
@@ -328,12 +338,32 @@
       });
     },
     set: function(arg$){
-      var row, col, data, ref$;
-      row = arg$.row, col = arg$.col, data = arg$.data;
-      ((ref$ = this.data)[row] || (ref$[row] = []))[col] = data;
-      return this._content({
-        y: row - this.pos.row + 1,
-        x: col - this.pos.col + 1
+      var row, col, data, range, ref$, i$, to$, r, j$, to1$, c, key$;
+      row = arg$.row, col = arg$.col, data = arg$.data, range = arg$.range;
+      if (!range) {
+        ((ref$ = this.data)[row] || (ref$[row] = []))[col] = data;
+        this._content({
+          y: row - this.pos.row + this.xif.row[1],
+          x: col - this.pos.col + this.xif.col[1]
+        });
+      } else {
+        for (i$ = 0, to$ = data.length; i$ < to$; ++i$) {
+          r = i$;
+          for (j$ = 0, to1$ = data[r].length; j$ < to1$; ++j$) {
+            c = j$;
+            ((ref$ = this.data)[key$ = r + row] || (ref$[key$] = []))[c + col] = data[r][c];
+            this._content({
+              y: r + row - this.pos.row + this.xif.row[1],
+              x: c + col - this.pos.col + this.xif.col[1]
+            });
+          }
+        }
+      }
+      return this.fire('update', {
+        row: row,
+        col: col,
+        data: data,
+        range: !!range
       });
     },
     _content: function(arg$){
@@ -597,12 +627,15 @@
       return this.dom.textarea.setSelectionRange(v.length, v.length);
     },
     edited: function(){
-      var v, ref$, key$, this$ = this;
+      var v, ref$, this$ = this;
       if (!this.editing.on) {
         return;
       }
-      this.editing.node.textContent = v = this.dom.textarea.value || '';
-      ((ref$ = this.data)[key$ = this.les.start.row] || (ref$[key$] = []))[this.les.start.col] = v;
+      this.set({
+        row: this.les.start.row,
+        col: this.les.start.col,
+        data: v = this.dom.textarea.value || ''
+      });
       ['edit', 'caret', 'range'].map(function(it){
         return this$.dom[it].classList.toggle('show', false);
       });

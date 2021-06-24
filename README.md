@@ -36,7 +36,8 @@ initialize:
 
 ## API
 
- - `set({row, col, content})` - set content to `content` for cells in row `row` and col `col`.
+ - `set({row, col, data, range})` - set cell data to `data` for cell(s) in row `row` and col `col`.
+   - update a range based on 2D array `data` when `range` is true.
  - `goto({row, col})` - set grid view starting from coordinate {row, col}
  - `render()` - force to re-render visible cells
 

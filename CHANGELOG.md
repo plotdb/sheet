@@ -1,5 +1,16 @@
 # Change Logs
 
+## v0.0.6
+
+ - re-focus sheet after selection moved to support quick editing
+ - remove outline of sheet to prevent unwanted focus style.
+ - tweak code for updating content
+ - add event handler
+ - fix bug of content updating issue when setting new data
+ - fire update event when data is changed.
+ - support range in `set` api.
+
+
 ## v0.0.5
 
  - add `tabindex` in root element to make it possible to capture key events.
