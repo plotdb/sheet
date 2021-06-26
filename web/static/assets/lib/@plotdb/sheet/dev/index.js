@@ -6,7 +6,6 @@
   };
   parent = function(n, s, e){
     var m;
-    e == null && (e = document);
     m = n;
     while (n && n !== e) {
       n = n.parentNode;

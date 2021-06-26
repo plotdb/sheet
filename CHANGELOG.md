@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.0.7 (upcoming)
+
+ - support sheet in shadow mode
+
+
 ## v0.0.6
 
  - re-focus sheet after selection moved to support quick editing

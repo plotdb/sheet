@@ -1,6 +1,6 @@
 parse-csv = (txt) -> Papa.parse(txt).data
 
-parent = (n, s, e = document) ->
+parent = (n, s, e) ->
   m = n
   while n and n != e => n = n.parentNode # must under e
   if n != e => return null
