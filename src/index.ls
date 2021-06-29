@@ -29,6 +29,7 @@ sheet = (opt={}) ->
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @evt-handler = {}
   @data = opt.data or []
+  @size = ({row: [], col: []} <<< opt.size){row, col}
   @_editing = if opt.editing? => !!opt.editing else true
   @dim = col: (opt.{}dim.col or 30), row: (opt.{}dim.row or 30)
   @frozen = ({col: 0, row: 0} <<< (opt.frozen or {})){col, row}
@@ -154,7 +155,16 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   event-in-scope: (e) -> (parent e.target, '.sheet', @dom.sheet) == @dom.sheet
   regrid: ->
-    @dom.inner.style.gridTemplateColumns = "repeat(#{@dim.col}, max-content)"
+    @dom.inner.style.gridTemplateColumns = (
+      "repeat(#{@xif.col.1}, max-content) " +
+      [0 til @frozen.col].map(~> @size.col[it] or "max-content").join(' ') + ' ' +
+      [@xif.col.2 til @dim.col].map(~> @size.col[it + @pos.col - @xif.col.1] or "max-content").join(' ')
+    )
+    @dom.inner.style.gridTemplateRows = (
+      "repeat(#{@xif.row.1}, max-content) " +
+      [0 til @frozen.row].map(~> @size.row[it] or "max-content").join(' ') + ' ' +
+      [@xif.row.2 til @dim.row].map(~> @size.row[it + @pos.row - @xif.row.1] or "max-content").join(' ')
+    )
 
   add-cell: (x, y) ->
     div = document.createElement \div

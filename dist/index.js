@@ -49,6 +49,13 @@
       : opt.root;
     this.evtHandler = {};
     this.data = opt.data || [];
+    this.size = {
+      row: (ref$ = import$({
+        row: [],
+        col: []
+      }, opt.size)).row,
+      col: ref$.col
+    };
     this._editing = opt.editing != null ? !!opt.editing : true;
     this.dim = {
       col: (opt.dim || (opt.dim = {})).col || 30,
@@ -325,7 +332,41 @@
       return parent(e.target, '.sheet', this.dom.sheet) === this.dom.sheet;
     },
     regrid: function(){
-      return this.dom.inner.style.gridTemplateColumns = "repeat(" + this.dim.col + ", max-content)";
+      var this$ = this;
+      this.dom.inner.style.gridTemplateColumns = ("repeat(" + this.xif.col[1] + ", max-content) ") + (function(){
+        var i$, to$, results$ = [];
+        for (i$ = 0, to$ = this.frozen.col; i$ < to$; ++i$) {
+          results$.push(i$);
+        }
+        return results$;
+      }.call(this)).map(function(it){
+        return this$.size.col[it] || "max-content";
+      }).join(' ') + ' ' + (function(){
+        var i$, to$, results$ = [];
+        for (i$ = this.xif.col[2], to$ = this.dim.col; i$ < to$; ++i$) {
+          results$.push(i$);
+        }
+        return results$;
+      }.call(this)).map(function(it){
+        return this$.size.col[it + this$.pos.col - this$.xif.col[1]] || "max-content";
+      }).join(' ');
+      return this.dom.inner.style.gridTemplateRows = ("repeat(" + this.xif.row[1] + ", max-content) ") + (function(){
+        var i$, to$, results$ = [];
+        for (i$ = 0, to$ = this.frozen.row; i$ < to$; ++i$) {
+          results$.push(i$);
+        }
+        return results$;
+      }.call(this)).map(function(it){
+        return this$.size.row[it] || "max-content";
+      }).join(' ') + ' ' + (function(){
+        var i$, to$, results$ = [];
+        for (i$ = this.xif.row[2], to$ = this.dim.row; i$ < to$; ++i$) {
+          results$.push(i$);
+        }
+        return results$;
+      }.call(this)).map(function(it){
+        return this$.size.row[it + this$.pos.row - this$.xif.row[1]] || "max-content";
+      }).join(' ');
     },
     addCell: function(x, y){
       var div;

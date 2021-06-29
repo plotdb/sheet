@@ -15,6 +15,9 @@ block script
   script: :lsc
     s = new sheet do
       root: '#root'
+      size:
+        col: [48,64,92,128].map -> "#{it}px"
+        row: [48,64,92,128].map -> "#{it}px"
       data: [
         [1,2,3,4],
         [5,6,7,8],

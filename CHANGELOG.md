@@ -1,9 +1,11 @@
 # Change Logs
 
-## v0.0.7 (upcoming)
+## v0.0.7
 
  - support sheet in shadow DOM mode
  - add editing option / api for togglgin editability
+ - add size option
+ - tweak style for `.fixed.frozen` cell.
 
 
 ## v0.0.6

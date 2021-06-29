@@ -47,6 +47,9 @@
   z-index: 12;
   background: #fdfeff;
 }
+.sheet .cell.fixed.frozen {
+  padding: 1px 3px;
+}
 .sheet .range {
   z-index: 10;
   border: 1px solid #27f;

@@ -29,7 +29,6 @@ initabs()
     /* use em may lead to nondeterminstic behavior in border rendering, due to rounding */
     padding: 1px 3px
     min-width: 48px
-    //-min-height: 26px
     line-height: 26px
     box-sizing: border-box
     white-space: pre
@@ -49,6 +48,8 @@ initabs()
   .cell.frozen
     z-index: 12
     background: #fdfeff
+  .cell.fixed.frozen
+    padding: 1px 3px
   .range
     z-index: 10
     border: 1px solid #27f
