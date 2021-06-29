@@ -25,6 +25,7 @@
   line-height: 26px;
   box-sizing: border-box;
   white-space: pre;
+  overflow: hidden;
 }
 .sheet .cell.idx {
   z-index: 100;

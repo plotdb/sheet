@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.0.8
+
+ - fix bug: cell overflow should be hidden so content won't overflow and cover following cells if size is fixed.
+
+
 ## v0.0.7
 
  - support sheet in shadow DOM mode
