@@ -32,14 +32,19 @@ initialize:
  - `fixed`: {row, col}. default {row: 0, col: 0}
  - `frozen`: {row, col}. default {row: 0, col: 0}
  - `idx`: {row, col}. default {row: true, col: true}
+ - `editing`: false to disable editing. default true.
+   - (TBD) in the future we should be able to:
+     - set edit permission ( e.g., edit, comment )
+     - apply on range
 
 
 ## API
 
- - `set({row, col, data, range})` - set cell data to `data` for cell(s) in row `row` and col `col`.
+ - `set({row, col, data, range})`: set cell data to `data` for cell(s) in row `row` and col `col`.
    - update a range based on 2D array `data` when `range` is true.
- - `goto({row, col})` - set grid view starting from coordinate {row, col}
- - `render()` - force to re-render visible cells
+ - `goto({row, col})`: set grid view starting from coordinate {row, col}
+ - `render()`: force to re-render visible cells
+ - `editing(v)`: set edit status to v, or return edit status if v is not provided.
 
 ## License
 

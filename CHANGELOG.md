@@ -2,7 +2,8 @@
 
 ## v0.0.7 (upcoming)
 
- - support sheet in shadow mode
+ - support sheet in shadow DOM mode
+ - add editing option / api for togglgin editability
 
 
 ## v0.0.6

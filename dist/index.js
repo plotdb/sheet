@@ -49,6 +49,7 @@
       : opt.root;
     this.evtHandler = {};
     this.data = opt.data || [];
+    this._editing = opt.editing != null ? !!opt.editing : true;
     this.dim = {
       col: (opt.dim || (opt.dim = {})).col || 30,
       row: (opt.dim || (opt.dim = {})).row || 30
@@ -597,6 +598,9 @@
     edit: function(arg$){
       var node, quick, idx, ref$, lbox, box, rbox, sx, sy, v;
       node = arg$.node, quick = arg$.quick;
+      if (!this._editing) {
+        return;
+      }
       idx = this.index(node);
       if (!idx || idx.col < 0 || idx.row < 0) {
         return;
@@ -684,6 +688,11 @@
       y = base.y + (opt.y || 0);
       x = base.x + (opt.x || 0);
       return this.dom.inner.childNodes[y * this.dim.col + x];
+    },
+    editing: function(v){
+      return !(v != null)
+        ? this._editing
+        : this._editing = !!v;
     },
     renderSelection: function(){
       var sx, sy, ex, ey, rbox, xbox, ybox, x1, x2, y1, y2, w, h, snode, sbox, ref$, this$ = this;

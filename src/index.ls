@@ -29,6 +29,7 @@ sheet = (opt={}) ->
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @evt-handler = {}
   @data = opt.data or []
+  @_editing = if opt.editing? => !!opt.editing else true
   @dim = col: (opt.{}dim.col or 30), row: (opt.{}dim.row or 30)
   @frozen = ({col: 0, row: 0} <<< (opt.frozen or {})){col, row}
   @idx = ({row: true, col: true} <<< (opt.idx or {})){col, row}
@@ -281,6 +282,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @render-selection!
 
   edit: ({node, quick}) ->
+    if !@_editing => return
     idx = @index node
     if !idx or idx.col < 0 or idx.row < 0 => return
 
@@ -332,6 +334,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     y = base.y + (opt.y or 0)
     x = base.x + (opt.x or 0)
     return @dom.inner.childNodes[y * @dim.col + x]
+
+  editing: (v) ->
+    return if !(v?) => @_editing
+    else @_editing = !!v
 
   render-selection: ->
     if !@les.start => return
