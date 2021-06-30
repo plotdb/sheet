@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.0.10
+
+ - fix selection issue across frozen cells
+ 
+
 ## v0.0.9
 
  - fix column label issue (plotdb/sheet#1)

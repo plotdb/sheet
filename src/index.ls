@@ -349,11 +349,22 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     return {x, y, col, row}
 
   cell: (opt = {}) ->
-    base = if opt.node => @index(opt.node) else {y: 0, x: 0}
-    if !base => throw new Error("node not found in sheet")
-    y = base.y + (opt.y or 0)
-    x = base.x + (opt.x or 0)
-    return @dom.inner.childNodes[y * @dim.col + x]
+    if opt.col? =>
+      if opt.col < @frozen.col => x = opt.col
+      else if opt.col - @pos.col < @frozen.col => return null
+      else x = (opt.col - @pos.col)
+      if opt.row < @frozen.row => y = opt.row
+      else if opt.row - @pos.row < @frozen.row => return null
+      else y = (opt.row - @pos.row)
+      [x, y] = [x + @xif.col.1, y + @xif.row.1]
+      if x < 0 or y < 0 or x >= @dim.col or y >= @dim.row => return null
+      return @dom.inner.childNodes[y * @dim.col + x]
+    else
+      base = if opt.node => @index(opt.node) else {y: 0, x: 0}
+      if !base => throw new Error("node not found in sheet")
+      y = base.y + (opt.y or 0)
+      x = base.x + (opt.x or 0)
+      return @dom.inner.childNodes[y * @dim.col + x]
 
   editing: (v) ->
     return if !(v?) => @_editing
@@ -361,32 +372,24 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   render-selection: ->
     if !@les.start => return
-    sx = if @les.start.col < @frozen.col => @les.start.col else @les.start.col - @pos.col
-    sy = if @les.start.row < @frozen.row => @les.start.row else @les.start.row - @pos.row
-    ex = if @les.end.col < @frozen.col => @les.end.col else @les.end.col - @pos.col
-    ey = if @les.end.row < @frozen.row => @les.end.row else @les.end.row - @pos.row
-
+    [sc,ec] = if @les.start.col < @les.end.col => [@les.start.col, @les.end.col] else [@les.end.col, @les.start.col]
+    [sr,er] = if @les.start.row < @les.end.row => [@les.start.row, @les.end.row] else [@les.end.row, @les.start.row]
     rbox = @dom.inner.getBoundingClientRect!
-
-    xbox = [sx, ex].map (x) ~>
-      if x < 0 => {x: rbox.x - 10, width: 0}
-      else if x > (@dim.col - 1) => {x: rbox.x + rbox.width + 10, width: 0}
-      else @dom.inner.childNodes[x + @xif.col.1].getBoundingClientRect!
-
-    ybox = [sy, ey].map (y) ~>
-      if y < 0 => {y: rbox.y - 10, height: 0}
-      else if y > (@dim.row - 1) => {y: rbox.y + rbox.height + 10, height: 0}
-      else @dom.inner.childNodes[@dim.col * (y + @xif.row.1)].getBoundingClientRect!
-
-    x1 = Math.min.apply Math, xbox.map -> it.x - rbox.x
-    x2 = Math.max.apply Math, xbox.map -> it.x - rbox.x + it.width
-    y1 = Math.min.apply Math, ybox.map -> it.y - rbox.y
-    y2 = Math.max.apply Math, ybox.map -> it.y - rbox.y + it.height
+    c0 = @cell({col: @pos.col + @frozen.col, row: @pos.row + @frozen.row})
+    c1 = @cell {col: sc, row: sr}
+    c2 = @cell {col: sc, row: er}
+    c3 = @cell {col: ec, row: sr}
+    c4 = @cell {col: ec, row: er}
+    [b0,b1,b2,b3,b4] = [c0,c1,c2,c3,c4].map -> if it => it.getBoundingClientRect! else null
+    b0 <<< {width: 0, height: 0}
+    x1 = (b1 or b2 or b0).x - rbox.x
+    y1 = (b1 or b3 or b0).y - rbox.y
+    x2 = (b3 or b4 or b0).x + (b3 or b4 or b0).width - rbox.x
+    y2 = (b2 or b4 or b0).y + (b2 or b4 or b0).height - rbox.y
     w = x2 - x1 + 1
     h = y2 - y1 + 1
 
-    snode = if !(sx >= 0 and sy >= 0 and sx < @dim.col and sy < @dim.row) => null
-    else @dom.inner.childNodes[(sx + @xif.col.1) + (sy + @xif.row.1) * @dim.col]
+    snode = @cell @les.start
     sbox = if !snode => null else snode.getBoundingClientRect!
 
     @dom.range.style <<< 
@@ -404,10 +407,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         zIndex: (
           if @les.start.row + @xif.row.1 < @xif.row.2 and @les.start.col + @xif.col.1 < @xif.col.2 => 101
           else if @les.start.row + @xif.row.1 < @xif.row.2 or @les.start.col + @xif.col.1 < @xif.col.2 => 20
-          else 10
+          else 15
         )
     @dom.caret.classList.toggle \show, !!sbox
-
 
 if module? => module.exports = sheet
 else if window? => window.sheet = sheet

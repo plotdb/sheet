@@ -730,20 +730,42 @@
       };
     },
     cell: function(opt){
-      var base, y, x;
+      var x, y, ref$, base;
       opt == null && (opt = {});
-      base = opt.node
-        ? this.index(opt.node)
-        : {
-          y: 0,
-          x: 0
-        };
-      if (!base) {
-        throw new Error("node not found in sheet");
+      if (opt.col != null) {
+        if (opt.col < this.frozen.col) {
+          x = opt.col;
+        } else if (opt.col - this.pos.col < this.frozen.col) {
+          return null;
+        } else {
+          x = opt.col - this.pos.col;
+        }
+        if (opt.row < this.frozen.row) {
+          y = opt.row;
+        } else if (opt.row - this.pos.row < this.frozen.row) {
+          return null;
+        } else {
+          y = opt.row - this.pos.row;
+        }
+        ref$ = [x + this.xif.col[1], y + this.xif.row[1]], x = ref$[0], y = ref$[1];
+        if (x < 0 || y < 0 || x >= this.dim.col || y >= this.dim.row) {
+          return null;
+        }
+        return this.dom.inner.childNodes[y * this.dim.col + x];
+      } else {
+        base = opt.node
+          ? this.index(opt.node)
+          : {
+            y: 0,
+            x: 0
+          };
+        if (!base) {
+          throw new Error("node not found in sheet");
+        }
+        y = base.y + (opt.y || 0);
+        x = base.x + (opt.x || 0);
+        return this.dom.inner.childNodes[y * this.dim.col + x];
       }
-      y = base.y + (opt.y || 0);
-      x = base.x + (opt.x || 0);
-      return this.dom.inner.childNodes[y * this.dim.col + x];
     },
     editing: function(v){
       return !(v != null)
@@ -751,70 +773,53 @@
         : this._editing = !!v;
     },
     renderSelection: function(){
-      var sx, sy, ex, ey, rbox, xbox, ybox, x1, x2, y1, y2, w, h, snode, sbox, ref$, this$ = this;
+      var ref$, sc, ec, sr, er, rbox, c0, c1, c2, c3, c4, b0, b1, b2, b3, b4, x1, y1, x2, y2, w, h, snode, sbox;
       if (!this.les.start) {
         return;
       }
-      sx = this.les.start.col < this.frozen.col
-        ? this.les.start.col
-        : this.les.start.col - this.pos.col;
-      sy = this.les.start.row < this.frozen.row
-        ? this.les.start.row
-        : this.les.start.row - this.pos.row;
-      ex = this.les.end.col < this.frozen.col
-        ? this.les.end.col
-        : this.les.end.col - this.pos.col;
-      ey = this.les.end.row < this.frozen.row
-        ? this.les.end.row
-        : this.les.end.row - this.pos.row;
+      ref$ = this.les.start.col < this.les.end.col
+        ? [this.les.start.col, this.les.end.col]
+        : [this.les.end.col, this.les.start.col], sc = ref$[0], ec = ref$[1];
+      ref$ = this.les.start.row < this.les.end.row
+        ? [this.les.start.row, this.les.end.row]
+        : [this.les.end.row, this.les.start.row], sr = ref$[0], er = ref$[1];
       rbox = this.dom.inner.getBoundingClientRect();
-      xbox = [sx, ex].map(function(x){
-        if (x < 0) {
-          return {
-            x: rbox.x - 10,
-            width: 0
-          };
-        } else if (x > this$.dim.col - 1) {
-          return {
-            x: rbox.x + rbox.width + 10,
-            width: 0
-          };
-        } else {
-          return this$.dom.inner.childNodes[x + this$.xif.col[1]].getBoundingClientRect();
-        }
+      c0 = this.cell({
+        col: this.pos.col + this.frozen.col,
+        row: this.pos.row + this.frozen.row
       });
-      ybox = [sy, ey].map(function(y){
-        if (y < 0) {
-          return {
-            y: rbox.y - 10,
-            height: 0
-          };
-        } else if (y > this$.dim.row - 1) {
-          return {
-            y: rbox.y + rbox.height + 10,
-            height: 0
-          };
-        } else {
-          return this$.dom.inner.childNodes[this$.dim.col * (y + this$.xif.row[1])].getBoundingClientRect();
-        }
+      c1 = this.cell({
+        col: sc,
+        row: sr
       });
-      x1 = Math.min.apply(Math, xbox.map(function(it){
-        return it.x - rbox.x;
-      }));
-      x2 = Math.max.apply(Math, xbox.map(function(it){
-        return it.x - rbox.x + it.width;
-      }));
-      y1 = Math.min.apply(Math, ybox.map(function(it){
-        return it.y - rbox.y;
-      }));
-      y2 = Math.max.apply(Math, ybox.map(function(it){
-        return it.y - rbox.y + it.height;
-      }));
+      c2 = this.cell({
+        col: sc,
+        row: er
+      });
+      c3 = this.cell({
+        col: ec,
+        row: sr
+      });
+      c4 = this.cell({
+        col: ec,
+        row: er
+      });
+      ref$ = [c0, c1, c2, c3, c4].map(function(it){
+        if (it) {
+          return it.getBoundingClientRect();
+        } else {
+          return null;
+        }
+      }), b0 = ref$[0], b1 = ref$[1], b2 = ref$[2], b3 = ref$[3], b4 = ref$[4];
+      b0.width = 0;
+      b0.height = 0;
+      x1 = (b1 || b2 || b0).x - rbox.x;
+      y1 = (b1 || b3 || b0).y - rbox.y;
+      x2 = (b3 || b4 || b0).x + (b3 || b4 || b0).width - rbox.x;
+      y2 = (b2 || b4 || b0).y + (b2 || b4 || b0).height - rbox.y;
       w = x2 - x1 + 1;
       h = y2 - y1 + 1;
-      snode = !(sx >= 0 && sy >= 0 && sx < this.dim.col && sy < this.dim.row)
-        ? null
-        : this.dom.inner.childNodes[(sx + this.xif.col[1]) + (sy + this.xif.row[1]) * this.dim.col];
+      snode = this.cell(this.les.start);
       sbox = !snode
         ? null
         : snode.getBoundingClientRect();
@@ -832,7 +837,7 @@
         ref$.height = (sbox.height + 2) + "px";
         ref$.zIndex = this.les.start.row + this.xif.row[1] < this.xif.row[2] && this.les.start.col + this.xif.col[1] < this.xif.col[2]
           ? 101
-          : this.les.start.row + this.xif.row[1] < this.xif.row[2] || this.les.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 10;
+          : this.les.start.row + this.xif.row[1] < this.xif.row[2] || this.les.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 15;
       }
       return this.dom.caret.classList.toggle('show', !!sbox);
     }
