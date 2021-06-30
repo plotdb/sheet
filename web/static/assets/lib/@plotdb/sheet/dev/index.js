@@ -302,13 +302,23 @@
       });
       this.dom.textarea.addEventListener('keydown', function(e){
         var lbox, box, ref$;
-        if (e.keyCode === 27 || (e.keyCode === 13 && !(e.altKey || e.metaKey))) {
-          this$.move({
-            row: 1,
-            col: 0
+        if (e.keyCode === 27) {
+          this$.edited({
+            cancel: true
           });
           e.stopPropagation();
           e.preventDefault();
+          this$.dom.sheet.focus();
+          return;
+        }
+        if (e.keyCode === 13 && !(e.altKey || e.metaKey)) {
+          this$.move({
+            y: 1,
+            x: 0
+          });
+          e.stopPropagation();
+          e.preventDefault();
+          this$.dom.sheet.focus();
           return;
         }
         if (e.keyCode === 13 && (e.altKey || e.metaKey)) {
@@ -709,19 +719,20 @@
       this.dom.textarea.focus();
       return this.dom.textarea.setSelectionRange(v.length, v.length);
     },
-    edited: function(){
-      var v, ref$, this$ = this;
+    edited: function(opt){
+      var v, ref$;
+      opt == null && (opt = {});
       if (!this.editing.on) {
         return;
       }
-      this.set({
-        row: this.les.start.row,
-        col: this.les.start.col,
-        data: v = this.dom.textarea.value || ''
-      });
-      ['edit', 'caret', 'range'].map(function(it){
-        return this$.dom[it].classList.toggle('show', false);
-      });
+      if (!opt.cancel) {
+        this.set({
+          row: this.les.start.row,
+          col: this.les.start.col,
+          data: v = this.dom.textarea.value || ''
+        });
+      }
+      this.dom.edit.classList.toggle('show', false);
       return ref$ = this.editing, ref$.node = null, ref$.on = false, ref$;
     },
     index: function(node){

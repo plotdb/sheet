@@ -1,5 +1,13 @@
 # Change Logs
 
+## v0.1.1
+
+ - fix bug: escape should cancel editing.
+ - fix bug: caret position incorrect after pressing enter.
+ - fix bug: should re-focus after enter.
+ - fix bug: caret and range should not be hidden after edited.
+
+
 ## v0.1.0
 
  - rename `update` event to `change` event.

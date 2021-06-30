@@ -125,16 +125,23 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @move opt
       e.stopPropagation!
       e.preventDefault!
-      @dom.sheet.focus!
+      @dom.sheet.focus!  # we need focus to accept key event.
 
     dom.addEventListener \keypress, (e) ~>
       if @les.node and !@editing.on => @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
 
     @dom.textarea.addEventListener \keydown, (e) ~>
-      if e.keyCode == 27 or (e.keyCode == 13 and !(e.altKey or e.metaKey)) =>
-        @move {row: 1, col: 0}
+      if e.keyCode == 27 =>
+        @edited cancel: true
         e.stopPropagation!
         e.preventDefault!
+        @dom.sheet.focus!  # we need focus to accept key event.
+        return
+      if (e.keyCode == 13 and !(e.altKey or e.metaKey)) =>
+        @move {y: 1, x: 0}
+        e.stopPropagation!
+        e.preventDefault!
+        @dom.sheet.focus!  # we need focus to accept key event.
         return
       if e.keyCode == 13 and (e.altKey or e.metaKey) =>
         @dom.textarea.value += \\n
@@ -336,11 +343,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @dom.textarea.focus!
     @dom.textarea.setSelectionRange v.length, v.length
 
-  edited: ->
+  edited: (opt = {}) ->
     if !@editing.on => return
-    @set {row: @les.start.row, col: @les.start.col, data: (v = (@dom.textarea.value or ''))}
-
-    <[edit caret range]>.map ~> @dom[it].classList.toggle \show, false
+    if !opt.cancel => @set {row: @les.start.row, col: @les.start.col, data: (v = (@dom.textarea.value or ''))}
+    @dom.edit.classList.toggle \show, false
     @editing <<< node: null, on: false
 
   index: (node) ->
