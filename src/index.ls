@@ -97,13 +97,14 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @edit {node: p, quick: false}
 
     document.body.addEventListener \paste, (e) ~>
-      # TODO we need to find some way to ensure sheet gets users' focus before handling paste event
+      if !parent(document.activeElement, '.sheet', dom) => return
       if !@les.start => return
       data = e.clipboardData.getData('text')
       data = parse-csv data
       @set {row: @les.start.row, col: @les.start.col, data: data, range: true}
 
     dom.addEventListener \keydown, (e) ~>
+      if e.keyCode == 67 and (e.metaKey or e.ctrlKey) => return @copy!
       if !@event-in-scope(e) => return
       code = e.keyCode
       if code == 8 =>
@@ -162,6 +163,16 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       e.preventDefault!
     ), {passive: false}
 
+  copy: ->
+    if !@les.start => return
+    c = []
+    for row from @les.start.row til @les.end.row + 1=>
+      r = []
+      for col from @les.start.col til @les.end.col + 1 =>
+        r.push ('"' + (('' + @data[][row][col]) or '').replace(/"/g,'""') + '"')
+      c.push r.join(\\t)
+    s = c.join(\\n)
+    navigator.clipboard.writeText s
 
   event-in-scope: (e) -> (parent e.target, '.sheet', @dom.sheet) == @dom.sheet
   regrid: ->
@@ -189,7 +200,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       for r from 0 til data.length => for c from 0 til data[r].length =>
         @data[][r + row][c + col] = data[r][c]
         @_content {y: r + row - @pos.row + @xif.row.1, x: c + col - @pos.col + @xif.col.1}
-    @fire \update, {row, col, data, range: !!range}
+    @fire \change, {row, col, data, range: !!range}
 
   # re-render cell with the content they suppose to have
   _content: ({x, y, n}) ->

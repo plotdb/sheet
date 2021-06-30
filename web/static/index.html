@@ -23,7 +23,7 @@ s = new sheet({
     col: 2
   }
 });
-s.on('update', function(it){
+s.on('change', function(it){
   return console.log(it);
 });
 c = s.cell({

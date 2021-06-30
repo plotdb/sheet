@@ -55,6 +55,26 @@ initialize:
  - `render()`: force to re-render visible cells
  - `editing(v)`: set edit status to v, or return edit status if v is not provided.
 
+
+## Event
+
+use `sheet.on('event-name', callback)` to handle sheet related events, e.g.,
+
+    s = new sheet( ... );
+    s.on('change', function({row, col, data, range}) {
+      ....
+    });
+
+
+Following are a list of possible events:
+
+ - `change`: fired when some cells are updated. callback function with following options, in object:
+   - `row`: base row of the updated cell
+   - `col`: base col of the updated cell
+   - `data`: data used to update. If it's a 2D array and `range` is true, then cells are updated with values in `data` correspondingly relative to `row` and `col` as the original cell
+   - `range`: true if a range of cells are updated.
+
+
 ## License
 
 MIT

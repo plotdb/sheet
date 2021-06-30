@@ -1,5 +1,12 @@
 # Change Logs
 
+## v0.1.0
+
+ - rename `update` event to `change` event.
+ - check sheet focus before pasting data
+ - support copy tsv format text to clipboard. use `navigator.clipboard`, which doesn't support older browsers.
+
+
 ## v0.0.10
 
  - fix selection issue across frozen cells

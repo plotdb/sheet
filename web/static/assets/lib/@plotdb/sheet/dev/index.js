@@ -208,6 +208,9 @@
       });
       document.body.addEventListener('paste', function(e){
         var data;
+        if (!parent(document.activeElement, '.sheet', dom)) {
+          return;
+        }
         if (!this$.les.start) {
           return;
         }
@@ -222,6 +225,9 @@
       });
       dom.addEventListener('keydown', function(e){
         var code, ref$, p1, p2, c1, c2, r1, r2, i$, row, j$, col, opt;
+        if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
+          return this$.copy();
+        }
         if (!this$.eventInScope(e)) {
           return;
         }
@@ -343,6 +349,24 @@
         passive: false
       });
     },
+    copy: function(){
+      var c, i$, to$, row, r, j$, to1$, col, ref$, s;
+      if (!this.les.start) {
+        return;
+      }
+      c = [];
+      for (i$ = this.les.start.row, to$ = this.les.end.row + 1; i$ < to$; ++i$) {
+        row = i$;
+        r = [];
+        for (j$ = this.les.start.col, to1$ = this.les.end.col + 1; j$ < to1$; ++j$) {
+          col = j$;
+          r.push('"' + ('' + ((ref$ = this.data)[row] || (ref$[row] = []))[col] || '').replace(/"/g, '""') + '"');
+        }
+        c.push(r.join('\t'));
+      }
+      s = c.join('\n');
+      return navigator.clipboard.writeText(s);
+    },
     eventInScope: function(e){
       return parent(e.target, '.sheet', this.dom.sheet) === this.dom.sheet;
     },
@@ -415,7 +439,7 @@
           }
         }
       }
-      return this.fire('update', {
+      return this.fire('change', {
         row: row,
         col: col,
         data: data,
