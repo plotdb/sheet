@@ -12,18 +12,28 @@ parent = (n, s, e) ->
   if n == e and (!e.matches or !e.matches(s)) => return null
   return n
 
-num-to-idx = (v) ->
-  if v < 0 => return ""
+idx-to-label = (val) ->
+  radix = Math.floor(Math.log( (val + 1) * 25 + 1 ) / Math.log(26)) - 1
+  base = ((Math.pow(26, (radix + 1)) - 1) / 25) - 1
+  v = val - base
+  map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   ret = ""
-  u = v % 26
-  ret = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(u)) + ret
-  v = (v - u) / 26
-  while v > 0
-    u = v % 26
-    ret = (" ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(u)) + ret
-    v = (v - u) / 26
-
+  for i from 0 to radix
+    c = map.charAt(v % 26)
+    ret = c + ret
+    v = (v - (v % 26)) / 26
   return ret
+
+label-to-idx = (label) ->
+  radix = label.length - 1
+  base = ((Math.pow(26, (radix + 1)) - 1) / 25) - 1
+  map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  val = 0
+  for i from 0 to radix =>
+    idx = map.indexOf(label[i])
+    if idx < 0 => throw new Error("incorrect label")
+    val = val * 26 + idx
+  return val + base
 
 sheet = (opt={}) ->
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
@@ -192,8 +202,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       [v,"cell idx"]
     else if y < @xif.row.0 =>
       v = if x < @xif.col.1 => " "
-      else if x < @xif.col.2 => num-to-idx(x - @xif.col.1)
-      else num-to-idx(x - @xif.col.1 + @pos.col)
+      else if x < @xif.col.2 => idx-to-label(x - @xif.col.1)
+      else idx-to-label(x - @xif.col.1 + @pos.col)
       [v,"cell idx"]
     else if x < @xif.col.1 => [null, "cell fixed"]
     else if y < @xif.row.1 => [null, "cell fixed"]

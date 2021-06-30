@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.0.9
+
+ - fix column label issue (plotdb/sheet#1)
+
+
 ## v0.0.8
 
  - fix bug: cell overflow should be hidden so content won't overflow and cover following cells if size is fixed.
