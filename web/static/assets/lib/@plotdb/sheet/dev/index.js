@@ -59,6 +59,7 @@
   sheet = function(opt){
     var ref$, this$ = this;
     opt == null && (opt = {});
+    this.opt = opt;
     this.root = typeof opt.root === 'string'
       ? document.querySelector(opt.root)
       : opt.root;
@@ -329,10 +330,18 @@
           return ref$ = this$.dom.textarea.style, ref$.width = Math.max(lbox.width, box.width + 1) + "px", ref$.height = Math.max(lbox.height, box.height + 1) + "px", ref$;
         }
       });
-      return document.body.addEventListener('wheel', function(e){
-        var spos, ref$, dx, dy, ox, oy;
-        if (!this$.eventInScope(e)) {
-          return;
+      return document.addEventListener('wheel', function(e){
+        var inscope, spos, ref$, dx, dy, ox, oy;
+        inscope = this$.eventInScope(e);
+        if (!(this$.opt.scrollLock != null) || this$.opt.scrollLock) {
+          if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+            if (inscope || e.target === document.body) {
+              e.preventDefault();
+            }
+          }
+        }
+        if (!inscope) {
+          return false;
         }
         spos = this$.scrollPos;
         ref$ = [e.deltaX, e.deltaY], dx = ref$[0], dy = ref$[1];

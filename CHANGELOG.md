@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.1.2
+
+ - add `scrollLock` option for locking body scrolling to prevent swipe gesture.
+
+
 ## v0.1.1
 
  - fix bug: escape should cancel editing.

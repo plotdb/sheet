@@ -45,6 +45,8 @@ initialize:
    - (TBD) in the future we should be able to:
      - set edit permission ( e.g., edit, comment )
      - apply on range
+ - `scrollLock`: default true. prevent from horizontal scrolling of document.body if true.
+   - this affects how user interact with sheet with scrolling gestures. check src comment for more information.
 
 
 ## API

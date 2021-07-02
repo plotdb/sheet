@@ -36,6 +36,7 @@ label-to-idx = (label) ->
   return val + base
 
 sheet = (opt={}) ->
+  @opt = opt
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @evt-handler = {}
   @data = opt.data or []
@@ -152,8 +153,25 @@ sheet.prototype = Object.create(Object.prototype) <<< do
           width: "#{Math.max(lbox.width, box.width + 1)}px"
           height: "#{Math.max(lbox.height, box.height + 1)}px"
 
-    document.body.addEventListener \wheel, ((e) ~>
-      if !@event-in-scope(e) => return
+
+    document.addEventListener \wheel, ((e) ~>
+      # we should block wheel event only if target element is under sheet.
+      # however, some scenarios may trigger swipe back gesture of browser:
+      #  - container with overflow: hidden, or container which has scrolled to the leftmost position.
+      #  - in limited region while the gesture has been activated once in other unlimited regions
+      #    - this is true even if user reload the page after acitvated the gesture. wtf!
+      # there can be prevented by calling preventDefault over every wheel event, but it may cause issues in:
+      #  - other scrollable
+      #  - outside sheet area
+      # for now we only find a way to make it okay:
+      #  - always preventDefault for horizontal scrolling  if document.body is the target.
+      # this may affect the host document so we make it configurable by user, and by default enabled.
+      inscope = @event-in-scope(e)
+      if (!(@opt.scroll-lock?) or @opt.scroll-lock) => # if scroll-lock is enabled
+        if Math.abs(e.deltaX) > Math.abs(e.deltaY) => # and it's horizontal scrolling
+          if inscope or e.target == document.body => # and is in interested region
+            e.preventDefault!
+      if !inscope => return false
       spos = @scroll-pos
       [dx, dy] = [e.deltaX, e.deltaY]
       [dx, dy] = if Math.abs(dx) > Math.abs(dy) => [dx, 0] else [0, dy]
@@ -167,6 +185,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       else if dx > 0 => @_mr dx
       else if dx < 0 => @_ml dx
       @render-selection!
+      # despite the above hack, we still preventDefault here for default behavior.
+      # that is, once users are scrolling in sheet, the event should not trigger default behavior.
       e.preventDefault!
     ), {passive: false}
 
