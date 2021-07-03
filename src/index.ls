@@ -39,7 +39,7 @@ sheet = (opt={}) ->
   @opt = opt
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @evt-handler = {}
-  @data = opt.data or []
+  @_data = opt.data or []
   @size = ({row: [], col: []} <<< opt.size){row, col}
   @_editing = if opt.editing? => !!opt.editing else true
   @dim = col: (opt.{}dim.col or 30), row: (opt.{}dim.row or 30)
@@ -196,7 +196,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     for row from @les.start.row til @les.end.row + 1=>
       r = []
       for col from @les.start.col til @les.end.col + 1 =>
-        r.push ('"' + (('' + @data[][row][col]) or '').replace(/"/g,'""') + '"')
+        r.push ('"' + (('' + @_data[][row][col]) or '').replace(/"/g,'""') + '"')
       c.push r.join(\\t)
     s = c.join(\\n)
     navigator.clipboard.writeText s
@@ -221,11 +221,11 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   set: ({row, col, data, range}) ->
     if !range =>
-      @data[][row][col] = data
+      @_data[][row][col] = data
       @_content {y: row - @pos.row + @xif.row.1, x: col - @pos.col + @xif.col.1}
     else
       for r from 0 til data.length => for c from 0 til data[r].length =>
-        @data[][r + row][c + col] = data[r][c]
+        @_data[][r + row][c + col] = data[r][c]
         @_content {y: r + row - @pos.row + @xif.row.1, x: c + col - @pos.col + @xif.col.1}
     @fire \change, {row, col, data, range: !!range}
 
@@ -246,12 +246,12 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     else if x < @xif.col.1 => [null, "cell fixed"]
     else if y < @xif.row.1 => [null, "cell fixed"]
     else if x < @xif.col.2 and y < @xif.row.2 =>
-      [@data[][y - @xif.row.1][x - @xif.col.1] or '', "cell frozen fixed"]
+      [@_data[][y - @xif.row.1][x - @xif.col.1] or '', "cell frozen fixed"]
     else if x < @xif.col.2 =>
-      [@data[][@pos.row + y - @xif.row.1][x - @xif.col.1] or '', "cell frozen"]
+      [@_data[][@pos.row + y - @xif.row.1][x - @xif.col.1] or '', "cell frozen"]
     else if y < @xif.row.2 =>
-      [@data[][y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell frozen"]
-    else [@data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell"]
+      [@_data[][y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell frozen"]
+    else [@_data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell"]
 
     n.className = className
     if textContent != null => n.textContent = textContent
@@ -319,6 +319,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   goto: (opt={row: 0, col: 0}) ->
     @pos <<< opt
     @render!
+
   render:  ->
     for y from 0 til @dim.row => for x from 0 til @dim.col => @_content {x, y}
 
@@ -447,6 +448,11 @@ sheet.prototype = Object.create(Object.prototype) <<< do
           else 15
         )
     @dom.caret.classList.toggle \show, !!sbox
+
+  data: ->
+    if !(it?) => return @_data
+    @_data = it
+    @render!
 
 if module? => module.exports = sheet
 else if window? => window.sheet = sheet

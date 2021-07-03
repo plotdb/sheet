@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.1.3
+
+ - add `data(d)` api
+
+
 ## v0.1.2
 
  - add `scrollLock` option for locking body scrolling to prevent swipe gesture.

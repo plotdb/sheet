@@ -64,7 +64,7 @@
       ? document.querySelector(opt.root)
       : opt.root;
     this.evtHandler = {};
-    this.data = opt.data || [];
+    this._data = opt.data || [];
     this.size = {
       row: (ref$ = import$({
         row: [],
@@ -379,7 +379,7 @@
         r = [];
         for (j$ = this.les.start.col, to1$ = this.les.end.col + 1; j$ < to1$; ++j$) {
           col = j$;
-          r.push('"' + ('' + ((ref$ = this.data)[row] || (ref$[row] = []))[col] || '').replace(/"/g, '""') + '"');
+          r.push('"' + ('' + ((ref$ = this._data)[row] || (ref$[row] = []))[col] || '').replace(/"/g, '""') + '"');
         }
         c.push(r.join('\t'));
       }
@@ -440,7 +440,7 @@
       var row, col, data, range, ref$, i$, to$, r, j$, to1$, c, key$;
       row = arg$.row, col = arg$.col, data = arg$.data, range = arg$.range;
       if (!range) {
-        ((ref$ = this.data)[row] || (ref$[row] = []))[col] = data;
+        ((ref$ = this._data)[row] || (ref$[row] = []))[col] = data;
         this._content({
           y: row - this.pos.row + this.xif.row[1],
           x: col - this.pos.col + this.xif.col[1]
@@ -450,7 +450,7 @@
           r = i$;
           for (j$ = 0, to1$ = data[r].length; j$ < to1$; ++j$) {
             c = j$;
-            ((ref$ = this.data)[key$ = r + row] || (ref$[key$] = []))[c + col] = data[r][c];
+            ((ref$ = this._data)[key$ = r + row] || (ref$[key$] = []))[c + col] = data[r][c];
             this._content({
               y: r + row - this.pos.row + this.xif.row[1],
               x: c + col - this.pos.col + this.xif.col[1]
@@ -490,12 +490,12 @@
               : y < this.xif.row[1]
                 ? [null, "cell fixed"]
                 : x < this.xif.col[2] && y < this.xif.row[2]
-                  ? [((ref$ = this.data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen fixed"]
+                  ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen fixed"]
                   : x < this.xif.col[2]
-                    ? [((ref$ = this.data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen"]
+                    ? [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen"]
                     : y < this.xif.row[2]
-                      ? [((ref$ = this.data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell frozen"]
-                      : [((ref$ = this.data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell"], textContent = ref$[0], className = ref$[1];
+                      ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell frozen"]
+                      : [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell"], textContent = ref$[0], className = ref$[1];
       n.className = className;
       if (textContent !== null) {
         return n.textContent = textContent;
@@ -884,6 +884,13 @@
           : this.les.start.row + this.xif.row[1] < this.xif.row[2] || this.les.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 15;
       }
       return this.dom.caret.classList.toggle('show', !!sbox);
+    },
+    data: function(it){
+      if (!(it != null)) {
+        return this._data;
+      }
+      this._data = it;
+      return this.render();
     }
   });
   if (typeof module != 'undefined' && module !== null) {

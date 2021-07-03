@@ -56,6 +56,8 @@ initialize:
  - `goto({row, col})`: set grid view starting from coordinate {row, col}
  - `render()`: force to re-render visible cells
  - `editing(v)`: set edit status to v, or return edit status if v is not provided.
+ - `data(d)`: replace data completely with `d` and re-render.
+   - return current data if `d` is omitted.
 
 
 ## Event
