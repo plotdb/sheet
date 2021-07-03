@@ -246,12 +246,13 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     else if x < @xif.col.1 => [null, "cell fixed"]
     else if y < @xif.row.1 => [null, "cell fixed"]
     else if x < @xif.col.2 and y < @xif.row.2 =>
-      [@_data[][y - @xif.row.1][x - @xif.col.1] or '', "cell frozen fixed"]
+      [@_data[][y - @xif.row.1][x - @xif.col.1], "cell frozen fixed"]
     else if x < @xif.col.2 =>
-      [@_data[][@pos.row + y - @xif.row.1][x - @xif.col.1] or '', "cell frozen"]
+      [@_data[][@pos.row + y - @xif.row.1][x - @xif.col.1], "cell frozen"]
     else if y < @xif.row.2 =>
-      [@_data[][y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell frozen"]
-    else [@_data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1] or '', "cell"]
+      [@_data[][y - @xif.row.1][@pos.col + x - @xif.col.1], "cell frozen"]
+    else [@_data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1], "cell"]
+    if !(textContent?) => textContent = ""
 
     n.className = className
     if textContent != null => n.textContent = textContent

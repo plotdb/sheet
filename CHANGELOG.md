@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.1.4
+
+ - fix bug: `0` wasn't shown when set cell content. fix this by checking `!(textContent?)` instead of `!(textContent)`.
+
+
 ## v0.1.3
 
  - add `data(d)` api

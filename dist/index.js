@@ -490,12 +490,15 @@
               : y < this.xif.row[1]
                 ? [null, "cell fixed"]
                 : x < this.xif.col[2] && y < this.xif.row[2]
-                  ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen fixed"]
+                  ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]], "cell frozen fixed"]
                   : x < this.xif.col[2]
-                    ? [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]] || '', "cell frozen"]
+                    ? [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]], "cell frozen"]
                     : y < this.xif.row[2]
-                      ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell frozen"]
-                      : [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]] || '', "cell"], textContent = ref$[0], className = ref$[1];
+                      ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]], "cell frozen"]
+                      : [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]], "cell"], textContent = ref$[0], className = ref$[1];
+      if (!(textContent != null)) {
+        textContent = "";
+      }
       n.className = className;
       if (textContent !== null) {
         return n.textContent = textContent;
