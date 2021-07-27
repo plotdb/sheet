@@ -47,7 +47,7 @@ initialize:
      - apply on range
  - `scrollLock`: default true. prevent from horizontal scrolling of document.body if true.
    - this affects how user interact with sheet with scrolling gestures. check src comment for more information.
-
+ - `data`: initial data, as array of arrays
 
 ## API
 
@@ -58,6 +58,7 @@ initialize:
  - `editing(v)`: set edit status to v, or return edit status if v is not provided.
  - `data(d)`: replace data completely with `d` and re-render.
    - return current data if `d` is omitted.
+   - `d` is in the same format with the constructor `data` option
 
 
 ## Event
