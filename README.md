@@ -90,7 +90,7 @@ You can add more than texts in the grid of the sheet, by having an object with f
 
 Currently, only `node` type is supported:
 
-    { type: "node", node: SomeElement }
+    { type: "dom", node: SomeElement }
 
 
 ## License
