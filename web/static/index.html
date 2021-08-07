@@ -1,4 +1,13 @@
-<!DOCTYPE html><html><head><base href="."><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap/main/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldiconfont/main/ldif.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldcover/main/ldcv.min.css"><link rel="stylesheet" type="text/css" href="css/index.css"><link rel="stylesheet" type="text/css" href="assets/lib/@plotdb/sheet/dev/index.min.css"></head><body><div class="p-4"><div class="mx-auto rwd w-640"><div class="aspect-ratio ratio-1by1"><div class="shadow-sm border border-secondary rounded" id="root"></div></div></div></div><script type="text/javascript" src="assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="assets/lib/dompurify/main/purify.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/sheet/dev/index.min.js"></script><script>var s, c;
+<!DOCTYPE html><html><head><base href="."><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap/main/css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldiconfont/main/ldif.min.css"><link rel="stylesheet" type="text/css" href="assets/lib/ldcover/main/ldcv.min.css"><link rel="stylesheet" type="text/css" href="css/index.css"><link rel="stylesheet" type="text/css" href="assets/lib/@plotdb/sheet/dev/index.min.css"></head><body><div class="p-4"><div class="mx-auto rwd w-640"><div class="aspect-ratio ratio-1by1"><div class="shadow-sm border border-secondary rounded" id="root"></div></div></div></div><script type="text/javascript" src="assets/lib/proxise/main/proxise.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/json0/main/json0.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.native/main/bootstrap-native.min.js"></script><script type="text/javascript" src="assets/lib/bootstrap.ldui/main/bootstrap.ldui.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/ldquery/main/ldq.min.js"></script><script type="text/javascript" src="assets/lib/@loadingio/debounce.js/main/debounce.min.js"></script><script type="text/javascript" src="assets/lib/ldcover/main/ldcv.min.js"></script><script type="text/javascript" src="assets/lib/ldview/main/index.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/datadom/main/datadom.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/csscope/main/csscope.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/rescope/main/rescope.min.js"></script><script type="text/javascript" src="assets/lib/dompurify/main/purify.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script><script type="text/javascript" src="assets/lib/@plotdb/sheet/dev/index.min.js"></script><script>var node, div, s, c;
+node = {
+  type: 'dom',
+  node: div = document.createElement('div')
+};
+div.setAttribute('class', "d-flex w-100 justify-content-between h-100 align-items-center");
+div.innerHTML = "<div>sample</div>\n<div>&times;</div>";
+div.addEventListener('click', function(it){
+  return console.log('hi', it.target);
+});
 s = new sheet({
   root: '#root',
   size: {
@@ -9,7 +18,7 @@ s = new sheet({
       return it + "px";
     })
   },
-  data: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
+  data: [[2, 3, node], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
   idx: {
     row: true,
     col: true

@@ -13,13 +13,22 @@ block script
   +script("https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js")
   +script("assets/lib/@plotdb/sheet/dev/index.min.js")
   script: :lsc
+    node =
+      type: \dom
+      node: div = document.createElement(\div)
+    div.setAttribute \class, "d-flex w-100 justify-content-between h-100 align-items-center"
+    div.innerHTML = """
+    <div>sample</div>
+    <div>&times;</div>
+    """
+    div.addEventListener \click, -> console.log \hi, it.target
     s = new sheet do
       root: '#root'
       size:
         col: [48,64,92,128].map -> "#{it}px"
         row: [48,64,92,128].map -> "#{it}px"
       data: [
-        [1,2,3,4],
+        [2,3,node],
         [5,6,7,8],
         [9,10,11,12],
         [13,14,15,16]

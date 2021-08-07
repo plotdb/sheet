@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.1.5
+
+ - make it possible to add node instead of pure text.
+
+
 ## v0.1.4
 
  - fix bug: `0` wasn't shown when set cell content. fix this by checking `!(textContent?)` instead of `!(textContent)`.

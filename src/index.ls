@@ -196,7 +196,11 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     for row from @les.start.row til @les.end.row + 1=>
       r = []
       for col from @les.start.col til @les.end.col + 1 =>
-        r.push ('"' + (('' + @_data[][row][col]) or '').replace(/"/g,'""') + '"')
+        content = @_data[][rpw][col]
+        # TODO advanced content support
+        if typeof(content) == \object => continue
+
+        r.push ('"' + (('' + content) or '').replace(/"/g,'""') + '"')
       c.push r.join(\\t)
     s = c.join(\\n)
     navigator.clipboard.writeText s
@@ -232,7 +236,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   # re-render cell with the content they suppose to have
   _content: ({x, y, n}) ->
     if !n and !(n = @dom.inner.childNodes[x + y * @dim.col]) => return
-    [textContent, className] = if x < @xif.col.0 and y < @xif.col.0 => ["","cell idx"]
+    [content, className] = if x < @xif.col.0 and y < @xif.col.0 => ["","cell idx"]
     else if x < @xif.col.0 =>
       v = if y < @xif.row.1 => " "
       else if y < @xif.row.2 => y - @xif.row.1 + 1
@@ -252,10 +256,16 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     else if y < @xif.row.2 =>
       [@_data[][y - @xif.row.1][@pos.col + x - @xif.col.1], "cell frozen"]
     else [@_data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1], "cell"]
-    if !(textContent?) => textContent = ""
+    if !(content?) => content = ""
 
     n.className = className
-    if textContent != null => n.textContent = textContent
+    if content != null =>
+      # TODO support advanced content
+      if typeof(content) == \object =>
+        if content.type == \dom =>
+          n.textContent = ""
+          n.appendChild content.node
+      else n.textContent = content
 
   # move down
   _md: (mag = 1) ->

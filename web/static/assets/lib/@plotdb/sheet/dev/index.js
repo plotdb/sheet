@@ -369,7 +369,7 @@
       });
     },
     copy: function(){
-      var c, i$, to$, row, r, j$, to1$, col, ref$, s;
+      var c, i$, to$, row, r, j$, to1$, col, content, ref$, s;
       if (!this.les.start) {
         return;
       }
@@ -379,7 +379,11 @@
         r = [];
         for (j$ = this.les.start.col, to1$ = this.les.end.col + 1; j$ < to1$; ++j$) {
           col = j$;
-          r.push('"' + ('' + ((ref$ = this._data)[row] || (ref$[row] = []))[col] || '').replace(/"/g, '""') + '"');
+          content = ((ref$ = this._data)[rpw] || (ref$[rpw] = []))[col];
+          if (typeof content === 'object') {
+            continue;
+          }
+          r.push('"' + ('' + content || '').replace(/"/g, '""') + '"');
         }
         c.push(r.join('\t'));
       }
@@ -466,7 +470,7 @@
       });
     },
     _content: function(arg$){
-      var x, y, n, v, ref$, key$, textContent, className;
+      var x, y, n, v, ref$, key$, content, className;
       x = arg$.x, y = arg$.y, n = arg$.n;
       if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
         return;
@@ -495,13 +499,20 @@
                     ? [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]], "cell frozen"]
                     : y < this.xif.row[2]
                       ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]], "cell frozen"]
-                      : [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]], "cell"], textContent = ref$[0], className = ref$[1];
-      if (!(textContent != null)) {
-        textContent = "";
+                      : [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]], "cell"], content = ref$[0], className = ref$[1];
+      if (!(content != null)) {
+        content = "";
       }
       n.className = className;
-      if (textContent !== null) {
-        return n.textContent = textContent;
+      if (content !== null) {
+        if (typeof content === 'object') {
+          if (content.type === 'dom') {
+            n.textContent = "";
+            return n.appendChild(content.node);
+          }
+        } else {
+          return n.textContent = content;
+        }
       }
     },
     _md: function(mag){

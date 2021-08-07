@@ -79,6 +79,19 @@ Following are a list of possible events:
    - `data`: data used to update. If it's a 2D array and `range` is true, then cells are updated with values in `data` correspondingly relative to `row` and `col` as the original cell
    - `range`: true if a range of cells are updated.
 
+## Rich Text
+
+You can add more than texts in the grid of the sheet, by having an object with following structure in data:
+
+    {
+      type: "data-type",
+      ... /* members according to type */
+    }
+
+Currently, only `node` type is supported:
+
+    { type: "node", node: SomeElement }
+
 
 ## License
 
