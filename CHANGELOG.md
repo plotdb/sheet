@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.1.6
+
+ - support custom class names in cells
+
+
 ## v0.1.5
 
  - make it possible to add node instead of pure text.

@@ -41,6 +41,7 @@ sheet = (opt={}) ->
   @evt-handler = {}
   @_data = opt.data or []
   @size = ({row: [], col: []} <<< opt.size){row, col}
+  @cls = ({row: [], col: []} <<< opt.class){row, col}
   @_editing = if opt.editing? => !!opt.editing else true
   @dim = col: (opt.{}dim.col or 30), row: (opt.{}dim.row or 30)
   @frozen = ({col: 0, row: 0} <<< (opt.frozen or {})){col, row}
@@ -258,7 +259,14 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     else [@_data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1], "cell"]
     if !(content?) => content = ""
 
-    n.className = className
+    clsext = if x >= @xif.col.0 and y >= @xif.row.0 =>
+      (
+        (@cls.col[@pos.col + x - @xif.col.1] or '') + ' ' +
+        (@cls.row[@pos.row + y - @xif.row.1] or '')
+      )
+    else ''
+    n.className = (className + ' ' + clsext)
+
     if content != null =>
       # TODO support advanced content
       if typeof(content) == \object =>

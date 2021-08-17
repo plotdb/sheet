@@ -41,6 +41,8 @@ initialize:
  - `idx`: {row, col}. default {row: true, col: true}
  - `size`: {row, col}. force cell size, in array by order.
    - default: {row: [], col: []}
+ - `class`: {row, col}. additional cell class name, in array by order, as space separated string.
+   - default: {row: [], col: []}
  - `editing`: false to disable editing. default true.
    - (TBD) in the future we should be able to:
      - set edit permission ( e.g., edit, comment )

@@ -72,6 +72,13 @@
       }, opt.size)).row,
       col: ref$.col
     };
+    this.cls = {
+      row: (ref$ = import$({
+        row: [],
+        col: []
+      }, opt['class'])).row,
+      col: ref$.col
+    };
     this._editing = opt.editing != null ? !!opt.editing : true;
     this.dim = {
       col: (opt.dim || (opt.dim = {})).col || 30,
@@ -470,7 +477,7 @@
       });
     },
     _content: function(arg$){
-      var x, y, n, v, ref$, key$, content, className;
+      var x, y, n, v, ref$, key$, content, className, clsext;
       x = arg$.x, y = arg$.y, n = arg$.n;
       if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
         return;
@@ -503,7 +510,8 @@
       if (!(content != null)) {
         content = "";
       }
-      n.className = className;
+      clsext = x >= this.xif.col[0] && y >= this.xif.row[0] ? (this.cls.col[this.pos.col + x - this.xif.col[1]] || '') + ' ' + (this.cls.row[this.pos.row + y - this.xif.row[1]] || '') : '';
+      n.className = className + ' ' + clsext;
       if (content !== null) {
         if (typeof content === 'object') {
           if (content.type === 'dom') {
