@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.1.7
+
+ - support resizing after initialization
+
+
 ## v0.1.6
 
  - support custom class names in cells

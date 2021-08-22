@@ -65,7 +65,7 @@
       : opt.root;
     this.evtHandler = {};
     this._data = opt.data || [];
-    this.size = {
+    this._size = {
       row: (ref$ = import$({
         row: [],
         col: []
@@ -400,6 +400,20 @@
     eventInScope: function(e){
       return parent(e.target, '.sheet', this.dom.sheet) === this.dom.sheet;
     },
+    size: function(it){
+      var ref$;
+      if (it == null) {
+        return this._size;
+      }
+      this._size = {
+        row: (ref$ = import$({
+          row: [],
+          col: []
+        }, it)).row,
+        col: ref$.col
+      };
+      return this.regrid();
+    },
     regrid: function(){
       var this$ = this;
       this.dom.inner.style.gridTemplateColumns = ("repeat(" + this.xif.col[1] + ", max-content) ") + (function(){
@@ -409,7 +423,7 @@
         }
         return results$;
       }.call(this)).map(function(it){
-        return this$.size.col[it] || "max-content";
+        return this$._size.col[it] || "max-content";
       }).join(' ') + ' ' + (function(){
         var i$, to$, results$ = [];
         for (i$ = this.xif.col[2], to$ = this.dim.col; i$ < to$; ++i$) {
@@ -417,7 +431,7 @@
         }
         return results$;
       }.call(this)).map(function(it){
-        return this$.size.col[it + this$.pos.col - this$.xif.col[1]] || "max-content";
+        return this$._size.col[it + this$.pos.col - this$.xif.col[1]] || "max-content";
       }).join(' ');
       return this.dom.inner.style.gridTemplateRows = ("repeat(" + this.xif.row[1] + ", max-content) ") + (function(){
         var i$, to$, results$ = [];
@@ -426,7 +440,7 @@
         }
         return results$;
       }.call(this)).map(function(it){
-        return this$.size.row[it] || "max-content";
+        return this$._size.row[it] || "max-content";
       }).join(' ') + ' ' + (function(){
         var i$, to$, results$ = [];
         for (i$ = this.xif.row[2], to$ = this.dim.row; i$ < to$; ++i$) {
@@ -434,7 +448,7 @@
         }
         return results$;
       }.call(this)).map(function(it){
-        return this$.size.row[it + this$.pos.row - this$.xif.row[1]] || "max-content";
+        return this$._size.row[it + this$.pos.row - this$.xif.row[1]] || "max-content";
       }).join(' ');
     },
     addCell: function(x, y){

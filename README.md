@@ -61,6 +61,7 @@ initialize:
  - `data(d)`: replace data completely with `d` and re-render.
    - return current data if `d` is omitted.
    - `d` is in the same format with the constructor `data` option
+ - `size({row, col})`: update grid size.
 
 
 ## Event
