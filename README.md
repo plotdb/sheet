@@ -96,6 +96,23 @@ Currently, only `node` type is supported:
     { type: "dom", node: SomeElement }
 
 
+# Swipe Back Issue
+
+On Chrome in Mac, scrolling left with trackpad with two finger gesture may also triggers swipe back action, which navigate the page back in browsing history. This happens in all websites needing similar actions, including Airtable and Google Spreadsheet.
+
+This may be temporarily solved by setting `overscroll-behavior` to `contain` of the sheet container, however - if swipe back happens once anywhere outside the sheet container, it then always triggered even in sheet container.
+
+If this happens, try setting `overscroll-behavior` to `contain` directly on `body` to see if it may solve this issue.
+
+Reference:
+
+ - https://bugs.chromium.org/p/chromium/issues/detail?id=889846
+ - https://bugs.chromium.org/p/chromium/issues/detail?id=862693
+ - https://bugs.chromium.org/p/chromium/issues/detail?id=906886
+ - https://community.airtable.com/t/3074
+
+
+
 ## License
 
 MIT

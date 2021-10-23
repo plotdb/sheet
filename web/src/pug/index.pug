@@ -3,6 +3,15 @@ block prehead
   base(href=".")
 block head
   +css("assets/lib/@plotdb/sheet/dev/index.min.css")
+  style(type="text/css"): :stylus
+    /* if swipe back happens once, it then always triggered even in container with overscroll-behavior: contain.
+    enforce this on body may solve this issue.
+    https://bugs.chromium.org/p/chromium/issues/detail?id=889846
+    https://bugs.chromium.org/p/chromium/issues/detail?id=862693
+    https://bugs.chromium.org/p/chromium/issues/detail?id=906886
+    https://community.airtable.com/t/3074
+    */
+    body { overscroll-behavior: contain }
 block body
   .p-4: .mx-auto.rwd.w-640
     .aspect-ratio.ratio-1by1
