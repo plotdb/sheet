@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.1.8
+
+ - add `overscroll-behavior` over `.sheet`
+ - swipe back note in README.md
+
+
 ## v0.1.7
 
  - support resizing after initialization

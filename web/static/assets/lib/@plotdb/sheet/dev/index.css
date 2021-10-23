@@ -3,6 +3,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: contain;
 /* sheet may get focus. this prevents unwanted outline. */
   outline: none;
 }
