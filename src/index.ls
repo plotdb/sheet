@@ -481,5 +481,3 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
 if module? => module.exports = sheet
 else if window? => window.sheet = sheet
-
-
