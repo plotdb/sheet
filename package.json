@@ -3,7 +3,7 @@
   "name": "@plotdb/sheet",
   "license": "MIT",
   "description": "spreadsheet",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "style": "dist/index.min.css",
   "browser": "dist/index.min.js",
   "main": "dist/index.min.js",

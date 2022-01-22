@@ -1,5 +1,16 @@
 # Change Logs
 
+
+## v0.2.0
+
+ - add `style` in `package.json`
+ - add `main` and `browser` field in `package.json`.
+ - further minimize generated js file with mangling and compression
+ - upgrade modules
+ - patch test code to make it work with upgraded modules
+ - release with compact directory structure
+
+
 ## v0.1.8
 
  - add `overscroll-behavior` over `.sheet`
