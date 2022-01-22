@@ -21,7 +21,7 @@ block body
 block script
   +script("https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js")
   +script("assets/lib/@plotdb/sheet/dev/index.min.js")
-  script: :lsc
+  script(type="module"): :lsc
     node =
       type: \dom
       node: div = document.createElement(\div)
