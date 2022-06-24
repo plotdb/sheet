@@ -20,8 +20,8 @@ install:
 
 include:
 
-    <script src="path-to/sheet.js"></script>
-    <link rel="stylesheet" type="text/css" href="path-to/sheet.css"/>
+    <script src="path-to/sheet/index.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="path-to/sheet/index.min.css"/>
     <div class="container"></div>
 
 
