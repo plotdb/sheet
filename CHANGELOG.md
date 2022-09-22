@@ -1,8 +1,10 @@
 # Change Logs
 
-## v0.3.0 (upcoming)
+## v0.3.0
 
  - support shift-select a range
+ - support selection from idx cells
+ - support selection without boundary
 
 
 ## v0.2.0

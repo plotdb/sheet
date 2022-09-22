@@ -86,7 +86,17 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @edited!
       if !(p = parent (e.target), '.cell', dom) => return
       idx = @index(p){row, col}
-      if idx.col < 0 or idx.row < 0 => return
+      # negative: clicking on idx cell.
+      # we use `undefined` to indicate selecting a whole row/col.
+      if idx.col < 0 or idx.row < 0 =>
+        if !(e.shiftKey and @les.start) =>
+          @les.node = @cell @les.start
+          @les.start = {col: idx.col >? 0, row: idx.row >? 0}
+        @les.end =
+          col: if idx.col >= 0 => idx.col else undefined
+          row: if idx.row >= 0 => idx.row else undefined
+        @render-selection!
+        return
       if e.shiftKey and @les.start => @les.end = idx
       else
         @les.start = @les.end = idx
@@ -94,7 +104,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @render-selection!
     dom.addEventListener \mousemove, (e) ~>
       if @editing.on or !(e.buttons and (p = parent (e.target), '.cell', dom)) => return
-      @les.end = @index(p){row, col}
+      idx = @index(p){row, col}
+      @les.end =
+        col: if idx.col >= 0 => idx.col else undefined
+        row: if idx.row >= 0 => idx.row else undefined
       @render-selection!
     dom.addEventListener \dblclick, (e) ~>
       if !(p = parent (e.target), '.cell', dom) => return
@@ -113,10 +126,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       code = e.keyCode
       if code == 8 =>
         if !@les.node => return
-        [p1, p2] = [@les.start, @les.end]
-        [c1, c2] = if p1.col < p2.col => [p1.col, p2.col] else [p2.col, p1.col]
-        [r1, r2] = if p1.row < p2.row => [p1.row, p2.row] else [p2.row, p1.row]
-        for row from r1 to r2 => for col from c1 to c2 => @set {row, col, data: ""}
+        {sc,ec,sr,er} = @_bound!
+        for row from sr to er => for col from sc to ec => @set {row, col, data: ""}
 
       opt = switch code
       | 37 => {y:  0, x: -1}
@@ -193,12 +204,23 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       e.preventDefault!
     ), {passive: false}
 
+  _bound: (o={}) ->
+    [p1, p2] = [@les.start, @les.end]
+    [sc, ec] = if p1.col < p2.col or !p2.col? => [p1.col, p2.col] else [p2.col, p1.col]
+    [sr, er] = if p1.row < p2.row or !p2.row? => [p1.row, p2.row] else [p2.row, p1.row]
+    if !o.defined? or o.defined =>
+      if !ec? => ec = Math.max.apply Math, @_data.map(->it.length)
+      if !er? => er = @_data.length
+    return {sc, ec, sr, er}
+
   copy: ->
     if !@les.start => return
     c = []
-    for row from @les.start.row til @les.end.row + 1=>
+    {sc, ec, sr, er} = @_bound!
+
+    for row from sr to er =>
       r = []
-      for col from @les.start.col til @les.end.col + 1 =>
+      for col from sc to ec =>
         content = @_data[][rpw][col]
         # TODO advanced content support
         if typeof(content) == \object => continue
@@ -437,8 +459,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   render-selection: ->
     if !@les.start => return
-    [sc,ec] = if @les.start.col < @les.end.col => [@les.start.col, @les.end.col] else [@les.end.col, @les.start.col]
-    [sr,er] = if @les.start.row < @les.end.row => [@les.start.row, @les.end.row] else [@les.end.row, @les.start.row]
+    {sc,ec,sr,er} = @_bound defined: false
     rbox = @dom.inner.getBoundingClientRect!
     c0 = @cell({col: @pos.col + @frozen.col, row: @pos.row + @frozen.row})
     c1 = @cell {col: sc, row: sr}
@@ -453,6 +474,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     y2 = (b2 or b4 or b0).y + (b2 or b4 or b0).height - rbox.y
     w = x2 - x1 + 1
     h = y2 - y1 + 1
+
+    if !ec? => w = @root.getBoundingClientRect!width
+    if !er? => h = @root.getBoundingClientRect!height
 
     snode = @cell @les.start
     sbox = if !snode => null else snode.getBoundingClientRect!

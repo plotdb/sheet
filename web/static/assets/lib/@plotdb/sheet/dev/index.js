@@ -186,6 +186,18 @@
           col: ref$.col
         };
         if (idx.col < 0 || idx.row < 0) {
+          if (!(e.shiftKey && this$.les.start)) {
+            this$.les.node = this$.cell(this$.les.start);
+            this$.les.start = {
+              col: (ref$ = idx.col) > 0 ? ref$ : 0,
+              row: (ref$ = idx.row) > 0 ? ref$ : 0
+            };
+          }
+          this$.les.end = {
+            col: idx.col >= 0 ? idx.col : undefined,
+            row: idx.row >= 0 ? idx.row : undefined
+          };
+          this$.renderSelection();
           return;
         }
         if (e.shiftKey && this$.les.start) {
@@ -197,13 +209,17 @@
         return this$.renderSelection();
       });
       dom.addEventListener('mousemove', function(e){
-        var p, ref$;
+        var p, ref$, idx;
         if (this$.editing.on || !(e.buttons && (p = parent(e.target, '.cell', dom)))) {
           return;
         }
-        this$.les.end = {
+        idx = {
           row: (ref$ = this$.index(p)).row,
           col: ref$.col
+        };
+        this$.les.end = {
+          col: idx.col >= 0 ? idx.col : undefined,
+          row: idx.row >= 0 ? idx.row : undefined
         };
         return this$.renderSelection();
       });
@@ -235,7 +251,7 @@
         });
       });
       dom.addEventListener('keydown', function(e){
-        var code, ref$, p1, p2, c1, c2, r1, r2, i$, row, j$, col, opt;
+        var code, ref$, sc, ec, sr, er, i$, row, j$, col, opt;
         if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
           return this$.copy();
         }
@@ -247,16 +263,10 @@
           if (!this$.les.node) {
             return;
           }
-          ref$ = [this$.les.start, this$.les.end], p1 = ref$[0], p2 = ref$[1];
-          ref$ = p1.col < p2.col
-            ? [p1.col, p2.col]
-            : [p2.col, p1.col], c1 = ref$[0], c2 = ref$[1];
-          ref$ = p1.row < p2.row
-            ? [p1.row, p2.row]
-            : [p2.row, p1.row], r1 = ref$[0], r2 = ref$[1];
-          for (i$ = r1; i$ <= r2; ++i$) {
+          ref$ = this$._bound(), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+          for (i$ = sr; i$ <= er; ++i$) {
             row = i$;
-            for (j$ = c1; j$ <= c2; ++j$) {
+            for (j$ = sc; j$ <= ec; ++j$) {
               col = j$;
               this$.set({
                 row: row,
@@ -378,16 +388,44 @@
         passive: false
       });
     },
+    _bound: function(o){
+      var ref$, p1, p2, sc, ec, sr, er;
+      o == null && (o = {});
+      ref$ = [this.les.start, this.les.end], p1 = ref$[0], p2 = ref$[1];
+      ref$ = p1.col < p2.col || p2.col == null
+        ? [p1.col, p2.col]
+        : [p2.col, p1.col], sc = ref$[0], ec = ref$[1];
+      ref$ = p1.row < p2.row || p2.row == null
+        ? [p1.row, p2.row]
+        : [p2.row, p1.row], sr = ref$[0], er = ref$[1];
+      if (o.defined == null || o.defined) {
+        if (ec == null) {
+          ec = Math.max.apply(Math, this._data.map(function(it){
+            return it.length;
+          }));
+        }
+        if (er == null) {
+          er = this._data.length;
+        }
+      }
+      return {
+        sc: sc,
+        ec: ec,
+        sr: sr,
+        er: er
+      };
+    },
     copy: function(){
-      var c, i$, to$, row, r, j$, to1$, col, content, ref$, s;
+      var c, ref$, sc, ec, sr, er, i$, row, r, j$, col, content, s;
       if (!this.les.start) {
         return;
       }
       c = [];
-      for (i$ = this.les.start.row, to$ = this.les.end.row + 1; i$ < to$; ++i$) {
+      ref$ = this._bound(), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+      for (i$ = sr; i$ <= er; ++i$) {
         row = i$;
         r = [];
-        for (j$ = this.les.start.col, to1$ = this.les.end.col + 1; j$ < to1$; ++j$) {
+        for (j$ = sc; j$ <= ec; ++j$) {
           col = j$;
           content = ((ref$ = this._data)[rpw] || (ref$[rpw] = []))[col];
           if (typeof content === 'object') {
@@ -860,12 +898,9 @@
       if (!this.les.start) {
         return;
       }
-      ref$ = this.les.start.col < this.les.end.col
-        ? [this.les.start.col, this.les.end.col]
-        : [this.les.end.col, this.les.start.col], sc = ref$[0], ec = ref$[1];
-      ref$ = this.les.start.row < this.les.end.row
-        ? [this.les.start.row, this.les.end.row]
-        : [this.les.end.row, this.les.start.row], sr = ref$[0], er = ref$[1];
+      ref$ = this._bound({
+        defined: false
+      }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
       rbox = this.dom.inner.getBoundingClientRect();
       c0 = this.cell({
         col: this.pos.col + this.frozen.col,
@@ -902,6 +937,12 @@
       y2 = (b2 || b4 || b0).y + (b2 || b4 || b0).height - rbox.y;
       w = x2 - x1 + 1;
       h = y2 - y1 + 1;
+      if (ec == null) {
+        w = this.root.getBoundingClientRect().width;
+      }
+      if (er == null) {
+        h = this.root.getBoundingClientRect().height;
+      }
       snode = this.cell(this.les.start);
       sbox = !snode
         ? null
