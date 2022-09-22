@@ -1,5 +1,9 @@
 # Change Logs
 
+## v0.3.0 (upcoming)
+
+ - support shift-select a range
+
 
 ## v0.2.0
 

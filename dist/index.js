@@ -188,8 +188,12 @@
         if (idx.col < 0 || idx.row < 0) {
           return;
         }
-        this$.les.start = this$.les.end = idx;
-        this$.les.node = p;
+        if (e.shiftKey && this$.les.start) {
+          this$.les.end = idx;
+        } else {
+          this$.les.start = this$.les.end = idx;
+          this$.les.node = p;
+        }
         return this$.renderSelection();
       });
       dom.addEventListener('mousemove', function(e){

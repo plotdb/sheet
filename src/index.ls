@@ -87,8 +87,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       if !(p = parent (e.target), '.cell', dom) => return
       idx = @index(p){row, col}
       if idx.col < 0 or idx.row < 0 => return
-      @les.start = @les.end = idx
-      @les.node = p
+      if e.shiftKey and @les.start => @les.end = idx
+      else
+        @les.start = @les.end = idx
+        @les.node = p
       @render-selection!
     dom.addEventListener \mousemove, (e) ~>
       if @editing.on or !(e.buttons and (p = parent (e.target), '.cell', dom)) => return
