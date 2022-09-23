@@ -277,7 +277,7 @@
         }
       });
       dom.addEventListener('keydown', function(e){
-        var code, ref$, sc, ec, sr, er, i$, row, j$, col, opt;
+        var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, d, opt;
         code = e.keyCode;
         if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
           return this$.copy();
@@ -295,17 +295,23 @@
             return;
           }
           ref$ = this$._bound(), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+          res$ = [];
           for (i$ = sr; i$ <= er; ++i$) {
             row = i$;
+            lresult$ = [];
             for (j$ = sc; j$ <= ec; ++j$) {
               col = j$;
-              this$.set({
-                row: row,
-                col: col,
-                data: ""
-              });
+              lresult$.push('');
             }
+            res$.push(lresult$);
           }
+          data = res$;
+          this$.set({
+            row: sr,
+            col: sc,
+            data: data,
+            range: true
+          });
         }
         if (code === 189 && (e.metaKey || e.ctrlKey)) {
           if (!this$.les.node) {
@@ -315,13 +321,19 @@
             defined: false
           }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
           if (ec == null) {
-            this$._data.splice(sr, er - sr + 1);
+            d = this$._data.splice(sr, er - sr + 1);
           }
           if (er == null) {
-            this$._data.map(function(it){
+            d = this$._data.map(function(it){
               return it.splice(sc, ec - sc + 1);
             });
           }
+          this$.fire('change', {
+            row: sr,
+            col: sc,
+            data: d,
+            range: true
+          });
           this$.les.end = this$.les.start;
           this$.renderSelection();
           this$.render();

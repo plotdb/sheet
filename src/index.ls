@@ -139,12 +139,14 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       if code == 8 =>
         if !@les.node => return
         {sc,ec,sr,er} = @_bound!
-        for row from sr to er => for col from sc to ec => @set {row, col, data: ""}
+        data = for row from sr to er => for col from sc to ec => ''
+        @set {row: sr, col: sc, data, range: true}
       if code == 189 and (e.metaKey or e.ctrlKey) =>
         if !@les.node => return
         {sc,ec,sr,er} = @_bound defined: false
-        if !ec? => @_data.splice sr, (er - sr + 1)
-        if !er? => @_data.map -> it.splice sc, (ec - sc + 1)
+        if !ec? => d = @_data.splice sr, (er - sr + 1)
+        if !er? => d = @_data.map -> it.splice sc, (ec - sc + 1)
+        @fire \change, {row: sr, col: sc, data: d, range: true}
         @les.end = @les.start
         @render-selection!
         @render!

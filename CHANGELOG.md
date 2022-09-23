@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.4.1
+
+ - fix bug: `change` event should be fired for row-wise / col-wise deletion
+ - fix bug: `change` event for range update should be fired in one batch
+
+
 ## v0.4.0
 
  - support in-sheet cut / paste
