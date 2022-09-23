@@ -56,17 +56,18 @@ sheet = (opt={}) ->
   @pos = col: 0, row: 0
   @scroll-pos = x: 0, y: 0
 
-  @sel = {}
+  @sel = {cut: {}}
+  # TODO why we use `les` but not `sel`? figure it out and refactor this
   @les = {}
   @editing = {}
-  @dom = Object.fromEntries <[sheet inner caret range edit layout]>.map ->
+  @dom = Object.fromEntries <[sheet inner caret range edit layout range-cut]>.map ->
     n = document.createElement(\div)
       ..classList.add it
     [it, n]
   @dom.sheet.setAttribute \tabindex, -1
   @dom.textarea = document.createElement \textarea
   @root.appendChild(@dom.sheet)
-  <[inner caret range edit layout]>.map ~> @dom.sheet.appendChild @dom[it]
+  <[inner caret range edit layout range-cut]>.map ~> @dom.sheet.appendChild @dom[it]
   @dom.edit.appendChild @dom.textarea
   @_init!
   @
@@ -116,18 +117,38 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     document.body.addEventListener \paste, (e) ~>
       if !parent(document.activeElement, '.sheet', dom) => return
       if !@les.start => return
-      data = e.clipboardData.getData('text')
-      data = parse-csv data
+      raw = e.clipboardData.getData('text')
+      data = parse-csv raw
       @set {row: @les.start.row, col: @les.start.col, data: data, range: true}
+      if @sel.cut =>
+        # NOTE we may need a general `hide-selection` api in the future.
+        # at that time, we probably will want integrate this into it.
+        s = @_to-text {sel: @sel.cut}
+        if s == raw =>
+          {sc,ec,sr,er} = @_bound sel: @sel.cut
+          for row from sr to er => for col from sc to ec => @set {row, col, data: ""}
+          navigator.clipboard.writeText ''
+        @sel.cut = null
+        @dom["range-cut"].classList.toggle \show, false
 
     dom.addEventListener \keydown, (e) ~>
-      if e.keyCode == 67 and (e.metaKey or e.ctrlKey) => return @copy!
-      if !@event-in-scope(e) => return
       code = e.keyCode
+      if e.keyCode == 67 and (e.metaKey or e.ctrlKey) => return @copy!
+      if e.keyCode == 88 and (e.metaKey or e.ctrlKey) => return @copy cut: true
+      if !@event-in-scope(e) => return
       if code == 8 =>
         if !@les.node => return
         {sc,ec,sr,er} = @_bound!
         for row from sr to er => for col from sc to ec => @set {row, col, data: ""}
+      if code == 189 and (e.metaKey or e.ctrlKey) =>
+        if !@les.node => return
+        {sc,ec,sr,er} = @_bound defined: false
+        if !ec? => @_data.splice sr, (er - sr + 1)
+        if !er? => @_data.map -> it.splice sc, (ec - sc + 1)
+        @les.end = @les.start
+        @render-selection!
+        @render!
+        return
 
       opt = switch code
       | 37 => {y:  0, x: -1}
@@ -143,6 +164,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @dom.sheet.focus!  # we need focus to accept key event.
 
     dom.addEventListener \keypress, (e) ~>
+      # 189 in keydown, 31 in keypress
+      if e.keyCode == 31 and (e.metaKey or e.ctrlKey) => return
       if @les.node and !@editing.on => @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
 
     @dom.textarea.addEventListener \keydown, (e) ~>
@@ -205,7 +228,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     ), {passive: false}
 
   _bound: (o={}) ->
-    [p1, p2] = [@les.start, @les.end]
+    sel = o.sel or @les
+    [p1, p2] = [sel.start, sel.end]
     [sc, ec] = if p1.col < p2.col or !p2.col? => [p1.col, p2.col] else [p2.col, p1.col]
     [sr, er] = if p1.row < p2.row or !p2.row? => [p1.row, p2.row] else [p2.row, p1.row]
     if !o.defined? or o.defined =>
@@ -213,22 +237,28 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       if !er? => er = @_data.length
     return {sc, ec, sr, er}
 
-  copy: ->
-    if !@les.start => return
+  _to-text: ({sel}) ->
+    if !(sel and sel.start) => return ''
     c = []
-    {sc, ec, sr, er} = @_bound!
-
+    {sc, ec, sr, er} = @_bound {sel}
     for row from sr to er =>
       r = []
       for col from sc to ec =>
-        content = @_data[][rpw][col]
+        if !(content = @_data[][row][col])? => content = ''
         # TODO advanced content support
         if typeof(content) == \object => continue
-
         r.push ('"' + (('' + content) or '').replace(/"/g,'""') + '"')
       c.push r.join(\\t)
     s = c.join(\\n)
+    return s
+
+  copy: (o={}) ->
+    if !@les.start => return
+    s = @_to-text {sel: @les}
     navigator.clipboard.writeText s
+    if o.cut =>
+      @sel.cut = start: @les.start, end: @les.end
+      @render-selection @sel.cut, {cut: true}
 
   event-in-scope: (e) -> (parent e.target, '.sheet', @dom.sheet) == @dom.sheet
 
@@ -350,7 +380,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @pos.col += mag
     @regrid!
 
-  _ml: (mag = 1) -> 
+  _ml: (mag = 1) ->
     inner = @dom.inner
     mag = Math.round Math.abs mag
     if mag >= @pos.col => mag = @pos.col
@@ -400,7 +430,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     box = node.getBoundingClientRect!
     rbox = @dom.sheet.getBoundingClientRect!
     [sx,sy] = [@dom.sheet.scrollLeft, @dom.sheet.scrollTop]
-    @dom.edit.style <<< 
+    @dom.edit.style <<<
       left: "#{box.x - rbox.x + sx - 2}px"
       top: "#{box.y - rbox.y + sy - 2}px"
       width: "fit-content"
@@ -457,9 +487,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     return if !(v?) => @_editing
     else @_editing = !!v
 
-  render-selection: ->
-    if !@les.start => return
-    {sc,ec,sr,er} = @_bound defined: false
+  render-selection: (sel, o = {}) ->
+    if !sel => sel = @les
+    if !sel.start => return
+    {sc,ec,sr,er} = @_bound defined: false, sel: sel
     rbox = @dom.inner.getBoundingClientRect!
     c0 = @cell({col: @pos.col + @frozen.col, row: @pos.row + @frozen.row})
     c1 = @cell {col: sc, row: sr}
@@ -478,27 +509,29 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if !ec? => w = @root.getBoundingClientRect!width
     if !er? => h = @root.getBoundingClientRect!height
 
-    snode = @cell @les.start
+    snode = @cell sel.start
     sbox = if !snode => null else snode.getBoundingClientRect!
 
-    @dom.range.style <<< 
+    dom = if o.cut => @dom["range-cut"] else @dom.range
+    dom.style <<<
       left: "#{x1}px"
       top: "#{y1}px"
       width: "#{w}px"
       height: "#{h}px"
-    @dom.range.classList.toggle \show, true
-    if sbox =>
-      @dom.caret.style <<< 
-        left: "#{sbox.x - rbox.x - 1}px"
-        top: "#{sbox.y - rbox.y - 1}px"
-        width: "#{sbox.width + 2}px"
-        height: "#{sbox.height + 2}px"
-        zIndex: (
-          if @les.start.row + @xif.row.1 < @xif.row.2 and @les.start.col + @xif.col.1 < @xif.col.2 => 101
-          else if @les.start.row + @xif.row.1 < @xif.row.2 or @les.start.col + @xif.col.1 < @xif.col.2 => 20
-          else 15
-        )
-    @dom.caret.classList.toggle \show, !!sbox
+    dom.classList.toggle \show, true
+    if !o.cut =>
+      if sbox =>
+        @dom.caret.style <<<
+          left: "#{sbox.x - rbox.x - 1}px"
+          top: "#{sbox.y - rbox.y - 1}px"
+          width: "#{sbox.width + 2}px"
+          height: "#{sbox.height + 2}px"
+          zIndex: (
+            if sel.start.row + @xif.row.1 < @xif.row.2 and sel.start.col + @xif.col.1 < @xif.col.2 => 101
+            else if sel.start.row + @xif.row.1 < @xif.row.2 or sel.start.col + @xif.col.1 < @xif.col.2 => 20
+            else 15
+          )
+      @dom.caret.classList.toggle \show, !!sbox
 
   data: ->
     if !(it?) => return @_data

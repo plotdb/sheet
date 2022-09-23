@@ -52,13 +52,16 @@ initabs()
     background: #fdfeff
   .cell.fixed.frozen
     padding: 1px 3px
-  .range
+  .range, .range-cut
     z-index: 14
     border: 1px solid #27f
     user-select: none
     pointer-events: none
     hide()
     initabs()
+  .range-cut
+    border-style: dashed
+
   .caret
     z-index: 15
     border: 2px solid #27f

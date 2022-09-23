@@ -1,5 +1,13 @@
 # Change Logs
 
+## v0.4.0
+
+ - support in-sheet cut / paste
+ - support row-wise / column-wise deletion by ctrl+`-`
+ - separate `_to-text` function from `copy`
+ - parameterize `render-selection` for possibly future features such as multiple selection
+
+
 ## v0.3.0
 
  - support shift-select a range

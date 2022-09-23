@@ -124,10 +124,12 @@
       x: 0,
       y: 0
     };
-    this.sel = {};
+    this.sel = {
+      cut: {}
+    };
     this.les = {};
     this.editing = {};
-    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
+    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout', 'range-cut'].map(function(it){
       var x$, n;
       x$ = n = document.createElement('div');
       x$.classList.add(it);
@@ -136,7 +138,7 @@
     this.dom.sheet.setAttribute('tabindex', -1);
     this.dom.textarea = document.createElement('textarea');
     this.root.appendChild(this.dom.sheet);
-    ['inner', 'caret', 'range', 'edit', 'layout'].map(function(it){
+    ['inner', 'caret', 'range', 'edit', 'layout', 'range-cut'].map(function(it){
       return this$.dom.sheet.appendChild(this$.dom[it]);
     });
     this.dom.edit.appendChild(this.dom.textarea);
@@ -234,31 +236,60 @@
         });
       });
       document.body.addEventListener('paste', function(e){
-        var data;
+        var raw, data, s, ref$, sc, ec, sr, er, i$, row, j$, col;
         if (!parent(document.activeElement, '.sheet', dom)) {
           return;
         }
         if (!this$.les.start) {
           return;
         }
-        data = e.clipboardData.getData('text');
-        data = parseCsv(data);
-        return this$.set({
+        raw = e.clipboardData.getData('text');
+        data = parseCsv(raw);
+        this$.set({
           row: this$.les.start.row,
           col: this$.les.start.col,
           data: data,
           range: true
         });
+        if (this$.sel.cut) {
+          s = this$._toText({
+            sel: this$.sel.cut
+          });
+          if (s === raw) {
+            ref$ = this$._bound({
+              sel: this$.sel.cut
+            }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+            for (i$ = sr; i$ <= er; ++i$) {
+              row = i$;
+              for (j$ = sc; j$ <= ec; ++j$) {
+                col = j$;
+                this$.set({
+                  row: row,
+                  col: col,
+                  data: ""
+                });
+              }
+            }
+            navigator.clipboard.writeText('');
+          }
+          this$.sel.cut = null;
+          return this$.dom["range-cut"].classList.toggle('show', false);
+        }
       });
       dom.addEventListener('keydown', function(e){
         var code, ref$, sc, ec, sr, er, i$, row, j$, col, opt;
+        code = e.keyCode;
         if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
           return this$.copy();
+        }
+        if (e.keyCode === 88 && (e.metaKey || e.ctrlKey)) {
+          return this$.copy({
+            cut: true
+          });
         }
         if (!this$.eventInScope(e)) {
           return;
         }
-        code = e.keyCode;
         if (code === 8) {
           if (!this$.les.node) {
             return;
@@ -275,6 +306,26 @@
               });
             }
           }
+        }
+        if (code === 189 && (e.metaKey || e.ctrlKey)) {
+          if (!this$.les.node) {
+            return;
+          }
+          ref$ = this$._bound({
+            defined: false
+          }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+          if (ec == null) {
+            this$._data.splice(sr, er - sr + 1);
+          }
+          if (er == null) {
+            this$._data.map(function(it){
+              return it.splice(sc, ec - sc + 1);
+            });
+          }
+          this$.les.end = this$.les.start;
+          this$.renderSelection();
+          this$.render();
+          return;
         }
         opt = (function(){
           switch (code) {
@@ -314,6 +365,9 @@
         return this$.dom.sheet.focus();
       });
       dom.addEventListener('keypress', function(e){
+        if (e.keyCode === 31 && (e.metaKey || e.ctrlKey)) {
+          return;
+        }
         if (this$.les.node && !this$.editing.on) {
           return this$.edit({
             node: this$.les.node,
@@ -389,9 +443,10 @@
       });
     },
     _bound: function(o){
-      var ref$, p1, p2, sc, ec, sr, er;
+      var sel, ref$, p1, p2, sc, ec, sr, er;
       o == null && (o = {});
-      ref$ = [this.les.start, this.les.end], p1 = ref$[0], p2 = ref$[1];
+      sel = o.sel || this.les;
+      ref$ = [sel.start, sel.end], p1 = ref$[0], p2 = ref$[1];
       ref$ = p1.col < p2.col || p2.col == null
         ? [p1.col, p2.col]
         : [p2.col, p1.col], sc = ref$[0], ec = ref$[1];
@@ -415,19 +470,24 @@
         er: er
       };
     },
-    copy: function(){
-      var c, ref$, sc, ec, sr, er, i$, row, r, j$, col, content, s;
-      if (!this.les.start) {
-        return;
+    _toText: function(arg$){
+      var sel, c, ref$, sc, ec, sr, er, i$, row, r, j$, col, content, s;
+      sel = arg$.sel;
+      if (!(sel && sel.start)) {
+        return '';
       }
       c = [];
-      ref$ = this._bound(), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+      ref$ = this._bound({
+        sel: sel
+      }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
       for (i$ = sr; i$ <= er; ++i$) {
         row = i$;
         r = [];
         for (j$ = sc; j$ <= ec; ++j$) {
           col = j$;
-          content = ((ref$ = this._data)[rpw] || (ref$[rpw] = []))[col];
+          if ((content = ((ref$ = this._data)[row] || (ref$[row] = []))[col]) == null) {
+            content = '';
+          }
           if (typeof content === 'object') {
             continue;
           }
@@ -436,7 +496,27 @@
         c.push(r.join('\t'));
       }
       s = c.join('\n');
-      return navigator.clipboard.writeText(s);
+      return s;
+    },
+    copy: function(o){
+      var s;
+      o == null && (o = {});
+      if (!this.les.start) {
+        return;
+      }
+      s = this._toText({
+        sel: this.les
+      });
+      navigator.clipboard.writeText(s);
+      if (o.cut) {
+        this.sel.cut = {
+          start: this.les.start,
+          end: this.les.end
+        };
+        return this.renderSelection(this.sel.cut, {
+          cut: true
+        });
+      }
     },
     eventInScope: function(e){
       return parent(e.target, '.sheet', this.dom.sheet) === this.dom.sheet;
@@ -893,13 +973,18 @@
         ? this._editing
         : this._editing = !!v;
     },
-    renderSelection: function(){
-      var ref$, sc, ec, sr, er, rbox, c0, c1, c2, c3, c4, b0, b1, b2, b3, b4, x1, y1, x2, y2, w, h, snode, sbox;
-      if (!this.les.start) {
+    renderSelection: function(sel, o){
+      var ref$, sc, ec, sr, er, rbox, c0, c1, c2, c3, c4, b0, b1, b2, b3, b4, x1, y1, x2, y2, w, h, snode, sbox, dom;
+      o == null && (o = {});
+      if (!sel) {
+        sel = this.les;
+      }
+      if (!sel.start) {
         return;
       }
       ref$ = this._bound({
-        defined: false
+        defined: false,
+        sel: sel
       }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
       rbox = this.dom.inner.getBoundingClientRect();
       c0 = this.cell({
@@ -943,27 +1028,32 @@
       if (er == null) {
         h = this.root.getBoundingClientRect().height;
       }
-      snode = this.cell(this.les.start);
+      snode = this.cell(sel.start);
       sbox = !snode
         ? null
         : snode.getBoundingClientRect();
-      ref$ = this.dom.range.style;
+      dom = o.cut
+        ? this.dom["range-cut"]
+        : this.dom.range;
+      ref$ = dom.style;
       ref$.left = x1 + "px";
       ref$.top = y1 + "px";
       ref$.width = w + "px";
       ref$.height = h + "px";
-      this.dom.range.classList.toggle('show', true);
-      if (sbox) {
-        ref$ = this.dom.caret.style;
-        ref$.left = (sbox.x - rbox.x - 1) + "px";
-        ref$.top = (sbox.y - rbox.y - 1) + "px";
-        ref$.width = (sbox.width + 2) + "px";
-        ref$.height = (sbox.height + 2) + "px";
-        ref$.zIndex = this.les.start.row + this.xif.row[1] < this.xif.row[2] && this.les.start.col + this.xif.col[1] < this.xif.col[2]
-          ? 101
-          : this.les.start.row + this.xif.row[1] < this.xif.row[2] || this.les.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 15;
+      dom.classList.toggle('show', true);
+      if (!o.cut) {
+        if (sbox) {
+          ref$ = this.dom.caret.style;
+          ref$.left = (sbox.x - rbox.x - 1) + "px";
+          ref$.top = (sbox.y - rbox.y - 1) + "px";
+          ref$.width = (sbox.width + 2) + "px";
+          ref$.height = (sbox.height + 2) + "px";
+          ref$.zIndex = sel.start.row + this.xif.row[1] < this.xif.row[2] && sel.start.col + this.xif.col[1] < this.xif.col[2]
+            ? 101
+            : sel.start.row + this.xif.row[1] < this.xif.row[2] || sel.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 15;
+        }
+        return this.dom.caret.classList.toggle('show', !!sbox);
       }
-      return this.dom.caret.classList.toggle('show', !!sbox);
     },
     data: function(it){
       if (!(it != null)) {

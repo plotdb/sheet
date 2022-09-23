@@ -52,7 +52,8 @@
 .sheet .cell.fixed.frozen {
   padding: 1px 3px;
 }
-.sheet .range {
+.sheet .range,
+.sheet .range-cut {
   z-index: 14;
   border: 1px solid #27f;
   user-select: none;
@@ -62,6 +63,9 @@
   top: 0;
   left: 0;
   position: absolute;
+}
+.sheet .range-cut {
+  border-style: dashed;
 }
 .sheet .caret {
   z-index: 15;
