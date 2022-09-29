@@ -1043,8 +1043,8 @@
       b0.height = 0;
       x1 = (b1 || b2 || b0).x - rbox.x;
       y1 = (b1 || b3 || b0).y - rbox.y;
-      colOut = ec - this.pos.col < this.frozen.col;
-      rowOut = er - this.pos.row < this.frozen.row;
+      colOut = ec - this.pos.col < 0;
+      rowOut = er - this.pos.row < 0;
       x2 = (b3 || b4 || b0).x + (colOut
         ? 0
         : (b3 || b4 || b0).width) - rbox.x;
@@ -1077,8 +1077,12 @@
           ref$ = this.dom.caret.style;
           ref$.left = (sbox.x - rbox.x - 1) + "px";
           ref$.top = (sbox.y - rbox.y - 1) + "px";
-          ref$.width = (sbox.width + 2) + "px";
-          ref$.height = (sbox.height + 2) + "px";
+          ref$.width = ((colOut
+            ? 0
+            : sbox.width) + 2) + "px";
+          ref$.height = ((rowOut
+            ? 0
+            : sbox.height) + 2) + "px";
           ref$.zIndex = sel.start.row + this.xif.row[1] < this.xif.row[2] && sel.start.col + this.xif.col[1] < this.xif.col[2]
             ? 101
             : sel.start.row + this.xif.row[1] < this.xif.row[2] || sel.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 15;

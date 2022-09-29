@@ -506,8 +506,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     b0 <<< {width: 0, height: 0}
     x1 = (b1 or b2 or b0).x - rbox.x
     y1 = (b1 or b3 or b0).y - rbox.y
-    col-out = ec - @pos.col < @frozen.col
-    row-out = er - @pos.row < @frozen.row
+    col-out = ec - @pos.col < 0
+    row-out = er - @pos.row < 0
     x2 = (b3 or b4 or b0).x + (if col-out => 0 else (b3 or b4 or b0).width) - rbox.x
     y2 = (b2 or b4 or b0).y + (if row-out => 0 else (b2 or b4 or b0).height) - rbox.y
     w = x2 - x1 + 1
@@ -531,8 +531,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         @dom.caret.style <<<
           left: "#{sbox.x - rbox.x - 1}px"
           top: "#{sbox.y - rbox.y - 1}px"
-          width: "#{sbox.width + 2}px"
-          height: "#{sbox.height + 2}px"
+          width: "#{(if col-out => 0 else sbox.width) + 2}px"
+          height: "#{(if row-out => 0 else sbox.height) + 2}px"
           zIndex: (
             if sel.start.row + @xif.row.1 < @xif.row.2 and sel.start.col + @xif.col.1 < @xif.col.2 => 101
             else if sel.start.row + @xif.row.1 < @xif.row.2 or sel.start.col + @xif.col.1 < @xif.col.2 => 20
