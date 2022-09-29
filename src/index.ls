@@ -468,12 +468,15 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     return {x, y, col, row}
 
   cell: (opt = {}) ->
+    r = opt.roughly
     if opt.col? =>
       if opt.col < @frozen.col => x = opt.col
-      else if opt.col - @pos.col < @frozen.col => return null
+      else if opt.col - @pos.col < @frozen.col =>
+        if r => x = @frozen.col else return null
       else x = (opt.col - @pos.col)
       if opt.row < @frozen.row => y = opt.row
-      else if opt.row - @pos.row < @frozen.row => return null
+      else if opt.row - @pos.row < @frozen.row =>
+        if r => y = @frozen.row else return null
       else y = (opt.row - @pos.row)
       [x, y] = [x + @xif.col.1, y + @xif.row.1]
       if x < 0 or y < 0 or x >= @dim.col or y >= @dim.row => return null
@@ -495,16 +498,18 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     {sc,ec,sr,er} = @_bound defined: false, sel: sel
     rbox = @dom.inner.getBoundingClientRect!
     c0 = @cell({col: @pos.col + @frozen.col, row: @pos.row + @frozen.row})
-    c1 = @cell {col: sc, row: sr}
-    c2 = @cell {col: sc, row: er}
-    c3 = @cell {col: ec, row: sr}
-    c4 = @cell {col: ec, row: er}
+    c1 = @cell {col: sc, row: sr, roughly: true}
+    c2 = @cell {col: sc, row: er, roughly: true}
+    c3 = @cell {col: ec, row: sr, roughly: true}
+    c4 = @cell {col: ec, row: er, roughly: true}
     [b0,b1,b2,b3,b4] = [c0,c1,c2,c3,c4].map -> if it => it.getBoundingClientRect! else null
     b0 <<< {width: 0, height: 0}
     x1 = (b1 or b2 or b0).x - rbox.x
     y1 = (b1 or b3 or b0).y - rbox.y
-    x2 = (b3 or b4 or b0).x + (b3 or b4 or b0).width - rbox.x
-    y2 = (b2 or b4 or b0).y + (b2 or b4 or b0).height - rbox.y
+    col-out = ec - @pos.col < @frozen.col
+    row-out = er - @pos.row < @frozen.row
+    x2 = (b3 or b4 or b0).x + (if col-out => 0 else (b3 or b4 or b0).width) - rbox.x
+    y2 = (b2 or b4 or b0).y + (if row-out => 0 else (b2 or b4 or b0).height) - rbox.y
     w = x2 - x1 + 1
     h = y2 - y1 + 1
 

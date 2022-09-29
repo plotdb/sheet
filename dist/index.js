@@ -943,20 +943,29 @@
       };
     },
     cell: function(opt){
-      var x, y, ref$, base;
+      var r, x, y, ref$, base;
       opt == null && (opt = {});
+      r = opt.roughly;
       if (opt.col != null) {
         if (opt.col < this.frozen.col) {
           x = opt.col;
         } else if (opt.col - this.pos.col < this.frozen.col) {
-          return null;
+          if (r) {
+            x = this.frozen.col;
+          } else {
+            return null;
+          }
         } else {
           x = opt.col - this.pos.col;
         }
         if (opt.row < this.frozen.row) {
           y = opt.row;
         } else if (opt.row - this.pos.row < this.frozen.row) {
-          return null;
+          if (r) {
+            y = this.frozen.row;
+          } else {
+            return null;
+          }
         } else {
           y = opt.row - this.pos.row;
         }
@@ -986,7 +995,7 @@
         : this._editing = !!v;
     },
     renderSelection: function(sel, o){
-      var ref$, sc, ec, sr, er, rbox, c0, c1, c2, c3, c4, b0, b1, b2, b3, b4, x1, y1, x2, y2, w, h, snode, sbox, dom;
+      var ref$, sc, ec, sr, er, rbox, c0, c1, c2, c3, c4, b0, b1, b2, b3, b4, x1, y1, colOut, rowOut, x2, y2, w, h, snode, sbox, dom;
       o == null && (o = {});
       if (!sel) {
         sel = this.les;
@@ -1005,19 +1014,23 @@
       });
       c1 = this.cell({
         col: sc,
-        row: sr
+        row: sr,
+        roughly: true
       });
       c2 = this.cell({
         col: sc,
-        row: er
+        row: er,
+        roughly: true
       });
       c3 = this.cell({
         col: ec,
-        row: sr
+        row: sr,
+        roughly: true
       });
       c4 = this.cell({
         col: ec,
-        row: er
+        row: er,
+        roughly: true
       });
       ref$ = [c0, c1, c2, c3, c4].map(function(it){
         if (it) {
@@ -1030,8 +1043,14 @@
       b0.height = 0;
       x1 = (b1 || b2 || b0).x - rbox.x;
       y1 = (b1 || b3 || b0).y - rbox.y;
-      x2 = (b3 || b4 || b0).x + (b3 || b4 || b0).width - rbox.x;
-      y2 = (b2 || b4 || b0).y + (b2 || b4 || b0).height - rbox.y;
+      colOut = ec - this.pos.col < this.frozen.col;
+      rowOut = er - this.pos.row < this.frozen.row;
+      x2 = (b3 || b4 || b0).x + (colOut
+        ? 0
+        : (b3 || b4 || b0).width) - rbox.x;
+      y2 = (b2 || b4 || b0).y + (rowOut
+        ? 0
+        : (b2 || b4 || b0).height) - rbox.y;
       w = x2 - x1 + 1;
       h = y2 - y1 + 1;
       if (ec == null) {

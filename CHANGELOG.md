@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.4.2
+
+ - fix bug: selection out of canvas rendered incorrectly
+
+
 ## v0.4.1
 
  - fix bug: `change` event should be fired for row-wise / col-wise deletion
