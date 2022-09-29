@@ -142,7 +142,6 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         data = for row from sr to er => for col from sc to ec => ''
         @set {row: sr, col: sc, data, range: true}
       if code == 189 and (e.metaKey or e.ctrlKey) =>
-        if !@les.node => return
         {sc,ec,sr,er} = @_bound defined: false
         if !ec? => d = @_data.splice sr, (er - sr + 1)
         if !er? => d = @_data.map -> it.splice sc, (ec - sc + 1)

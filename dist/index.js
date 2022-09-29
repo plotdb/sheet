@@ -314,9 +314,6 @@
           });
         }
         if (code === 189 && (e.metaKey || e.ctrlKey)) {
-          if (!this$.les.node) {
-            return;
-          }
           ref$ = this$._bound({
             defined: false
           }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;

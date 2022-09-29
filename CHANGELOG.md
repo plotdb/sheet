@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.4.3
+
+ - fix bug: selection issue in frozen cell
+ - fic bug: row/col based deletion doesn't work when range start out of canvas
+
+
 ## v0.4.2
 
  - fix bug: selection out of canvas rendered incorrectly
