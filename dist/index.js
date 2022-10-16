@@ -800,20 +800,18 @@
       return this.render();
     },
     render: function(){
-      var i$, to$, y, lresult$, j$, to1$, x, results$ = [];
+      var i$, to$, y, j$, to1$, x;
       for (i$ = 0, to$ = this.dim.row; i$ < to$; ++i$) {
         y = i$;
-        lresult$ = [];
         for (j$ = 0, to1$ = this.dim.col; j$ < to1$; ++j$) {
           x = j$;
-          lresult$.push(this._content({
+          this._content({
             x: x,
             y: y
-          }));
+          });
         }
-        results$.push(lresult$);
       }
-      return results$;
+      return this.renderSelection();
     },
     move: function(opt){
       var node, idx, box, sbox, ref$;

@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.4.4
+
+ - fix bug: selection should also be rendered when `render` is called.
+
+
 ## v0.4.3
 
  - fix bug: selection issue in frozen cell

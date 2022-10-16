@@ -402,6 +402,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   render:  ->
     for y from 0 til @dim.row => for x from 0 til @dim.col => @_content {x, y}
+    @render-selection!
 
   move: (opt = {}) ->
     if @editing.on => @edited!
