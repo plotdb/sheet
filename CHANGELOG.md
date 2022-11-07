@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.5.0
+
+ - add `select` api for set / get selection status
+ - add test code for selection in demo page
+
+
 ## v0.4.4
 
  - fix bug: selection should also be rendered when `render` is called.

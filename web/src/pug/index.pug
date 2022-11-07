@@ -13,7 +13,17 @@ block head
     */
     body { overscroll-behavior: contain }
 block body
+  .ldcv(ld="ldcv",data-name="selection"): .base.w-640.rwd: .inner.p-4
+    textarea.form-control.mb-4(ld="textarea",rows="7")
+    .btn.btn-lg.btn-primary(data-ldcv-set="") Close
   .p-4: .mx-auto.rwd.w-640
+    .d-flex.g-2.mb-2
+      .btn.btn-sm.btn-outline-secondary(ld="clear") Clear Selection
+      .btn.btn-sm.btn-outline-secondary(ld="range") Select Range
+      .btn.btn-sm.btn-outline-secondary(ld="row") Select Row 3
+      .btn.btn-sm.btn-outline-secondary(ld="col") Select Col 3
+      .btn.btn-sm.btn-outline-secondary(ld="all") Select All
+      .btn.btn-sm.btn-outline-secondary(ld="cur") Show Current Selection
     .aspect-ratio.ratio-1by1
       #root.shadow-sm.border.border-secondary.rounded
 
@@ -22,6 +32,25 @@ block script
   +script("https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js")
   +script("assets/lib/@plotdb/sheet/dev/index.min.js")
   script(type="module"): :lsc
+    app = {}
+    <-(->it.apply {}) _
+    ldcv = {}
+    view = new ldview do
+      root: document.body
+      init: ldcv: ({node}) -> ldcv[node.getAttribute(\data-name)] = new ldcover root: node, resident: true
+      action: click:
+        clear: -> s.select null
+        range: -> s.select {row: 1, col: 1, rowspan: 3, colspan: 2}
+        row: -> s.select {row: 2}
+        col: -> s.select {col: 2}
+        all: -> s.select {}
+        cur: ->
+          app.selection = s.select!
+          ldcv.selection.toggle!
+          view.render \textarea
+      handler:
+        textarea: ({node}) ->
+          node.value = JSON.stringify((app.selection or null), 4, ' ')
     node =
       type: \dom
       node: div = document.createElement(\div)

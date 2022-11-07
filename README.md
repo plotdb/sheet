@@ -62,6 +62,16 @@ initialize:
    - return current data if `d` is omitted.
    - `d` is in the same format with the constructor `data` option
  - `size({row, col})`: update grid size.
+ - `select(opt)`: set / get selection range
+   - if opt is omitted, return current selection status, which is:
+     - null, if no selection available.
+     - the selection object with fields as below:
+       - `col`: index of column. omitted for selecting everything on a row.
+       - `colspan`: span of column. will be 1 if omitted 
+       - `row`: index of row. omitted for selecting everything on a column.
+       - `rowspan`: span of row. will be 1 if omitted 
+     - `{}` = the whole table selected, based on the definition of the selection object.
+   - otherwise, set selection based on the `opt` selection range object described as above.
 
 
 ## Event

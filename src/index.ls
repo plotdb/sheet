@@ -228,6 +228,28 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       e.preventDefault!
     ), {passive: false}
 
+  select: (o) ->
+    if !arguments.length =>
+      ret = {}
+      if !@les.start => return null
+      ret.col = @les.start.col
+      ret.row = @les.start.row
+      if !@les.end => ret <<< colspan: 1, rowspan: 1; return ret
+      if !@les.end.col? => delete ret.col else ret.colspan = @les.end.col - ret.col + 1
+      if !@les.end.row? => delete ret.row else ret.rowspan = @les.end.row - ret.row + 1
+      return ret
+    @les = {}
+    if o =>
+      @les = {start: {col: 0, row: 0}, end: {}}
+      if o.row? =>
+        @les.start.row = o.row
+        @les.end.row = o.row + (if o.rowspan => (that >? 1) else 1) - 1
+      if o.col? =>
+        @les.start.col = o.col
+        @les.end.col = o.col + (if o.colspan => (that >? 1) else 1) - 1
+    @render-selection!
+    return
+
   _bound: (o={}) ->
     sel = o.sel or @les
     [p1, p2] = [sel.start, sel.end]
@@ -494,7 +516,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   render-selection: (sel, o = {}) ->
     if !sel => sel = @les
-    if !sel.start => return
+    if !sel.start =>
+      @dom.caret.classList.toggle \show, false
+      @dom.range.classList.toggle \show, false
+      return
     {sc,ec,sr,er} = @_bound defined: false, sel: sel
     rbox = @dom.inner.getBoundingClientRect!
     c0 = @cell({col: @pos.col + @frozen.col, row: @pos.row + @frozen.row})

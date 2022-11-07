@@ -6,7 +6,7 @@ mkdir -p dist
 
 echo "building index.ls -> index.js ..."
 ./node_modules/.bin/lsc -cp --no-header src/index.ls > dist/index.js
-echo "minify index.js -> indeindex.min.js ..."
+echo "minify index.js -> index.min.js ..."
 ./node_modules/.bin/uglifyjs dist/index.js -m -c  > dist/index.min.js
 
 echo "build src/index.styl -> dist/index.css ..."

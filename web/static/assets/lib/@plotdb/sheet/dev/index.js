@@ -451,6 +451,52 @@
         passive: false
       });
     },
+    select: function(o){
+      var ret, that;
+      if (!arguments.length) {
+        ret = {};
+        if (!this.les.start) {
+          return null;
+        }
+        ret.col = this.les.start.col;
+        ret.row = this.les.start.row;
+        if (!this.les.end) {
+          ret.colspan = 1;
+          ret.rowspan = 1;
+          return ret;
+        }
+        if (this.les.end.col == null) {
+          delete ret.col;
+        } else {
+          ret.colspan = this.les.end.col - ret.col + 1;
+        }
+        if (this.les.end.row == null) {
+          delete ret.row;
+        } else {
+          ret.rowspan = this.les.end.row - ret.row + 1;
+        }
+        return ret;
+      }
+      this.les = {};
+      if (o) {
+        this.les = {
+          start: {
+            col: 0,
+            row: 0
+          },
+          end: {}
+        };
+        if (o.row != null) {
+          this.les.start.row = o.row;
+          this.les.end.row = o.row + ((that = o.rowspan) ? that > 1 ? that : 1 : 1) - 1;
+        }
+        if (o.col != null) {
+          this.les.start.col = o.col;
+          this.les.end.col = o.col + ((that = o.colspan) ? that > 1 ? that : 1 : 1) - 1;
+        }
+      }
+      this.renderSelection();
+    },
     _bound: function(o){
       var sel, ref$, p1, p2, sc, ec, sr, er;
       o == null && (o = {});
@@ -996,6 +1042,8 @@
         sel = this.les;
       }
       if (!sel.start) {
+        this.dom.caret.classList.toggle('show', false);
+        this.dom.range.classList.toggle('show', false);
         return;
       }
       ref$ = this._bound({
