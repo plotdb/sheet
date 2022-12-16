@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.5.1 (upcoming)
+
+ - upgrade dev modules and fix vulnerabilities
+
+
 ## v0.5.0
 
  - add `select` api for set / get selection status
