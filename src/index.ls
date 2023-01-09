@@ -141,15 +141,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         {sc,ec,sr,er} = @_bound!
         data = for row from sr to er => for col from sc to ec => ''
         @set {row: sr, col: sc, data, range: true}
-      if code == 189 and (e.metaKey or e.ctrlKey) =>
-        {sc,ec,sr,er} = @_bound defined: false
-        if !ec? => d = @_data.splice sr, (er - sr + 1)
-        if !er? => d = @_data.map -> it.splice sc, (ec - sc + 1)
-        @fire \change, {row: sr, col: sc, data: d, range: true}
-        @les.end = @les.start
-        @render-selection!
-        @render!
-        return
+      if code == 189 and (e.metaKey or e.ctrlKey) => @slice!
 
       opt = switch code
       | 37 => {y:  0, x: -1}
@@ -569,6 +561,16 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if !(it?) => return @_data
     @_data = it
     @render!
+
+  slice: ->
+    {sc,ec,sr,er} = @_bound defined: false
+    if !ec? => d = @_data.splice sr, (er - sr + 1)
+    if !er? => d = @_data.map -> it.splice sc, (ec - sc + 1)
+    @fire \change, {row: sr, col: sc, data: d, range: true}
+    @les.end = @les.start
+    @render-selection!
+    @render!
+    return
 
 if module? => module.exports = sheet
 else if window? => window.sheet = sheet

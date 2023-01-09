@@ -1,8 +1,9 @@
 # Change Logs
 
-## v0.5.1 (upcoming)
+## v0.5.1
 
  - upgrade dev modules and fix vulnerabilities
+ - add `slice` api
 
 
 ## v0.5.0

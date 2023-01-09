@@ -277,7 +277,7 @@
         }
       });
       dom.addEventListener('keydown', function(e){
-        var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, d, opt;
+        var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, opt;
         code = e.keyCode;
         if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
           return this$.copy();
@@ -314,27 +314,7 @@
           });
         }
         if (code === 189 && (e.metaKey || e.ctrlKey)) {
-          ref$ = this$._bound({
-            defined: false
-          }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
-          if (ec == null) {
-            d = this$._data.splice(sr, er - sr + 1);
-          }
-          if (er == null) {
-            d = this$._data.map(function(it){
-              return it.splice(sc, ec - sc + 1);
-            });
-          }
-          this$.fire('change', {
-            row: sr,
-            col: sc,
-            data: d,
-            range: true
-          });
-          this$.les.end = this$.les.start;
-          this$.renderSelection();
-          this$.render();
-          return;
+          this$.slice();
         }
         opt = (function(){
           switch (code) {
@@ -1139,6 +1119,29 @@
       }
       this._data = it;
       return this.render();
+    },
+    slice: function(){
+      var ref$, sc, ec, sr, er, d;
+      ref$ = this._bound({
+        defined: false
+      }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+      if (ec == null) {
+        d = this._data.splice(sr, er - sr + 1);
+      }
+      if (er == null) {
+        d = this._data.map(function(it){
+          return it.splice(sc, ec - sc + 1);
+        });
+      }
+      this.fire('change', {
+        row: sr,
+        col: sc,
+        data: d,
+        range: true
+      });
+      this.les.end = this.les.start;
+      this.renderSelection();
+      this.render();
     }
   });
   if (typeof module != 'undefined' && module !== null) {
