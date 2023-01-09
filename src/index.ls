@@ -245,6 +245,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   _bound: (o={}) ->
     sel = o.sel or @les
     [p1, p2] = [sel.start, sel.end]
+    # TODO is this a good return value?
+    if !(p1 and p2) => return {sc: 0, ec: 0, sr: 0, er: 0}
     [sc, ec] = if p1.col < p2.col or !p2.col? => [p1.col, p2.col] else [p2.col, p1.col]
     [sr, er] = if p1.row < p2.row or !p2.row? => [p1.row, p2.row] else [p2.row, p1.row]
     if !o.defined? or o.defined =>

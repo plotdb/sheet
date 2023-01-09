@@ -482,6 +482,14 @@
       o == null && (o = {});
       sel = o.sel || this.les;
       ref$ = [sel.start, sel.end], p1 = ref$[0], p2 = ref$[1];
+      if (!(p1 && p2)) {
+        return {
+          sc: 0,
+          ec: 0,
+          sr: 0,
+          er: 0
+        };
+      }
       ref$ = p1.col < p2.col || p2.col == null
         ? [p1.col, p2.col]
         : [p2.col, p1.col], sc = ref$[0], ec = ref$[1];

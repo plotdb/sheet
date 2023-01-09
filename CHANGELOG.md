@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.5.2
+
+ - fix bug: exception when slice without selection
+
+
 ## v0.5.1
 
  - upgrade dev modules and fix vulnerabilities
