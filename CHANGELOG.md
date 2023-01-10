@@ -1,5 +1,13 @@
 # Change Logs
 
+## v0.5.3 (upcoming)
+
+ - cell lookup now doesn't throw exception if node not found.
+   instead, null returned value is handled by caller
+ - fix bug: for narrow table, cell lookup of previous location may fail due to sheet move.
+ - trim class name.
+
+
 ## v0.5.2
 
  - fix bug: exception when slice without selection

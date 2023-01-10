@@ -689,7 +689,7 @@
         content = "";
       }
       clsext = x >= this.xif.col[0] && y >= this.xif.row[0] ? (this.cls.col[this.pos.col + x - this.xif.col[1]] || '') + ' ' + (this.cls.row[this.pos.row + y - this.xif.row[1]] || '') : '';
-      n.className = className + ' ' + clsext;
+      n.className = (className + ' ' + clsext).trim();
       if (content !== null) {
         if (typeof content === 'object') {
           if (content.type === 'dom') {
@@ -882,7 +882,10 @@
           this._mu(1);
         }
       }
-      if (!(node = this.cell(opt))) {
+      if (!(node = this.cell(opt)) && !(node = this.cell({
+        col: idx.col,
+        row: idx.row
+      }))) {
         return;
       }
       this.les.node = node;
@@ -1011,7 +1014,7 @@
             x: 0
           };
         if (!base) {
-          throw new Error("node not found in sheet");
+          return;
         }
         y = base.y + (opt.y || 0);
         x = base.x + (opt.x || 0);

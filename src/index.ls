@@ -342,7 +342,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         (@cls.row[@pos.row + y - @xif.row.1] or '')
       )
     else ''
-    n.className = (className + ' ' + clsext)
+    n.className = (className + ' ' + clsext).trim!
 
     if content != null =>
       # TODO support advanced content
@@ -431,7 +431,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if box.y + box.height > sbox.y + sbox.height => @_md 1
     if idx.x == 0 => ( if @pos.col == 0 => return else @_ml 1 )
     if idx.y == 0 => ( if @pos.row == 0 => return else @_mu 1 )
-    if !(node = @cell opt) => return
+    if !(node = @cell opt) and !(node = @cell idx{col, row}) => return
 
     @les.node = node
     @les.start = @les.end = @index(node){col, row}
@@ -499,7 +499,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       return @dom.inner.childNodes[y * @dim.col + x]
     else
       base = if opt.node => @index(opt.node) else {y: 0, x: 0}
-      if !base => throw new Error("node not found in sheet")
+      if !base => return #throw new Error("node not found in sheet")
       y = base.y + (opt.y or 0)
       x = base.x + (opt.x or 0)
       return @dom.inner.childNodes[y * @dim.col + x]
