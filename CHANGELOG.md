@@ -1,6 +1,6 @@
 # Change Logs
 
-## v0.5.3 (upcoming)
+## v0.5.3
 
  - cell lookup now doesn't throw exception if node not found.
    instead, null returned value is handled by caller
