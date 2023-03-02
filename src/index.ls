@@ -564,6 +564,16 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @_data = it
     @render!
 
+  insert: ->
+    {sc,ec,sr,er} = @_bound defined: false
+    if !ec? => d = @_data.splice sr, 0, []
+    if !er? => d = @_data.map -> it.splice sc, 0, ''
+    @fire \change, {row: sr, col: sc, data: d, range: true}
+    @les.end = @les.start
+    @render-selection!
+    @render!
+    return
+
   slice: ->
     {sc,ec,sr,er} = @_bound defined: false
     if !ec? => d = @_data.splice sr, (er - sr + 1)

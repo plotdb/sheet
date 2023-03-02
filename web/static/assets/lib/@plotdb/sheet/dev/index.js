@@ -1131,6 +1131,29 @@
       this._data = it;
       return this.render();
     },
+    insert: function(){
+      var ref$, sc, ec, sr, er, d;
+      ref$ = this._bound({
+        defined: false
+      }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+      if (ec == null) {
+        d = this._data.splice(sr, 0, []);
+      }
+      if (er == null) {
+        d = this._data.map(function(it){
+          return it.splice(sc, 0, '');
+        });
+      }
+      this.fire('change', {
+        row: sr,
+        col: sc,
+        data: d,
+        range: true
+      });
+      this.les.end = this.les.start;
+      this.renderSelection();
+      this.render();
+    },
     slice: function(){
       var ref$, sc, ec, sr, er, d;
       ref$ = this._bound({
