@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.5.7 (upcoming)
+
+ - correctly handle ctrl+`+` event for row/col insertion
+
+
 ## v0.5.6
 
  - fix bug: selection out of range isn't rendered correctly if current view is closer to origin point.

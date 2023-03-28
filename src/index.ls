@@ -155,6 +155,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         data = for row from sr to er => for col from sc to ec => ''
         @set {row: sr, col: sc, data, range: true}
       if code == 189 and (e.metaKey or e.ctrlKey) => @slice!
+      if code == 187 and (e.metaKey or e.ctrlKey) => @insert!
 
       opt = switch code
       | 37 => {y:  0, x: -1}
@@ -170,8 +171,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @dom.sheet.focus!  # we need focus to accept key event.
 
     dom.addEventListener \keypress, (e) ~>
-      # 189 in keydown, 31 in keypress
-      if e.keyCode == 31 and (e.metaKey or e.ctrlKey) => return
+      # ctrl+`-`: 189 in keydown, 31 in keypress
+      # ctrl+`+`: 187 in keydown, 61 in keypress
+      if e.keyCode in [31 61] and (e.metaKey or e.ctrlKey) => return
       if @les.node and !@editing.on => @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
 
     @dom.textarea.addEventListener \keydown, (e) ~>

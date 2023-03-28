@@ -342,6 +342,9 @@
         if (code === 189 && (e.metaKey || e.ctrlKey)) {
           this$.slice();
         }
+        if (code === 187 && (e.metaKey || e.ctrlKey)) {
+          this$.insert();
+        }
         opt = (function(){
           switch (code) {
           case 37:
@@ -380,7 +383,8 @@
         return this$.dom.sheet.focus();
       });
       dom.addEventListener('keypress', function(e){
-        if (e.keyCode === 31 && (e.metaKey || e.ctrlKey)) {
+        var ref$;
+        if (((ref$ = e.keyCode) === 31 || ref$ === 61) && (e.metaKey || e.ctrlKey)) {
           return;
         }
         if (this$.les.node && !this$.editing.on) {
