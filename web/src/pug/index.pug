@@ -12,6 +12,9 @@ block head
     https://community.airtable.com/t/3074
     */
     body { overscroll-behavior: contain }
+    [ld=menu] {
+      position: absolute;
+    }
 block body
   .ldcv(ld="ldcv",data-name="selection"): .base.w-640.rwd: .inner.p-4
     textarea.form-control.mb-4(ld="textarea",rows="7")
@@ -26,6 +29,9 @@ block body
       .btn.btn-sm.btn-outline-secondary(ld="cur") Show Current Selection
     .aspect-ratio.ratio-1by1
       #root.shadow-sm.border.border-secondary.rounded
+  .dropdown-menu.shadow-sm(ld="menu")
+    .dropdown-item(ld="del") Del Row/Col
+    .dropdown-item(ld="ins") Ins Row/Col
 
 
 block script
@@ -44,6 +50,8 @@ block script
         row: -> s.select {row: 2}
         col: -> s.select {col: 2}
         all: -> s.select {}
+        del: -> s.slice!
+        ins: -> s.insert!
         cur: ->
           app.selection = s.select!
           ldcv.selection.toggle!
@@ -77,6 +85,20 @@ block script
     s.on \change, -> console.log it
     c = s.cell {x: 1, y: 1}
     console.log c
+    s.on \menu.on, ({evt, node}) ->
+      if !(node.classList.contains \idx) => return
+      m = view.get(\menu)
+      m.style.top = "#{evt.clientY}px"
+      m.style.left = "#{evt.clientX}px"
+      m.classList.toggle \show, true
+      evt.preventDefault!
+      evt.stopPropagation!
+    s.on \menu.off, ({evt, node}) ->
+      m = view.get(\menu)
+      m.classList.toggle \show, false
+      evt.preventDefault!
+      evt.stopPropagation!
+
     /*
     c.innerHTML = """
     <div class="dropdown">

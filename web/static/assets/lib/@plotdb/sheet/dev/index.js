@@ -176,9 +176,35 @@
       this.dom.textarea.addEventListener('mousedown', function(e){
         return e.stopPropagation();
       });
+      this.dom.sheet.addEventListener('contextmenu', function(e){
+        this$.fire('menu.on', {
+          evt: e,
+          node: e.target
+        });
+        if (this$._menuOff) {
+          return;
+        }
+        this$._menuOff = function(e){
+          if (e.type === 'keydown' && e.keyCode !== 27) {
+            return;
+          }
+          document.body.removeEventListener('click', this$._menuOff);
+          document.body.removeEventListener('keydown', this$._menuOff);
+          this$._menuOff = null;
+          return this$.fire('menu.off', {
+            evt: e,
+            node: e.target
+          });
+        };
+        document.body.addEventListener('click', this$._menuOff);
+        return document.body.addEventListener('keydown', this$._menuOff);
+      });
       dom = this.dom.sheet;
       dom.addEventListener('mousedown', function(e){
         var p, ref$, idx;
+        if (e.button > 1) {
+          return;
+        }
         this$.edited();
         if (!(p = parent(e.target, '.cell', dom))) {
           return;

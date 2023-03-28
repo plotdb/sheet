@@ -91,6 +91,13 @@ Following are a list of possible events:
    - `col`: base col of the updated cell
    - `data`: data used to update. If it's a 2D array and `range` is true, then cells are updated with values in `data` correspondingly relative to `row` and `col` as the original cell
    - `range`: true if a range of cells are updated.
+ - `menu.on`: fired when a `contextmenu` event is fired within sheet. Option is an object with following fields:
+   - `evt`: corresponding event object
+   - `node`: target node from which this event was fired.
+ - `menu.off`: fired when a context menu is expected to dismiss. Option is an object with following fields:
+   - `evt`: corresponding event object
+   - `node`: target node from which this event was fired.
+
 
 ## Rich Text
 

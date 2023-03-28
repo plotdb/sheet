@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.5.5
+
+ - support `menu.on` and `menu.off` event
+ - fix bug: right click incorrectly considered as selection.
+
+
 ## v0.5.4
 
  - add `insert` api

@@ -81,9 +81,22 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
     # to prevent grid selection
     @dom.textarea.addEventListener \mousedown, (e) -> e.stopPropagation!
+    @dom.sheet.addEventListener \contextmenu, (e) ~>
+      @fire \menu.on, {evt: e, node: e.target}
+      if @_menu-off => return
+      @_menu-off = (e) ~>
+        if e.type == \keydown and e.keyCode != 27 => return
+        document.body.removeEventListener \click, @_menu-off
+        document.body.removeEventListener \keydown, @_menu-off
+        @_menu-off = null
+        @fire \menu.off, {evt: e, node: e.target}
+      document.body.addEventListener \click, @_menu-off
+      document.body.addEventListener \keydown, @_menu-off
 
     dom = @dom.sheet
     dom.addEventListener \mousedown, (e) ~>
+      # selection should skip right click
+      if e.button > 1 => return
       @edited!
       if !(p = parent (e.target), '.cell', dom) => return
       idx = @index(p){row, col}
