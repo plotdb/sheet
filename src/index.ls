@@ -174,7 +174,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       # ctrl+`-`: 189 in keydown, 31 in keypress
       # ctrl+`+`: 187 in keydown, 61 in keypress
       if e.keyCode in [31 61] and (e.metaKey or e.ctrlKey) => return
-      if @les.node and !@editing.on => @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
+      if @les.node and !@editing.on =>
+        @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
+        # it's an event for toggling editing. don't send a newline into textarea
+        if e.keyCode == 13 => e.preventDefault!
 
     @dom.textarea.addEventListener \keydown, (e) ~>
       if e.keyCode == 27 =>

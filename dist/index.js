@@ -388,10 +388,13 @@
           return;
         }
         if (this$.les.node && !this$.editing.on) {
-          return this$.edit({
+          this$.edit({
             node: this$.les.node,
             quick: e.keyCode === 13 ? false : true
           });
+          if (e.keyCode === 13) {
+            return e.preventDefault();
+          }
         }
       });
       this.dom.textarea.addEventListener('keydown', function(e){

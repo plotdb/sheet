@@ -3,6 +3,7 @@
 ## v0.5.7 (upcoming)
 
  - correctly handle ctrl+`+` event for row/col insertion
+ - prevent `enter` from sending newline to cell when it's used to toggle editing.
 
 
 ## v0.5.6
