@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.5.6
+
+ - fix bug: selection out of range isn't rendered correctly if current view is closer to origin point.
+
+
 ## v0.5.5
 
  - support `menu.on` and `menu.off` event

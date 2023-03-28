@@ -498,7 +498,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   cell: (opt = {}) ->
     r = opt.roughly
-    if opt.col? =>
+    if opt.col? or opt.row? =>
       if opt.col < @frozen.col => x = opt.col
       else if opt.col - @pos.col < @frozen.col =>
         if r => x = @frozen.col else return null
@@ -534,14 +534,15 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     c2 = @cell {col: sc, row: er, roughly: true}
     c3 = @cell {col: ec, row: sr, roughly: true}
     c4 = @cell {col: ec, row: er, roughly: true}
-    [b0,b1,b2,b3,b4] = [c0,c1,c2,c3,c4].map -> if it => it.getBoundingClientRect! else null
+    c5 = @cell {col: @pos.col + @dim.col - 2, row: @pos.row + @dim.row - 2}
+    [b0,b1,b2,b3,b4,b5] = [c0,c1,c2,c3,c4,c5].map -> if it => it.getBoundingClientRect! else null
     b0 <<< {width: 0, height: 0}
-    x1 = (b1 or b2 or b0).x - rbox.x
-    y1 = (b1 or b3 or b0).y - rbox.y
+    x1 = (b1 or b2 or (if sc > @pos.col => b5 else b0)).x - rbox.x
+    y1 = (b1 or b3 or (if sr > @pos.row => b5 else b0)).y - rbox.y
     col-out = ec - @pos.col < 0
     row-out = er - @pos.row < 0
-    x2 = (b3 or b4 or b0).x + (if col-out => 0 else (b3 or b4 or b0).width) - rbox.x
-    y2 = (b2 or b4 or b0).y + (if row-out => 0 else (b2 or b4 or b0).height) - rbox.y
+    x2 = (b3 or b4 or b5 or b0).x + (if col-out => 0 else (b3 or b4 or b5 or b0).width) - rbox.x
+    y2 = (b2 or b4 or b5 or b0).y + (if row-out => 0 else (b2 or b4 or b5 or b0).height) - rbox.y
     w = x2 - x1 + 1
     h = y2 - y1 + 1
 
