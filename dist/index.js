@@ -164,7 +164,7 @@
       return results$;
     },
     _init: function(){
-      var i$, to$, r, j$, to1$, c, dom, this$ = this;
+      var i$, to$, r, j$, to1$, c, dom, _dp, _dparse, this$ = this;
       for (i$ = 0, to$ = this.dim.row; i$ < to$; ++i$) {
         r = i$;
         for (j$ = 0, to1$ = this.dim.col; j$ < to1$; ++j$) {
@@ -261,16 +261,29 @@
           quick: false
         });
       });
+      _dp = new DOMParser();
+      _dparse = function(it){
+        return _dp.parseFromString(it, 'text/html');
+      };
       document.body.addEventListener('paste', function(e){
-        var raw, data, s, ref$, sc, ec, sr, er, i$, row, j$, col;
+        var d, data, raw, s, ref$, sc, ec, sr, er, i$, row, j$, col;
         if (!parent(document.activeElement, '.sheet', dom)) {
           return;
         }
         if (!this$.les.start) {
           return;
         }
-        raw = e.clipboardData.getData('text');
-        data = parseCsv(raw);
+        if (in$('text/html', e.clipboardData.types || [])) {
+          d = _dparse(e.clipboardData.getData('text/html'));
+          data = Array.from(d.querySelectorAll('tr')).map(function(n){
+            return Array.from(n.querySelectorAll('th,td')).map(function(n){
+              return n.textContent;
+            });
+          });
+        } else {
+          raw = e.clipboardData.getData('text');
+          data = parseCsv(raw);
+        }
         this$.set({
           row: this$.les.start.row,
           col: this$.les.start.col,
@@ -1224,5 +1237,10 @@
     var own = {}.hasOwnProperty;
     for (var key in src) if (own.call(src, key)) obj[key] = src[key];
     return obj;
+  }
+  function in$(x, xs){
+    var i = -1, l = xs.length >>> 0;
+    while (++i < l) if (x === xs[i]) return true;
+    return false;
   }
 }).call(this);

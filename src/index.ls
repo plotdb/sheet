@@ -127,11 +127,21 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       if !(p = parent (e.target), '.cell', dom) => return
       @edit {node: p, quick: false}
 
+    _dp = new DOMParser!
+    _dparse = -> return _dp.parseFromString it, \text/html
+
     document.body.addEventListener \paste, (e) ~>
       if !parent(document.activeElement, '.sheet', dom) => return
       if !@les.start => return
-      raw = e.clipboardData.getData('text')
-      data = parse-csv raw
+      if \text/html in (e.clipboardData.types or []) =>
+        # TODO / NOTE don't know why but it doesn't work if we put parseFromString
+        # directly here. so anyway we wrap it in `_dparse` first.
+        d = _dparse e.clipboardData.getData('text/html')
+        data = Array.from(d.querySelectorAll \tr).map (n) ->
+          Array.from(n.querySelectorAll 'th,td').map (n) -> n.textContent
+      else
+        raw = e.clipboardData.getData('text')
+        data = parse-csv raw
       @set {row: @les.start.row, col: @les.start.col, data: data, range: true}
       if @sel.cut =>
         # NOTE we may need a general `hide-selection` api in the future.

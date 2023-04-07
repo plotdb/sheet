@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.5.8
+
+ - support html parsing when HTML code is detected in paste event.
+
+
 ## v0.5.7
 
  - correctly handle ctrl+`+` event for row/col insertion
