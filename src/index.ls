@@ -593,6 +593,20 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @_data = it
     @render!
 
+  sort: (o={}) ->
+    {sc,ec,sr,er} = @_bound defined: false
+    d = @_data.map (d,i) -> {d,i}
+    d.sort (a,b) ~>
+      if a.i < @frozen.row => if b.i >= @frozen.row => return -1
+      if b.i < @frozen.row => if a.i >= @frozen.row => return 1
+      a = if isNaN(+a.d[sc]) => a.d[sc] else +a.d[sc]
+      b = if isNaN(+b.d[sc]) => b.d[sc] else +b.d[sc]
+      (if o.dir == \asc => 1 else -1) * (if a > b => 1 else if a < b => -1 else 0)
+    @_data = d.map (d) -> d.d
+    @fire \change, {row: 0, col: 0, data: @_data, range: true}
+    @render-selection!
+    @render!
+
   insert: ->
     {sc,ec,sr,er} = @_bound defined: false
     if !ec? => d = @_data.splice sr, 0, []

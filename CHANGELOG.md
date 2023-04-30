@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.5.9
+
+ - add sorting API
+
+
 ## v0.5.8
 
  - support html parsing when HTML code is detected in paste event.

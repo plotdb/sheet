@@ -72,6 +72,10 @@ initialize:
        - `rowspan`: span of row. will be 1 if omitted 
      - `{}` = the whole table selected, based on the definition of the selection object.
    - otherwise, set selection based on the `opt` selection range object described as above.
+ - `slice()`: delete selected rows/columns
+ - `insert()`: insert empty row/column at selected location.
+ - `sort(opt)`: sort data based on selected column. `opt` is an object with following fields as options:
+   - `dir`: direction. either `asc` or `desc`, by default `asc`.
 
 
 ## Event

@@ -1181,6 +1181,53 @@
       this._data = it;
       return this.render();
     },
+    sort: function(o){
+      var ref$, sc, ec, sr, er, d, this$ = this;
+      o == null && (o = {});
+      ref$ = this._bound({
+        defined: false
+      }), sc = ref$.sc, ec = ref$.ec, sr = ref$.sr, er = ref$.er;
+      d = this._data.map(function(d, i){
+        return {
+          d: d,
+          i: i
+        };
+      });
+      d.sort(function(a, b){
+        if (a.i < this$.frozen.row) {
+          if (b.i >= this$.frozen.row) {
+            return -1;
+          }
+        }
+        if (b.i < this$.frozen.row) {
+          if (a.i >= this$.frozen.row) {
+            return 1;
+          }
+        }
+        a = isNaN(+a.d[sc])
+          ? a.d[sc]
+          : +a.d[sc];
+        b = isNaN(+b.d[sc])
+          ? b.d[sc]
+          : +b.d[sc];
+        return (o.dir === 'asc'
+          ? 1
+          : -1) * (a > b
+          ? 1
+          : a < b ? -1 : 0);
+      });
+      this._data = d.map(function(d){
+        return d.d;
+      });
+      this.fire('change', {
+        row: 0,
+        col: 0,
+        data: this._data,
+        range: true
+      });
+      this.renderSelection();
+      return this.render();
+    },
     insert: function(){
       var ref$, sc, ec, sr, er, d;
       ref$ = this._bound({
