@@ -41,6 +41,7 @@ initialize:
  - `idx`: {row, col}. default {row: true, col: true}
  - `size`: {row, col}. force cell size, in array by order.
    - default: {row: [], col: []}
+   - example: `{col: ["300px", "12em"]}`
  - `class`: {row, col}. additional cell class name, in array by order, as space separated string.
    - default: {row: [], col: []}
  - `editing`: false to disable editing. default true.
