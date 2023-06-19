@@ -77,7 +77,8 @@ initialize:
  - `insert()`: insert empty row/column at selected location.
  - `sort(opt)`: sort data based on selected column. `opt` is an object with following fields as options:
    - `dir`: direction. either `asc` or `desc`, by default `asc`.
-
+ - `edited(opt)`: force sheet enter non-edit mode. option:
+   - `cancel`: default false. if true, cancel current editing and remove content that are going to be inputted.
 
 ## Event
 
