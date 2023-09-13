@@ -81,8 +81,10 @@
 .sheet .edit {
   z-index: 121;
   border: 2px solid #27f;
+  pointer-events: none;
   opacity: 0;
-  display: none;
+  width: 0;
+  height: 0;
   top: 0;
   left: 0;
   position: absolute;
@@ -106,6 +108,12 @@
 .sheet .show {
   opacity: 1 !important;
   display: block;
+}
+.sheet .edit.show {
+  pointer-events: auto;
+  width: initial;
+  height: initial;
+  opacity: initial;
 }
 .sheet .slide-y,
 .sheet .slide-x {

@@ -322,7 +322,7 @@
           return this$.dom["range-cut"].classList.toggle('show', false);
         }
       });
-      dom.addEventListener('keydown', function(e){
+      this.dom.textarea.addEventListener('keydown', function(e){
         var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, opt;
         code = e.keyCode;
         if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
@@ -405,9 +405,9 @@
         this$.move((opt.select = e.shiftKey, opt));
         e.stopPropagation();
         e.preventDefault();
-        return this$.dom.sheet.focus();
+        return this$.dom.textarea.focus();
       });
-      dom.addEventListener('keypress', function(e){
+      this.dom.textarea.addEventListener('keypress', function(e){
         var ref$;
         if (((ref$ = e.keyCode) === 31 || ref$ === 61) && (e.metaKey || e.ctrlKey)) {
           return;
@@ -423,14 +423,30 @@
         }
       });
       this.dom.textarea.addEventListener('keydown', function(e){
-        var lbox, box, ref$;
+        var ref$, lbox, box;
+        if (this$.les.node && !this$.editing.on) {
+          if ((ref$ = e.keyCode) === 37 || ref$ === 38 || ref$ === 39 || ref$ === 40 || ref$ === 9 || ref$ === 16 || ref$ === 18 || ref$ === 91 || ref$ === 27) {
+            return;
+          }
+          this$.edit({
+            node: this$.les.node,
+            quick: e.keyCode === 13 ? false : true
+          });
+          if (e.keyCode === 13) {
+            e.preventDefault();
+          }
+          return;
+        }
+        if (!this$.editing.on) {
+          return;
+        }
         if (e.keyCode === 27) {
           this$.edited({
             cancel: true
           });
           e.stopPropagation();
           e.preventDefault();
-          this$.dom.sheet.focus();
+          this$.dom.textarea.focus();
           return;
         }
         if (e.keyCode === 13 && !(e.altKey || e.metaKey)) {
@@ -440,7 +456,7 @@
           });
           e.stopPropagation();
           e.preventDefault();
-          this$.dom.sheet.focus();
+          this$.dom.textarea.focus();
           return;
         }
         if (e.keyCode === 13 && (e.altKey || e.metaKey)) {
@@ -1168,7 +1184,7 @@
         : this._editing = !!v;
     },
     renderSelection: function(sel, o){
-      var ref$, sc, ec, sr, er, rbox, c0, c1, c2, c3, c4, c5, b0, b1, b2, b3, b4, b5, x1, y1, colOut, rowOut, x2, y2, w, h, snode, sbox, dom;
+      var ref$, sc, ec, sr, er, rbox, c0, c1, c2, c3, c4, c5, b0, b1, b2, b3, b4, b5, x1, y1, colOut, rowOut, x2, y2, w, h, snode, sbox, dom, this$ = this;
       o == null && (o = {});
       if (!sel) {
         sel = this.les;
@@ -1266,8 +1282,11 @@
             ? 101
             : sel.start.row + this.xif.row[1] < this.xif.row[2] || sel.start.col + this.xif.col[1] < this.xif.col[2] ? 20 : 15;
         }
-        return this.dom.caret.classList.toggle('show', !!sbox);
+        this.dom.caret.classList.toggle('show', !!sbox);
       }
+      return setTimeout(function(){
+        return this$.dom.textarea.focus();
+      }, 0);
     },
     data: function(it){
       if (!(it != null)) {

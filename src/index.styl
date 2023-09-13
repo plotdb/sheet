@@ -72,7 +72,12 @@ initabs()
   .edit
     z-index: 121
     border: 2px solid #27f
-    hide()
+    // here we don't use `hide()` but make it impossible to reach
+    // so it won't be clicked but still can accept keydown event.
+    pointer-events: none
+    opacity: 0
+    width: 0
+    height: 0
     initabs()
     textarea
       display: block /* eliminate small gap between .edit and textarea */
@@ -89,6 +94,11 @@ initabs()
   .show
     opacity: 1!important
     display: block
+  .edit.show
+    pointer-events: auto
+    width: initial
+    height: initial
+    opacity: initial
 
 .sheet
   .slide-y, .slide-x

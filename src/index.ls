@@ -157,7 +157,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         @sel.cut = null
         @dom["range-cut"].classList.toggle \show, false
 
-    dom.addEventListener \keydown, (e) ~>
+    @dom.textarea.addEventListener \keydown, (e) ~>
       code = e.keyCode
       if e.keyCode == 67 and (e.metaKey or e.ctrlKey) => return @copy!
       if e.keyCode == 88 and (e.metaKey or e.ctrlKey) => return @copy cut: true
@@ -182,9 +182,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @move(opt <<< {select: e.shiftKey})
       e.stopPropagation!
       e.preventDefault!
-      @dom.sheet.focus!  # we need focus to accept key event.
+      @dom.textarea.focus!  # we need focus to accept key event.
 
-    dom.addEventListener \keypress, (e) ~>
+    @dom.textarea.addEventListener \keypress, (e) ~>
       # ctrl+`-`: 189 in keydown, 31 in keypress
       # ctrl+`+`: 187 in keydown, 61 in keypress
       if e.keyCode in [31 61] and (e.metaKey or e.ctrlKey) => return
@@ -194,17 +194,26 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         if e.keyCode == 13 => e.preventDefault!
 
     @dom.textarea.addEventListener \keydown, (e) ~>
+      if @les.node and !@editing.on =>
+        # dont enter editing mode for following key code:
+        # 37 ~ 40: arrow / 9: tab / 16 18 91 27: shift, option, command, esc
+        if e.keyCode in [37 38 39 40 9 16 18 91 27] => return
+        @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
+        # it's an event for toggling editing. don't send a newline into textarea
+        if e.keyCode == 13 => e.preventDefault!
+        return
+      if !@editing.on => return
       if e.keyCode == 27 =>
         @edited cancel: true
         e.stopPropagation!
         e.preventDefault!
-        @dom.sheet.focus!  # we need focus to accept key event.
+        @dom.textarea.focus!  # we need focus to accept key event.
         return
       if (e.keyCode == 13 and !(e.altKey or e.metaKey)) =>
         @move {y: 1, x: 0}
         e.stopPropagation!
         e.preventDefault!
-        @dom.sheet.focus!  # we need focus to accept key event.
+        @dom.textarea.focus!  # we need focus to accept key event.
         return
       if e.keyCode == 13 and (e.altKey or e.metaKey) =>
         @dom.textarea.value += \\n
@@ -636,6 +645,15 @@ sheet.prototype = Object.create(Object.prototype) <<< do
             else 15
           )
       @dom.caret.classList.toggle \show, !!sbox
+
+    # for each render-selection, we refocus textarea so it can accept new keystroke immediately
+    # not sure why occasionally textarea loses focus. add a setTimeout seems to resolve this issue.
+    # - to reproduce: remove setTimeout, click on random cell, try pressing right arrow key.
+    #   sometimes selection moves, sometimes not.
+    # - perhaps this is because we do render-selection in mousedown,
+    #   and click event send focus to clicked element. if this is the case, 
+    #   we may need to prevent refocusing once textarea.focus is on going. TODO
+    setTimeout (~> @dom.textarea.focus!), 0
 
   data: ->
     if !(it?) => return @_data
