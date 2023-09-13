@@ -217,12 +217,13 @@
           col: ref$.col
         };
         if (idx.col < 0 || idx.row < 0) {
+          this$.les.node = this$.cell(this$.les.start);
           if (!(e.shiftKey && this$.les.start)) {
-            this$.les.node = this$.cell(this$.les.start);
             this$.les.start = {
               col: (ref$ = idx.col) > 0 ? ref$ : 0,
               row: (ref$ = idx.row) > 0 ? ref$ : 0
             };
+            this$.les.node = this$.cell(this$.les.start);
           }
           this$.les.end = {
             col: idx.col >= 0 ? idx.col : undefined,
@@ -401,7 +402,7 @@
         if (this$.editing.on && !this$.editing.quick) {
           return;
         }
-        this$.move(opt);
+        this$.move((opt.select = e.shiftKey, opt));
         e.stopPropagation();
         e.preventDefault();
         return this$.dom.sheet.focus();
@@ -958,7 +959,7 @@
       return this.renderSelection();
     },
     move: function(opt){
-      var node, idx, box, sbox, ref$;
+      var node, idx, box, sbox, ref$, ns;
       opt == null && (opt = {});
       if (this.editing.on) {
         this.edited();
@@ -999,10 +1000,40 @@
         return;
       }
       this.les.node = node;
-      this.les.start = this.les.end = {
-        col: (ref$ = this.index(node)).col,
-        row: ref$.row
-      };
+      if (opt.select) {
+        ns = {
+          col: (ref$ = this.index(node)).col,
+          row: ref$.row
+        };
+        if (this.les.end === this.les.start) {
+          this.les.end = JSON.parse(JSON.stringify(this.les.start));
+        }
+        if (ns.col < this.les.start.col && (ns.col < this.les.end.col || !(this.les.end.col != null))) {
+          (this.les.start.col > this.les.end.col
+            ? this.les.end
+            : this.les.start).col = ns.col;
+        }
+        if (ns.row < this.les.start.row && (ns.row < this.les.end.row || !(this.les.end.row != null))) {
+          (this.les.start.row > this.les.end.row
+            ? this.les.end
+            : this.les.start).row = ns.row;
+        }
+        if (ns.col > this.les.start.col && ns.col > this.les.end.col) {
+          (this.les.start.col < this.les.end.col
+            ? this.les.end
+            : this.les.start).col = ns.col;
+        }
+        if (ns.row > this.les.start.row && ns.row > this.les.end.row) {
+          (this.les.start.row < this.les.end.row
+            ? this.les.end
+            : this.les.start).row = ns.row;
+        }
+      } else {
+        this.les.start = this.les.end = {
+          col: (ref$ = this.index(node)).col,
+          row: ref$.row
+        };
+      }
       return this.renderSelection();
     },
     edit: function(arg$){
@@ -1207,7 +1238,7 @@
       if (er == null) {
         h = this.root.getBoundingClientRect().height;
       }
-      snode = this.cell(sel.start);
+      snode = this.les.node;
       sbox = !snode
         ? null
         : snode.getBoundingClientRect();

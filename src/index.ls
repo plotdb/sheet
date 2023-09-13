@@ -104,9 +104,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       # negative: clicking on idx cell.
       # we use `undefined` to indicate selecting a whole row/col.
       if idx.col < 0 or idx.row < 0 =>
+        @les.node = @cell @les.start
         if !(e.shiftKey and @les.start) =>
-          @les.node = @cell @les.start
           @les.start = {col: idx.col >? 0, row: idx.row >? 0}
+          @les.node = @cell @les.start
         @les.end =
           col: if idx.col >= 0 => idx.col else undefined
           row: if idx.row >= 0 => idx.row else undefined
@@ -178,7 +179,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       | otherwise => null
       if !opt => return
       if @editing.on and !@editing.quick => return
-      @move opt
+      @move(opt <<< {select: e.shiftKey})
       e.stopPropagation!
       e.preventDefault!
       @dom.sheet.focus!  # we need focus to accept key event.
@@ -486,7 +487,28 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if !(node = @cell opt) and !(node = @cell idx{col, row}) => return
 
     @les.node = node
-    @les.start = @les.end = @index(node){col, row}
+    if opt.select =>
+      ns = @index(node){col, row}
+      # we use @les.start = @les.end below, which makes it the same object
+      # since we may change them separatedly here, we have to ensure that they are different.
+      # TODO the better way is to always give start/end a different object
+      #      we shall do this in the future.
+      if @les.end == @les.start => @les.end = JSON.parse(JSON.stringify(@les.start))
+      # undefined = the whole col/row is selected, thus:
+      #  - for lower bound, `undefined` = always larger
+      #  - for upper bound, it doesn't have to be checked.
+      # extending lower bound
+      if ns.col < @les.start.col and (ns.col < @les.end.col or !(@les.end.col?)) =>
+        (if @les.start.col > @les.end.col => @les.end else @les.start).col = ns.col
+      if ns.row < @les.start.row and (ns.row < @les.end.row or !(@les.end.row?)) =>
+        (if @les.start.row > @les.end.row => @les.end else @les.start).row = ns.row
+      # extending upper bound
+      if ns.col > @les.start.col and (ns.col > @les.end.col) =>
+        (if @les.start.col < @les.end.col => @les.end else @les.start).col = ns.col
+      if ns.row > @les.start.row and (ns.row > @les.end.row) =>
+        (if @les.start.row < @les.end.row => @les.end else @les.start).row = ns.row
+    else
+      @les.start = @les.end = @index(node){col, row}
     @render-selection!
 
   edit: ({node, quick}) ->
@@ -588,7 +610,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if !ec? => w = @root.getBoundingClientRect!width
     if !er? => h = @root.getBoundingClientRect!height
 
-    snode = @cell sel.start
+    # use current node or selection start node
+    # we original used `@cell(sel.start)` but it doesn't work
+    # for cursor moving with keyboard while shift is pressed.
+    snode = @les.node
     sbox = if !snode => null else snode.getBoundingClientRect!
 
     dom = if o.cut => @dom["range-cut"] else @dom.range
