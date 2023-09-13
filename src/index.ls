@@ -174,6 +174,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       | 38 => {y: -1, x:  0}
       | 39 => {y:  0, x:  1}
       | 40 => {y:  1, x:  0}
+      | 9 =>  {y:  0, x:  1}
       | otherwise => null
       if !opt => return
       if @editing.on and !@editing.quick => return

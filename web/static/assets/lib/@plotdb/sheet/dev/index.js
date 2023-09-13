@@ -386,6 +386,11 @@
               y: 1,
               x: 0
             };
+          case 9:
+            return {
+              y: 0,
+              x: 1
+            };
           default:
             return null;
           }

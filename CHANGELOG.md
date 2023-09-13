@@ -4,6 +4,7 @@
 
  - optionally disable pasting if `papaparse` is not available (not yet implemented TODO)
  - support slider with `slider` option to toggle it on
+ - let `tab` key stroke move cursor one cell forward in x direction.
 
 
 ## v0.5.9
