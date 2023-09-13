@@ -70,6 +70,7 @@ block script
     div.addEventListener \click, -> console.log \hi, it.target
     s = new sheet do
       root: '#root'
+      slider: true
       size:
         col: [48,64,92,128].map -> "#{it}px"
         row: [48,64,92,128].map -> "#{it}px"

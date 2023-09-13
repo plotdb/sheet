@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.5.10 (upcoming)
+
+ - optionally disable pasting if `papaparse` is not available (not yet implemented TODO)
+ - support slider with `slider` option to toggle it on
+
+
 ## v0.5.9
 
  - add sorting API

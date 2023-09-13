@@ -60,14 +60,15 @@ sheet = (opt={}) ->
   # TODO why we use `les` but not `sel`? figure it out and refactor this
   @les = {}
   @editing = {}
-  @dom = Object.fromEntries <[sheet inner caret range edit layout range-cut]>.map ->
+  @dom = Object.fromEntries <[sheet inner caret range edit layout range-cut slide-y slide-x]>.map ->
     n = document.createElement(\div)
       ..classList.add it
     [it, n]
   @dom.sheet.setAttribute \tabindex, -1
   @dom.textarea = document.createElement \textarea
   @root.appendChild(@dom.sheet)
-  <[inner caret range edit layout range-cut]>.map ~> @dom.sheet.appendChild @dom[it]
+  <[inner caret range edit layout range-cut slide-y slide-x]>.map ~> @dom.sheet.appendChild @dom[it]
+  if !@opt.slider => @dom["slide-x"].style.display = @dom["slide-y"].style.display = \none
   @dom.edit.appendChild @dom.textarea
   @_init!
   @
@@ -117,6 +118,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         @les.node = p
       @render-selection!
     dom.addEventListener \mousemove, (e) ~>
+      if @_slider.y.on or @_slider.x.on => return
       if @editing.on or !(e.buttons and (p = parent (e.target), '.cell', dom)) => return
       idx = @index(p){row, col}
       @les.end =
@@ -211,6 +213,27 @@ sheet.prototype = Object.create(Object.prototype) <<< do
           width: "#{Math.max(lbox.width, box.width + 1)}px"
           height: "#{Math.max(lbox.height, box.height + 1)}px"
 
+    _obj = @
+    @_slider =
+      hd: (evt) ->
+        @ <<< on: true, p: evt[@t.2]
+        document.addEventListener \mouseup, (e) ~> @hu e
+        document.addEventListener \mousemove, (e) ~> @hm e
+      hu: (evt) ->
+        @on = false
+        document.removeEventListener \mouseup, @hu
+        document.removeEventListener \mousemove, @hm
+      hm: (evt) ->
+        if !@on => return
+        d = @p - evt[@t.2]
+        v = Math.sign(d) * @dir * Math.round(Math.log(Math.abs(d) >? 1))
+        if v > 0 => _obj[@t.1] v
+        if v < 0 => _obj[@t.0] v
+        _obj.render-selection!
+    @_slider.y = {n: \slide-y, on: false, p: 0, t: <[_mu _md clientY]>, dir: -1} <<< @_slider{hd, hu, hm}
+    @_slider.x = {n: \slide-x, on: false, p: 0, t: <[_mr _ml clientX]>, dir: 1} <<< @_slider{hd, hu, hm}
+
+    <[x y]>.map (n) ~> @dom[@_slider[n].n].addEventListener \mousedown, (e) ~> @_slider[n].hd e
 
     document.addEventListener \wheel, ((e) ~>
       # we should block wheel event only if target element is under sheet.

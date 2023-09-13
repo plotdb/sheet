@@ -51,6 +51,7 @@ initialize:
  - `scrollLock`: default true. prevent from horizontal scrolling of document.body if true.
    - this affects how user interact with sheet with scrolling gestures. check src comment for more information.
  - `data`: initial data, as array of arrays
+ - `slider`: default false. show slider widgets if true.
 
 ## API
 

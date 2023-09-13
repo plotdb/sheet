@@ -129,7 +129,7 @@
     };
     this.les = {};
     this.editing = {};
-    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout', 'range-cut'].map(function(it){
+    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x'].map(function(it){
       var x$, n;
       x$ = n = document.createElement('div');
       x$.classList.add(it);
@@ -138,9 +138,12 @@
     this.dom.sheet.setAttribute('tabindex', -1);
     this.dom.textarea = document.createElement('textarea');
     this.root.appendChild(this.dom.sheet);
-    ['inner', 'caret', 'range', 'edit', 'layout', 'range-cut'].map(function(it){
+    ['inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x'].map(function(it){
       return this$.dom.sheet.appendChild(this$.dom[it]);
     });
+    if (!this.opt.slider) {
+      this.dom["slide-x"].style.display = this.dom["slide-y"].style.display = 'none';
+    }
     this.dom.edit.appendChild(this.dom.textarea);
     this._init();
     return this;
@@ -164,7 +167,7 @@
       return results$;
     },
     _init: function(){
-      var i$, to$, r, j$, to1$, c, dom, _dp, _dparse, this$ = this;
+      var i$, to$, r, j$, to1$, c, dom, _dp, _dparse, _obj, ref$, ref1$, ref2$, this$ = this;
       for (i$ = 0, to$ = this.dim.row; i$ < to$; ++i$) {
         r = i$;
         for (j$ = 0, to1$ = this.dim.col; j$ < to1$; ++j$) {
@@ -238,6 +241,9 @@
       });
       dom.addEventListener('mousemove', function(e){
         var p, ref$, idx;
+        if (this$._slider.y.on || this$._slider.x.on) {
+          return;
+        }
         if (this$.editing.on || !(e.buttons && (p = parent(e.target, '.cell', dom)))) {
           return;
         }
@@ -438,6 +444,59 @@
           box = this$.editing.node.getBoundingClientRect();
           return ref$ = this$.dom.textarea.style, ref$.width = Math.max(lbox.width, box.width + 1) + "px", ref$.height = Math.max(lbox.height, box.height + 1) + "px", ref$;
         }
+      });
+      _obj = this;
+      this._slider = {
+        hd: function(evt){
+          var this$ = this;
+          this.on = true;
+          this.p = evt[this.t[2]];
+          document.addEventListener('mouseup', function(e){
+            return this$.hu(e);
+          });
+          return document.addEventListener('mousemove', function(e){
+            return this$.hm(e);
+          });
+        },
+        hu: function(evt){
+          this.on = false;
+          document.removeEventListener('mouseup', this.hu);
+          return document.removeEventListener('mousemove', this.hm);
+        },
+        hm: function(evt){
+          var d, v, ref$;
+          if (!this.on) {
+            return;
+          }
+          d = this.p - evt[this.t[2]];
+          v = Math.sign(d) * this.dir * Math.round(Math.log((ref$ = Math.abs(d)) > 1 ? ref$ : 1));
+          if (v > 0) {
+            _obj[this.t[1]](v);
+          }
+          if (v < 0) {
+            _obj[this.t[0]](v);
+          }
+          return _obj.renderSelection();
+        }
+      };
+      this._slider.y = (ref1$ = {
+        n: 'slide-y',
+        on: false,
+        p: 0,
+        t: ['_mu', '_md', 'clientY'],
+        dir: -1
+      }, ref1$.hd = (ref$ = this._slider).hd, ref1$.hu = ref$.hu, ref1$.hm = ref$.hm, ref1$);
+      this._slider.x = (ref2$ = {
+        n: 'slide-x',
+        on: false,
+        p: 0,
+        t: ['_mr', '_ml', 'clientX'],
+        dir: 1
+      }, ref2$.hd = (ref1$ = this._slider).hd, ref2$.hu = ref1$.hu, ref2$.hm = ref1$.hm, ref2$);
+      ['x', 'y'].map(function(n){
+        return this$.dom[this$._slider[n].n].addEventListener('mousedown', function(e){
+          return this$._slider[n].hd(e);
+        });
       });
       return document.addEventListener('wheel', function(e){
         var inscope, spos, ref$, dx, dy, ox, oy;
