@@ -15,6 +15,7 @@ block head
     [ld=menu] {
       position: absolute;
     }
+    .disabled { background: #edeeef; color: #777}
 block body
   .ldcv(ld="ldcv",data-name="selection"): .base.w-640.rwd: .inner.p-4
     textarea.form-control.mb-4(ld="textarea",rows="7")
@@ -69,6 +70,10 @@ block script
     """
     div.addEventListener \click, -> console.log \hi, it.target
     s = new sheet do
+      cellcfg: ({row, col, type}) ->
+        if type == \readonly => return row == 3
+        if type == \class => return if row == 3 => \disabled else ''
+        return null
       root: '#root'
       slider: true
       size:
@@ -81,8 +86,8 @@ block script
         [13,14,15,16]
       ]
       idx: {row: true, col: true}
-      #fixed: {row: 2, col: 2}
-      #frozen: {row: 2, col: 2}
+      fixed: {row: 1, col: 1}
+      frozen: {row: 1, col: 1}
     s.on \change, -> console.log it
     c = s.cell {x: 1, y: 1}
     console.log c

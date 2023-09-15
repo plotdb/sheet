@@ -1,7 +1,11 @@
 (function(){
   var parseCsv, parent, idxToLabel, labelToIdx, sheet;
   parseCsv = function(txt){
-    return Papa.parse(txt).data;
+    if (typeof Papa != 'undefined' && Papa !== null) {
+      return Papa.parse(txt).data;
+    } else {
+      return [[txt]];
+    }
   };
   parent = function(n, s, e){
     var m;
@@ -782,7 +786,7 @@
       });
     },
     _content: function(arg$){
-      var x, y, n, v, ref$, key$, content, className, clsext;
+      var x, y, n, v, ref$, key$, content, className, fr, clsext, clsopt;
       x = arg$.x, y = arg$.y, n = arg$.n;
       if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
         return;
@@ -815,8 +819,26 @@
       if (!(content != null)) {
         content = "";
       }
-      clsext = x >= this.xif.col[0] && y >= this.xif.row[0] ? (this.cls.col[this.pos.col + x - this.xif.col[1]] || '') + ' ' + (this.cls.row[this.pos.row + y - this.xif.row[1]] || '') : '';
-      n.className = (className + ' ' + clsext).trim();
+      fr = /frozen/.exec(className);
+      clsext = x >= this.xif.col[0] && y >= this.xif.row[0] ? (this.cls.col[(fr
+        ? 0
+        : this.pos.col) + x - this.xif.col[1]] || '') + ' ' + (this.cls.row[(fr
+        ? 0
+        : this.pos.row) + y - this.xif.row[1]] || '') : '';
+      clsopt = !this.opt.cellcfg
+        ? ''
+        : this.opt.cellcfg({
+          type: 'class',
+          col: (fr
+            ? 0
+            : this.pos.col) + x - this.xif.col[1],
+          row: (fr
+            ? 0
+            : this.pos.row) + y - this.xif.row[1]
+        }) || '';
+      n.className = [className, clsext, clsopt].filter(function(it){
+        return it.trim();
+      }).join(' ').trim();
       if (content !== null) {
         if (typeof content === 'object') {
           if (content.type === 'dom') {
@@ -1059,6 +1081,13 @@
         return;
       }
       idx = this.index(node);
+      if (this.opt.cellcfg && this.opt.cellcfg({
+        row: idx.row,
+        col: idx.col,
+        type: 'readonly'
+      })) {
+        return;
+      }
       if (!idx || idx.col < 0 || idx.row < 0) {
         return;
       }

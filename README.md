@@ -52,6 +52,13 @@ initialize:
    - this affects how user interact with sheet with scrolling gestures. check src comment for more information.
  - `data`: initial data, as array of arrays
  - `slider`: default false. show slider widgets if true.
+ - `cellcfg(opt)`: custom cell definition function. return value based on the given `opt`, which contains:
+   - `row`: row of the cell to query
+   - `col`: col of the cell to query
+   - `type`: a string indicating what should we return. it can be:
+     - `class`: should return the CSS classes for the given cell
+     - `readonly`: return true if the given cell should be readonly.
+
 
 ## API
 

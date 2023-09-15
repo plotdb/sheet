@@ -7,6 +7,8 @@
  - let `tab` key stroke move cursor one cell forward in x direction.
  - support shift + arrow key to extend selection.
  - fix bug: IME composition isn't working at the first keystroke to enter editing mode.
+ - support `cellcfg()` for customizing cells with `readonly` and `class` type.
+ - check `Papa` for existency before parsing CSV with papaparse.
 
 
 ## v0.5.9

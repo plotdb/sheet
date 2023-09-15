@@ -1,4 +1,4 @@
-parse-csv = (txt) -> Papa.parse(txt).data
+parse-csv = (txt) -> if Papa? => Papa.parse(txt).data else [[txt]]
 
 parent = (n, s, e) ->
   m = n
@@ -398,13 +398,20 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     else [@_data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1], "cell"]
     if !(content?) => content = ""
 
+    fr = /frozen/.exec(className)
     clsext = if x >= @xif.col.0 and y >= @xif.row.0 =>
       (
-        (@cls.col[@pos.col + x - @xif.col.1] or '') + ' ' +
-        (@cls.row[@pos.row + y - @xif.row.1] or '')
+        (@cls.col[(if fr => 0 else @pos.col) + x - @xif.col.1] or '') + ' ' +
+        (@cls.row[(if fr => 0 else @pos.row) + y - @xif.row.1] or '')
       )
     else ''
-    n.className = (className + ' ' + clsext).trim!
+    clsopt = if !@opt.cellcfg => ''
+    else @opt.cellcfg({
+      type: \class
+      col: (if fr => 0 else @pos.col) + x - @xif.col.1
+      row: (if fr => 0 else @pos.row) + y - @xif.row.1
+    }) or ''
+    n.className = [ className, clsext, clsopt ].filter(->it.trim!).join(' ').trim!
 
     if content != null =>
       # TODO support advanced content
@@ -523,6 +530,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   edit: ({node, quick}) ->
     if !@_editing => return
     idx = @index node
+    if @opt.cellcfg and @opt.cellcfg {row: idx.row, col: idx.col, type: \readonly} => return
     if !idx or idx.col < 0 or idx.row < 0 => return
 
     @editing <<< {node, quick, on: true}
