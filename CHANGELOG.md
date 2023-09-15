@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.3
+
+ - bug fix: sliders is covered by grid due to z-index issue
+
+
 ## v0.6.2
 
  - bug fix: change isn't fired when editing
