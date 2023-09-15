@@ -370,6 +370,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   set: ({row, col, data, range, src}) ->
     if !range =>
       if src and @_ccfg({row, col, type: \readonly}) => return
+      touched = true
       @_data[][row][col] = data
       @_content {y: row - @pos.row + @xif.row.1, x: col - @pos.col + @xif.col.1}
     else

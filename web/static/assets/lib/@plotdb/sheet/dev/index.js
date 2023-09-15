@@ -763,7 +763,7 @@
       });
     },
     set: function(arg$){
-      var row, col, data, range, src, ref$, touched, i$, to$, r, j$, to1$, c, key$;
+      var row, col, data, range, src, touched, ref$, i$, to$, r, j$, to1$, c, key$;
       row = arg$.row, col = arg$.col, data = arg$.data, range = arg$.range, src = arg$.src;
       if (!range) {
         if (src && this._ccfg({
@@ -773,6 +773,7 @@
         })) {
           return;
         }
+        touched = true;
         ((ref$ = this._data)[row] || (ref$[row] = []))[col] = data;
         this._content({
           y: row - this.pos.row + this.xif.row[1],

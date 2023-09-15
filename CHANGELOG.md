@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.2
+
+ - bug fix: change isn't fired when editing
+
+
 ## v0.6.1
 
  - simplify `opt.cellcfg` to `_ccfg`
