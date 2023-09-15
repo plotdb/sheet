@@ -39,6 +39,7 @@ sheet = (opt={}) ->
   @opt = opt
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @evt-handler = {}
+  @_ccfg = opt.cellcfg
   @_data = opt.data or []
   @_size = ({row: [], col: []} <<< opt.size){row, col}
   @cls = ({row: [], col: []} <<< opt.class){row, col}
@@ -145,20 +146,31 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       else
         raw = e.clipboardData.getData('text')
         data = parse-csv raw
-      @set {row: @les.start.row, col: @les.start.col, data: data, range: true}
+      @set {row: @les.start.row, col: @les.start.col, data: data, range: true, src: \user}
       if @sel.cut =>
         # NOTE we may need a general `hide-selection` api in the future.
         # at that time, we probably will want integrate this into it.
         s = @_to-text {sel: @sel.cut}
         if s == raw =>
           {sc,ec,sr,er} = @_bound sel: @sel.cut
-          for row from sr to er => for col from sc to ec => @set {row, col, data: ""}
+          for row from sr to er => for col from sc to ec => @set {row, col, data: "", src: \user}
           navigator.clipboard.writeText ''
         @sel.cut = null
         @dom["range-cut"].classList.toggle \show, false
 
+    @dom.textarea.addEventListener \keypress, (e) ~>
+      # ctrl+`-`: 189 in keydown, 31 in keypress
+      # ctrl+`+`: 187 in keydown, 61 in keypress
+      # 67, 88: copy and cut
+      if e.keyCode in [31 61 67 88] and (e.metaKey or e.ctrlKey) => return
+      if @les.node and !@editing.on =>
+        @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
+        # it's an event for toggling editing. don't send a newline into textarea
+        if e.keyCode == 13 => e.preventDefault!
+
     @dom.textarea.addEventListener \keydown, (e) ~>
       code = e.keyCode
+      if e.keyCode == 86 and (e.metaKey or e.ctrlKey) => return # handled by paste event
       if e.keyCode == 67 and (e.metaKey or e.ctrlKey) => return @copy!
       if e.keyCode == 88 and (e.metaKey or e.ctrlKey) => return @copy cut: true
       if !@event-in-scope(e) => return
@@ -166,7 +178,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         if !@les.node => return
         {sc,ec,sr,er} = @_bound!
         data = for row from sr to er => for col from sc to ec => ''
-        @set {row: sr, col: sc, data, range: true}
+        @set {row: sr, col: sc, data, range: true, src: \user}
       if code == 189 and (e.metaKey or e.ctrlKey) => @slice!
       if code == 187 and (e.metaKey or e.ctrlKey) => @insert!
 
@@ -177,27 +189,19 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       | 40 => {y:  1, x:  0}
       | 9 =>  {y:  0, x:  1}
       | otherwise => null
-      if !opt => return
-      if @editing.on and !@editing.quick => return
-      @move(opt <<< {select: e.shiftKey})
-      e.stopPropagation!
-      e.preventDefault!
-      @dom.textarea.focus!  # we need focus to accept key event.
+      if opt =>
+        if @editing.on and !@editing.quick => return
+        @move(opt <<< {select: e.shiftKey})
+        e.stopPropagation!
+        e.preventDefault!
+        @dom.textarea.focus!  # we need focus to accept key event.
 
-    @dom.textarea.addEventListener \keypress, (e) ~>
-      # ctrl+`-`: 189 in keydown, 31 in keypress
-      # ctrl+`+`: 187 in keydown, 61 in keypress
-      if e.keyCode in [31 61] and (e.metaKey or e.ctrlKey) => return
-      if @les.node and !@editing.on =>
-        @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
-        # it's an event for toggling editing. don't send a newline into textarea
-        if e.keyCode == 13 => e.preventDefault!
-
-    @dom.textarea.addEventListener \keydown, (e) ~>
+      #@dom.textarea.addEventListener \keydown, (e) ~>
       if @les.node and !@editing.on =>
         # dont enter editing mode for following key code:
         # 37 ~ 40: arrow / 9: tab / 16 18 91 27: shift, option, command, esc
         if e.keyCode in [37 38 39 40 9 16 18 91 27] => return
+        if e.keyCode in [31 61 67 88] and (e.metaKey or e.ctrlKey) => return
         @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
         # it's an event for toggling editing. don't send a newline into textarea
         if e.keyCode == 13 => e.preventDefault!
@@ -363,15 +367,22 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @dom.inner.insertBefore div, @dom.inner.childNodes[y * @dim.col + x]
     @_content {x, y, n: div}
 
-  set: ({row, col, data, range}) ->
+  set: ({row, col, data, range, src}) ->
     if !range =>
+      if src and @_ccfg({row, col, type: \readonly}) => return
       @_data[][row][col] = data
       @_content {y: row - @pos.row + @xif.row.1, x: col - @pos.col + @xif.col.1}
     else
+      touched = false
+      data = JSON.parse(JSON.stringify data)
       for r from 0 til data.length => for c from 0 til data[r].length =>
+        if src and @_ccfg({row: row + r, col: col + c, type: \readonly}) =>
+          data[r][c] = @_data[][r + row][c + col]
+          continue
+        touched = true
         @_data[][r + row][c + col] = data[r][c]
         @_content {y: r + row - @pos.row + @xif.row.1, x: c + col - @pos.col + @xif.col.1}
-    @fire \change, {row, col, data, range: !!range}
+    if touched => @fire \change, {row, col, data, range: !!range}
 
   # re-render cell with the content they suppose to have
   _content: ({x, y, n}) ->
@@ -405,8 +416,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         (@cls.row[(if fr => 0 else @pos.row) + y - @xif.row.1] or '')
       )
     else ''
-    clsopt = if !@opt.cellcfg => ''
-    else @opt.cellcfg({
+    clsopt = if !@_ccfg => ''
+    else @_ccfg({
       type: \class
       col: (if fr => 0 else @pos.col) + x - @xif.col.1
       row: (if fr => 0 else @pos.row) + y - @xif.row.1
@@ -530,7 +541,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   edit: ({node, quick}) ->
     if !@_editing => return
     idx = @index node
-    if @opt.cellcfg and @opt.cellcfg {row: idx.row, col: idx.col, type: \readonly} => return
+    if @_ccfg and @_ccfg {row: idx.row, col: idx.col, type: \readonly} => return
     if !idx or idx.col < 0 or idx.row < 0 => return
 
     @editing <<< {node, quick, on: true}

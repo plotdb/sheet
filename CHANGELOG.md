@@ -1,5 +1,12 @@
 # Change Logs
 
+## v0.6.1
+
+ - simplify `opt.cellcfg` to `_ccfg`
+ - prevent readonly cells to be edited by paste, cut or delete
+ - add `papaparse` in demo page
+
+
 ## v0.6.0
 
  - optionally disable pasting if `papaparse` is not available (not yet implemented TODO)

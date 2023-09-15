@@ -67,6 +67,7 @@
       ? document.querySelector(opt.root)
       : opt.root;
     this.evtHandler = {};
+    this._ccfg = opt.cellcfg;
     this._data = opt.data || [];
     this._size = {
       row: (ref$ = import$({
@@ -299,7 +300,8 @@
           row: this$.les.start.row,
           col: this$.les.start.col,
           data: data,
-          range: true
+          range: true,
+          src: 'user'
         });
         if (this$.sel.cut) {
           s = this$._toText({
@@ -316,7 +318,8 @@
                 this$.set({
                   row: row,
                   col: col,
-                  data: ""
+                  data: "",
+                  src: 'user'
                 });
               }
             }
@@ -326,9 +329,27 @@
           return this$.dom["range-cut"].classList.toggle('show', false);
         }
       });
+      this.dom.textarea.addEventListener('keypress', function(e){
+        var ref$;
+        if (((ref$ = e.keyCode) === 31 || ref$ === 61 || ref$ === 67 || ref$ === 88) && (e.metaKey || e.ctrlKey)) {
+          return;
+        }
+        if (this$.les.node && !this$.editing.on) {
+          this$.edit({
+            node: this$.les.node,
+            quick: e.keyCode === 13 ? false : true
+          });
+          if (e.keyCode === 13) {
+            return e.preventDefault();
+          }
+        }
+      });
       this.dom.textarea.addEventListener('keydown', function(e){
-        var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, opt;
+        var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, opt, lbox, box;
         code = e.keyCode;
+        if (e.keyCode === 86 && (e.metaKey || e.ctrlKey)) {
+          return;
+        }
         if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
           return this$.copy();
         }
@@ -360,7 +381,8 @@
             row: sr,
             col: sc,
             data: data,
-            range: true
+            range: true,
+            src: 'user'
           });
         }
         if (code === 189 && (e.metaKey || e.ctrlKey)) {
@@ -400,36 +422,20 @@
             return null;
           }
         }());
-        if (!opt) {
-          return;
-        }
-        if (this$.editing.on && !this$.editing.quick) {
-          return;
-        }
-        this$.move((opt.select = e.shiftKey, opt));
-        e.stopPropagation();
-        e.preventDefault();
-        return this$.dom.textarea.focus();
-      });
-      this.dom.textarea.addEventListener('keypress', function(e){
-        var ref$;
-        if (((ref$ = e.keyCode) === 31 || ref$ === 61) && (e.metaKey || e.ctrlKey)) {
-          return;
-        }
-        if (this$.les.node && !this$.editing.on) {
-          this$.edit({
-            node: this$.les.node,
-            quick: e.keyCode === 13 ? false : true
-          });
-          if (e.keyCode === 13) {
-            return e.preventDefault();
+        if (opt) {
+          if (this$.editing.on && !this$.editing.quick) {
+            return;
           }
+          this$.move((opt.select = e.shiftKey, opt));
+          e.stopPropagation();
+          e.preventDefault();
+          this$.dom.textarea.focus();
         }
-      });
-      this.dom.textarea.addEventListener('keydown', function(e){
-        var ref$, lbox, box;
         if (this$.les.node && !this$.editing.on) {
           if ((ref$ = e.keyCode) === 37 || ref$ === 38 || ref$ === 39 || ref$ === 40 || ref$ === 9 || ref$ === 16 || ref$ === 18 || ref$ === 91 || ref$ === 27) {
+            return;
+          }
+          if (((ref$ = e.keyCode) === 31 || ref$ === 61 || ref$ === 67 || ref$ === 88) && (e.metaKey || e.ctrlKey)) {
             return;
           }
           this$.edit({
@@ -757,19 +763,37 @@
       });
     },
     set: function(arg$){
-      var row, col, data, range, ref$, i$, to$, r, j$, to1$, c, key$;
-      row = arg$.row, col = arg$.col, data = arg$.data, range = arg$.range;
+      var row, col, data, range, src, ref$, touched, i$, to$, r, j$, to1$, c, key$;
+      row = arg$.row, col = arg$.col, data = arg$.data, range = arg$.range, src = arg$.src;
       if (!range) {
+        if (src && this._ccfg({
+          row: row,
+          col: col,
+          type: 'readonly'
+        })) {
+          return;
+        }
         ((ref$ = this._data)[row] || (ref$[row] = []))[col] = data;
         this._content({
           y: row - this.pos.row + this.xif.row[1],
           x: col - this.pos.col + this.xif.col[1]
         });
       } else {
+        touched = false;
+        data = JSON.parse(JSON.stringify(data));
         for (i$ = 0, to$ = data.length; i$ < to$; ++i$) {
           r = i$;
           for (j$ = 0, to1$ = data[r].length; j$ < to1$; ++j$) {
             c = j$;
+            if (src && this._ccfg({
+              row: row + r,
+              col: col + c,
+              type: 'readonly'
+            })) {
+              data[r][c] = ((ref$ = this._data)[key$ = r + row] || (ref$[key$] = []))[c + col];
+              continue;
+            }
+            touched = true;
             ((ref$ = this._data)[key$ = r + row] || (ref$[key$] = []))[c + col] = data[r][c];
             this._content({
               y: r + row - this.pos.row + this.xif.row[1],
@@ -778,12 +802,14 @@
           }
         }
       }
-      return this.fire('change', {
-        row: row,
-        col: col,
-        data: data,
-        range: !!range
-      });
+      if (touched) {
+        return this.fire('change', {
+          row: row,
+          col: col,
+          data: data,
+          range: !!range
+        });
+      }
     },
     _content: function(arg$){
       var x, y, n, v, ref$, key$, content, className, fr, clsext, clsopt;
@@ -825,9 +851,9 @@
         : this.pos.col) + x - this.xif.col[1]] || '') + ' ' + (this.cls.row[(fr
         ? 0
         : this.pos.row) + y - this.xif.row[1]] || '') : '';
-      clsopt = !this.opt.cellcfg
+      clsopt = !this._ccfg
         ? ''
-        : this.opt.cellcfg({
+        : this._ccfg({
           type: 'class',
           col: (fr
             ? 0
@@ -1081,7 +1107,7 @@
         return;
       }
       idx = this.index(node);
-      if (this.opt.cellcfg && this.opt.cellcfg({
+      if (this._ccfg && this._ccfg({
         row: idx.row,
         col: idx.col,
         type: 'readonly'
