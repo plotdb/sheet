@@ -3,8 +3,8 @@
 simple sheet UI in vanilla JS. Features:
 
  - fast, infinite scrolling.
- - small - < 20KB when minimized
- - vanilla - only optional depends on Papaparse
+ - small - < 25KB when minimized
+ - vanilla - only optional depends on Papaparse for CSV parsing
  - CSS-based layout - better user experience
  - size of column/row auto fit content yet still customizable
  - support frozen row/column for data, fixed row/column for custom content
