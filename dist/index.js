@@ -766,7 +766,7 @@
       var row, col, data, range, src, touched, ref$, i$, to$, r, j$, to1$, c, key$;
       row = arg$.row, col = arg$.col, data = arg$.data, range = arg$.range, src = arg$.src;
       if (!range) {
-        if (src && this._ccfg({
+        if (src && this._ccfg && this._ccfg({
           row: row,
           col: col,
           type: 'readonly'
@@ -786,7 +786,7 @@
           r = i$;
           for (j$ = 0, to1$ = data[r].length; j$ < to1$; ++j$) {
             c = j$;
-            if (src && this._ccfg({
+            if (src && this._ccfg && this._ccfg({
               row: row + r,
               col: col + c,
               type: 'readonly'

@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.4
+
+ - bug fix: check `ccfg` existence before using it
+
+
 ## v0.6.3
 
  - bug fix: sliders is covered by grid due to z-index issue

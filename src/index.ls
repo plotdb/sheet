@@ -369,7 +369,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
   set: ({row, col, data, range, src}) ->
     if !range =>
-      if src and @_ccfg({row, col, type: \readonly}) => return
+      if src and @_ccfg and @_ccfg({row, col, type: \readonly}) => return
       touched = true
       @_data[][row][col] = data
       @_content {y: row - @pos.row + @xif.row.1, x: col - @pos.col + @xif.col.1}
@@ -377,7 +377,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       touched = false
       data = JSON.parse(JSON.stringify data)
       for r from 0 til data.length => for c from 0 til data[r].length =>
-        if src and @_ccfg({row: row + r, col: col + c, type: \readonly}) =>
+        if src and @_ccfg and @_ccfg({row: row + r, col: col + c, type: \readonly}) =>
           data[r][c] = @_data[][r + row][c + col]
           continue
         touched = true
