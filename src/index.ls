@@ -230,6 +230,12 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
     _obj = @
     @_slider =
+      hc: (evt) ->
+        box = evt.target.getBoundingClientRect!
+        c = box[@t.3] + (box[@t.4] / 2)
+        d = @dir * Math.sign(evt[@t.2] - c)
+        _obj[if d < 0 => @t.1 else @t.0](1)
+        _obj.render-selection!
       hd: (evt) ->
         @ <<< on: true, p: evt[@t.2]
         document.addEventListener \mouseup, (e) ~> @hu e
@@ -241,14 +247,19 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       hm: (evt) ->
         if !@on => return
         d = @p - evt[@t.2]
-        v = Math.sign(d) * @dir * Math.round(Math.log(Math.abs(d) >? 1))
+        u = Math.abs(d)
+        u = if u > 500 => 10 else if u > 300 => 5 else if u > 150 => 2 else if u > 100 => 1 else 0.3
+        if u < 1 => u = if Math.random! < u => 1 else 0
+        v = Math.sign(d) * @dir * u
         if v > 0 => _obj[@t.1] v
         if v < 0 => _obj[@t.0] v
         _obj.render-selection!
-    @_slider.y = {n: \slide-y, on: false, p: 0, t: <[_mu _md clientY]>, dir: -1} <<< @_slider{hd, hu, hm}
-    @_slider.x = {n: \slide-x, on: false, p: 0, t: <[_mr _ml clientX]>, dir: 1} <<< @_slider{hd, hu, hm}
+    @_slider.y = {n: \slide-y, on: false, p: 0, t: <[_mu _md clientY y height]>, dir: -1} <<< @_slider{hd, hu, hm, hc}
+    @_slider.x = {n: \slide-x, on: false, p: 0, t: <[_mr _ml clientX x width]>, dir: 1} <<< @_slider{hd, hu, hm, hc}
 
-    <[x y]>.map (n) ~> @dom[@_slider[n].n].addEventListener \mousedown, (e) ~> @_slider[n].hd e
+    <[x y]>.map (n) ~>
+      @dom[@_slider[n].n].addEventListener \mousedown, (e) ~> @_slider[n].hd e
+      @dom[@_slider[n].n].addEventListener \click, (e) ~> @_slider[n].hc e
 
     document.addEventListener \wheel, ((e) ~>
       # we should block wheel event only if target element is under sheet.
@@ -281,6 +292,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       else if dx > 0 => @_mr dx
       else if dx < 0 => @_ml dx
       @render-selection!
+      # # if we want to overscroll
+      # if @pos.row == 0 and e.deltaY < 0 => return
+      # if @pos.col == 0 and e.deltaX < 0 => return
       # despite the above hack, we still preventDefault here for default behavior.
       # that is, once users are scrolling in sheet, the event should not trigger default behavior.
       e.preventDefault!

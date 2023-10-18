@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.6.5
+
+ - tweak scroll controller speed
+ - add sample code for overscrolling
+
+
 ## v0.6.4
 
  - bug fix: check `ccfg` existence before using it

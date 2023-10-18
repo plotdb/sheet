@@ -479,6 +479,16 @@
       });
       _obj = this;
       this._slider = {
+        hc: function(evt){
+          var box, c, d;
+          box = evt.target.getBoundingClientRect();
+          c = box[this.t[3]] + box[this.t[4]] / 2;
+          d = this.dir * Math.sign(evt[this.t[2]] - c);
+          _obj[d < 0
+            ? this.t[1]
+            : this.t[0]](1);
+          return _obj.renderSelection();
+        },
         hd: function(evt){
           var this$ = this;
           this.on = true;
@@ -496,12 +506,23 @@
           return document.removeEventListener('mousemove', this.hm);
         },
         hm: function(evt){
-          var d, v, ref$;
+          var d, u, v;
           if (!this.on) {
             return;
           }
           d = this.p - evt[this.t[2]];
-          v = Math.sign(d) * this.dir * Math.round(Math.log((ref$ = Math.abs(d)) > 1 ? ref$ : 1));
+          u = Math.abs(d);
+          u = u > 500
+            ? 10
+            : u > 300
+              ? 5
+              : u > 150
+                ? 2
+                : u > 100 ? 1 : 0.3;
+          if (u < 1) {
+            u = Math.random() < u ? 1 : 0;
+          }
+          v = Math.sign(d) * this.dir * u;
           if (v > 0) {
             _obj[this.t[1]](v);
           }
@@ -515,19 +536,22 @@
         n: 'slide-y',
         on: false,
         p: 0,
-        t: ['_mu', '_md', 'clientY'],
+        t: ['_mu', '_md', 'clientY', 'y', 'height'],
         dir: -1
-      }, ref1$.hd = (ref$ = this._slider).hd, ref1$.hu = ref$.hu, ref1$.hm = ref$.hm, ref1$);
+      }, ref1$.hd = (ref$ = this._slider).hd, ref1$.hu = ref$.hu, ref1$.hm = ref$.hm, ref1$.hc = ref$.hc, ref1$);
       this._slider.x = (ref2$ = {
         n: 'slide-x',
         on: false,
         p: 0,
-        t: ['_mr', '_ml', 'clientX'],
+        t: ['_mr', '_ml', 'clientX', 'x', 'width'],
         dir: 1
-      }, ref2$.hd = (ref1$ = this._slider).hd, ref2$.hu = ref1$.hu, ref2$.hm = ref1$.hm, ref2$);
+      }, ref2$.hd = (ref1$ = this._slider).hd, ref2$.hu = ref1$.hu, ref2$.hm = ref1$.hm, ref2$.hc = ref1$.hc, ref2$);
       ['x', 'y'].map(function(n){
-        return this$.dom[this$._slider[n].n].addEventListener('mousedown', function(e){
+        this$.dom[this$._slider[n].n].addEventListener('mousedown', function(e){
           return this$._slider[n].hd(e);
+        });
+        return this$.dom[this$._slider[n].n].addEventListener('click', function(e){
+          return this$._slider[n].hc(e);
         });
       });
       return document.addEventListener('wheel', function(e){
