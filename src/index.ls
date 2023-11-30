@@ -171,8 +171,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @dom.textarea.addEventListener \keydown, (e) ~>
       code = e.keyCode
       if e.keyCode == 86 and (e.metaKey or e.ctrlKey) => return # handled by paste event
-      if e.keyCode == 67 and (e.metaKey or e.ctrlKey) => return @copy!
-      if e.keyCode == 88 and (e.metaKey or e.ctrlKey) => return @copy cut: true
+      # if we are currently editing, let OS take care of copy/cut for us.
+      if !@editing.on =>
+        if e.keyCode == 67 and (e.metaKey or e.ctrlKey) => return @copy!
+        if e.keyCode == 88 and (e.metaKey or e.ctrlKey) => return @copy cut: true
       if !@event-in-scope(e) => return
       if code == 8 =>
         if !@les.node => return
@@ -686,7 +688,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     # - to reproduce: remove setTimeout, click on random cell, try pressing right arrow key.
     #   sometimes selection moves, sometimes not.
     # - perhaps this is because we do render-selection in mousedown,
-    #   and click event send focus to clicked element. if this is the case, 
+    #   and click event send focus to clicked element. if this is the case,
     #   we may need to prevent refocusing once textarea.focus is on going. TODO
     setTimeout (~> @dom.textarea.focus!), 0
 

@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.7
+
+ - skip cell copy/cut if we are editing in textarea to preserve content editing experience.
+
+
 ## v0.6.6
 
  - add `enableScrolling` option for enabling scrolling which by default is true

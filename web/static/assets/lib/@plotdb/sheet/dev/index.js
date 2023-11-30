@@ -350,13 +350,15 @@
         if (e.keyCode === 86 && (e.metaKey || e.ctrlKey)) {
           return;
         }
-        if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
-          return this$.copy();
-        }
-        if (e.keyCode === 88 && (e.metaKey || e.ctrlKey)) {
-          return this$.copy({
-            cut: true
-          });
+        if (!this$.editing.on) {
+          if (e.keyCode === 67 && (e.metaKey || e.ctrlKey)) {
+            return this$.copy();
+          }
+          if (e.keyCode === 88 && (e.metaKey || e.ctrlKey)) {
+            return this$.copy({
+              cut: true
+            });
+          }
         }
         if (!this$.eventInScope(e)) {
           return;
