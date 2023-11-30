@@ -267,13 +267,14 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       #  - container with overflow: hidden, or container which has scrolled to the leftmost position.
       #  - in limited region while the gesture has been activated once in other unlimited regions
       #    - this is true even if user reload the page after acitvated the gesture. wtf!
-      # there can be prevented by calling preventDefault over every wheel event, but it may cause issues in:
+      # this can be prevented by calling preventDefault over every wheel event, but it may cause issues in:
       #  - other scrollable
       #  - outside sheet area
       # for now we only find a way to make it okay:
-      #  - always preventDefault for horizontal scrolling  if document.body is the target.
+      #  - always preventDefault for horizontal scrolling if document.body is the target.
       # this may affect the host document so we make it configurable by user, and by default enabled.
       inscope = @event-in-scope(e)
+      if @opt.enable-scrolling? and !@opt.enable-scrolling => return
       if (!(@opt.scroll-lock?) or @opt.scroll-lock) => # if scroll-lock is enabled
         if Math.abs(e.deltaX) > Math.abs(e.deltaY) => # and it's horizontal scrolling
           if inscope or e.target == document.body => # and is in interested region

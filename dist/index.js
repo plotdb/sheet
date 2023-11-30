@@ -557,6 +557,9 @@
       return document.addEventListener('wheel', function(e){
         var inscope, spos, ref$, dx, dy, ox, oy;
         inscope = this$.eventInScope(e);
+        if (this$.opt.enableScrolling != null && !this$.opt.enableScrolling) {
+          return;
+        }
         if (!(this$.opt.scrollLock != null) || this$.opt.scrollLock) {
           if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
             if (inscope || e.target === document.body) {

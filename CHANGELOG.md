@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.6.6
+
+ - add `enableScrolling` option for enabling scrolling which by default is true
+ - upgrade dependencies
+
+
 ## v0.6.5
 
  - tweak scroll controller speed

@@ -50,6 +50,11 @@ initialize:
      - apply on range
  - `scrollLock`: default true. prevent from horizontal scrolling of document.body if true.
    - this affects how user interact with sheet with scrolling gestures. check src comment for more information.
+   - see also `enableScrolling`
+ - `enableScrolling`: default true. enable scrolling if true.
+   - the difference between `scrollLock` and `enableScrolling` is that:
+     - `scrollLock` is for horizontal scrolling that may conflict with browser gesture.
+     - `enableScrolling` is for mouse / trackpad scrolling behavior
  - `data`: initial data, as array of arrays
  - `slider`: default false. show slider widgets if true.
  - `cellcfg(opt)`: custom cell definition function. return value based on the given `opt`, which contains:
