@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.8
+
+ - call `focus` with `preventScroll: true` in render-selection to prevent scrolling from non-interaction update.
+
+
 ## v0.6.7
 
  - skip cell copy/cut if we are editing in textarea to preserve content editing experience.

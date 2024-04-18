@@ -690,7 +690,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     # - perhaps this is because we do render-selection in mousedown,
     #   and click event send focus to clicked element. if this is the case,
     #   we may need to prevent refocusing once textarea.focus is on going. TODO
-    setTimeout (~> @dom.textarea.focus!), 0
+    # - preventScroll: true is required to prevent scrolling
+    #   when we simply call data to update data without user interaction.
+    setTimeout (~> @dom.textarea.focus preventScroll: true), 0
 
   data: ->
     if !(it?) => return @_data

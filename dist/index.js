@@ -1370,7 +1370,9 @@
         this.dom.caret.classList.toggle('show', !!sbox);
       }
       return setTimeout(function(){
-        return this$.dom.textarea.focus();
+        return this$.dom.textarea.focus({
+          preventScroll: true
+        });
       }, 0);
     },
     data: function(it){
