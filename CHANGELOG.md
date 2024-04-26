@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.9
+
+ - fix bug: keydown cause exception if selection is out of viewport after scrolled.
+
+
 ## v0.6.8
 
  - call `focus` with `preventScroll: true` in render-selection to prevent scrolling from non-interaction update.

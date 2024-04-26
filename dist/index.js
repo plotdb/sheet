@@ -1137,14 +1137,14 @@
         return;
       }
       idx = this.index(node);
+      if (!idx || idx.col < 0 || idx.row < 0) {
+        return;
+      }
       if (this._ccfg && this._ccfg({
         row: idx.row,
         col: idx.col,
         type: 'readonly'
       })) {
-        return;
-      }
-      if (!idx || idx.col < 0 || idx.row < 0) {
         return;
       }
       ref$ = this.editing;

@@ -559,8 +559,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   edit: ({node, quick}) ->
     if !@_editing => return
     idx = @index node
-    if @_ccfg and @_ccfg {row: idx.row, col: idx.col, type: \readonly} => return
     if !idx or idx.col < 0 or idx.row < 0 => return
+    if @_ccfg and @_ccfg {row: idx.row, col: idx.col, type: \readonly} => return
 
     @editing <<< {node, quick, on: true}
     @dom.layout.textContent = node.textContent
