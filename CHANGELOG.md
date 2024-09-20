@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.10
+
+ - add `ctrl` (keycode 17) in the skip list when reacting to keyboard events.
+
+
 ## v0.6.9
 
  - fix bug: keydown cause exception if selection is out of viewport after scrolled.

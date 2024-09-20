@@ -201,8 +201,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       #@dom.textarea.addEventListener \keydown, (e) ~>
       if @les.node and !@editing.on =>
         # dont enter editing mode for following key code:
-        # 37 ~ 40: arrow / 9: tab / 16 18 91 27: shift, option, command, esc
-        if e.keyCode in [37 38 39 40 9 16 18 91 27] => return
+        # 37 ~ 40: arrow / 9: tab / 16 18 91 27 17: shift, option, command, esc, ctrl
+        if e.keyCode in [37 38 39 40 9 16 18 91 27 17] => return
         if e.keyCode in [31 61 67 88] and (e.metaKey or e.ctrlKey) => return
         @edit node: @les.node, quick: (if e.keyCode == 13 => false else true)
         # it's an event for toggling editing. don't send a newline into textarea

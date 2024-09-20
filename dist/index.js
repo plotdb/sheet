@@ -434,7 +434,7 @@
           this$.dom.textarea.focus();
         }
         if (this$.les.node && !this$.editing.on) {
-          if ((ref$ = e.keyCode) === 37 || ref$ === 38 || ref$ === 39 || ref$ === 40 || ref$ === 9 || ref$ === 16 || ref$ === 18 || ref$ === 91 || ref$ === 27) {
+          if ((ref$ = e.keyCode) === 37 || ref$ === 38 || ref$ === 39 || ref$ === 40 || ref$ === 9 || ref$ === 16 || ref$ === 18 || ref$ === 91 || ref$ === 27 || ref$ === 17) {
             return;
           }
           if (((ref$ = e.keyCode) === 31 || ref$ === 61 || ref$ === 67 || ref$ === 88) && (e.metaKey || e.ctrlKey)) {
