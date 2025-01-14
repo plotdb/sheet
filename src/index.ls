@@ -99,6 +99,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     dom.addEventListener \mousedown, (e) ~>
       # selection should skip right click
       if e.button > 1 => return
+      # click ensure focus so textarea == activeElement trick will work in render-selection
+      @dom.textarea.focus!
       @edited!
       if !(p = parent (e.target), '.cell', dom) => return
       idx = @index(p){row, col}
@@ -692,7 +694,11 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     #   we may need to prevent refocusing once textarea.focus is on going. TODO
     # - preventScroll: true is required to prevent scrolling
     #   when we simply call data to update data without user interaction.
-    setTimeout (~> @dom.textarea.focus preventScroll: true), 0
+    # additionally, we compare if dom.textarea == activeElement
+    # because if render-selection force focus textarea each time,
+    # there will be race condition and inconsistent behavior when there are multiple sheets.
+    if @dom.textarea == document.activeElement =>
+      setTimeout (~> @dom.textarea.focus preventScroll: true), 0
 
   data: ->
     if !(it?) => return @_data

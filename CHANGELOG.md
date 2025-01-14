@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.6.11 (upcoming)
+
+ - tweak textarea focus rule to prevent race condition in focus between multiple sheets
+
+
 ## v0.6.10
 
  - add `ctrl` (keycode 17) in the skip list when reacting to keyboard events.

@@ -213,6 +213,7 @@
         if (e.button > 1) {
           return;
         }
+        this$.dom.textarea.focus();
         this$.edited();
         if (!(p = parent(e.target, '.cell', dom))) {
           return;
@@ -1369,11 +1370,13 @@
         }
         this.dom.caret.classList.toggle('show', !!sbox);
       }
-      return setTimeout(function(){
-        return this$.dom.textarea.focus({
-          preventScroll: true
-        });
-      }, 0);
+      if (this.dom.textarea === document.activeElement) {
+        return setTimeout(function(){
+          return this$.dom.textarea.focus({
+            preventScroll: true
+          });
+        }, 0);
+      }
     },
     data: function(it){
       if (!(it != null)) {
