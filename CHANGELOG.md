@@ -1,6 +1,6 @@
 # Change Logs
 
-## v0.6.11 (upcoming)
+## v0.6.11
 
  - tweak textarea focus rule to prevent race condition in focus between multiple sheets
  - fix bug: selection moving with arrow keys beyond top / left with frozen cells doesn't work correctly
