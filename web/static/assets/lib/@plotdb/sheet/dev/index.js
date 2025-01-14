@@ -1074,18 +1074,18 @@
       if (box.y + box.height > sbox.y + sbox.height) {
         this._md(1);
       }
-      if (idx.x === 0) {
-        if (this.pos.col === 0) {
-          return;
-        } else {
+      if (idx.x <= this.frozen.col) {
+        if (this.pos.col > 0) {
           this._ml(1);
+        } else if (idx.x <= 0) {
+          return;
         }
       }
-      if (idx.y === 0) {
-        if (this.pos.row === 0) {
-          return;
-        } else {
+      if (idx.y <= this.frozen.row) {
+        if (this.pos.row > 0) {
           this._mu(1);
+        } else if (idx.y <= 0) {
+          return;
         }
       }
       if (!(node = this.cell(opt)) && !(node = this.cell({

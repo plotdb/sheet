@@ -529,8 +529,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     sbox = @dom.sheet.getBoundingClientRect!
     if box.x + box.width > sbox.x + sbox.width => @_mr 1
     if box.y + box.height > sbox.y + sbox.height => @_md 1
-    if idx.x == 0 => ( if @pos.col == 0 => return else @_ml 1 )
-    if idx.y == 0 => ( if @pos.row == 0 => return else @_mu 1 )
+    if idx.x <= @frozen.col => ( if @pos.col > 0 => @_ml 1 else if idx.x <= 0 => return )
+    if idx.y <= @frozen.row => ( if @pos.row > 0 => @_mu 1 else if idx.y <= 0 => return )
     if !(node = @cell opt) and !(node = @cell idx{col, row}) => return
 
     @les.node = node
