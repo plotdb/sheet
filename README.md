@@ -63,6 +63,8 @@ initialize:
    - `type`: a string indicating what should we return. it can be:
      - `class`: should return the CSS classes for the given cell
      - `readonly`: return true if the given cell should be readonly.
+     - `format`: return cell format for number. Use `d3-format` syntax.
+       - depends on `d3.format`. if not available, no formatting will be applied.
 
 
 ## API

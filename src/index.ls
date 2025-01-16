@@ -450,7 +450,20 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         if content.type == \dom =>
           n.textContent = ""
           n.appendChild content.node
-      else n.textContent = content
+      else
+        # we support format for number only, for now
+        if !sheet._d3warning and !isNaN(parseFloat(content)) =>
+          fc = @_ccfg({
+            type: \format
+            col: (if fr => 0 else @pos.col) + x - @xif.col.1
+            row: (if fr => 0 else @pos.row) + y - @xif.row.1
+          })
+          if fc =>
+            if d3? and d3.format => content = d3.format(fc)(content)
+            else
+              console.warn "[@plotdb/sheet] cell format provided yet d3.format not available. skip formatting."
+              sheet._d3warning = true
+        n.textContent = content
 
   # move down
   _md: (mag = 1) ->

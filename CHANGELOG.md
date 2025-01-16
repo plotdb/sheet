@@ -1,5 +1,10 @@
 # Change Logs
 
+## v0.7.0
+
+ - support number formatting based on d3-format
+
+
 ## v0.6.11
 
  - tweak textarea focus rule to prevent race condition in focus between multiple sheets

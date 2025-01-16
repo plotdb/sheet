@@ -843,7 +843,7 @@
       }
     },
     _content: function(arg$){
-      var x, y, n, v, ref$, key$, content, className, fr, clsext, clsopt;
+      var x, y, n, v, ref$, key$, content, className, fr, clsext, clsopt, fc;
       x = arg$.x, y = arg$.y, n = arg$.n;
       if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
         return;
@@ -903,6 +903,25 @@
             return n.appendChild(content.node);
           }
         } else {
+          if (!sheet._d3warning && !isNaN(parseFloat(content))) {
+            fc = this._ccfg({
+              type: 'format',
+              col: (fr
+                ? 0
+                : this.pos.col) + x - this.xif.col[1],
+              row: (fr
+                ? 0
+                : this.pos.row) + y - this.xif.row[1]
+            });
+            if (fc) {
+              if ((typeof d3 != 'undefined' && d3 !== null) && d3.format) {
+                content = d3.format(fc)(content);
+              } else {
+                console.warn("[@plotdb/sheet] cell format provided yet d3.format not available. skip formatting.");
+                sheet._d3warning = true;
+              }
+            }
+          }
           return n.textContent = content;
         }
       }
