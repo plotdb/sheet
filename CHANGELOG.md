@@ -1,5 +1,14 @@
 # Change Logs
 
+## v0.7.1
+
+ - fix bug: pasting HTML table with whitespace/newlines in cell content causes unexpected line breaks due to `white-space: pre`
+ - fix bug: row headers collapse and become invisible after deleting all cell content
+ - fix bug: `_content` accessing wrong DOM node when pasted data exceeds visible column range
+ - fix bug: `cellcfg` option causes exception if non-function value is provided
+ - upgrade dev dependencies for vulnerability fixing
+
+
 ## v0.7.0
 
  - support number formatting based on d3-format

@@ -39,7 +39,7 @@ sheet = (opt={}) ->
   @opt = opt
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @evt-handler = {}
-  @_ccfg = opt.cellcfg
+  @_ccfg = if typeof(opt.cellcfg) == \function => opt.cellcfg else null
   @_data = opt.data or []
   @_size = ({row: [], col: []} <<< opt.size){row, col}
   @cls = ({row: [], col: []} <<< opt.class){row, col}
@@ -183,6 +183,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         {sc,ec,sr,er} = @_bound!
         data = for row from sr to er => for col from sc to ec => ''
         @set {row: sr, col: sc, data, range: true, src: \user}
+        @render!
       if code == 189 and (e.metaKey or e.ctrlKey) => @slice!
       if code == 187 and (e.metaKey or e.ctrlKey) => @insert!
 
@@ -452,7 +453,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
           n.appendChild content.node
       else
         # we support format for number only, for now
-        if !sheet._d3warning and !isNaN(parseFloat(content)) =>
+        if @_ccfg and !sheet._d3warning and !isNaN(parseFloat(content)) =>
           fc = @_ccfg({
             type: \format
             col: (if fr => 0 else @pos.col) + x - @xif.col.1

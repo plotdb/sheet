@@ -67,7 +67,7 @@
       ? document.querySelector(opt.root)
       : opt.root;
     this.evtHandler = {};
-    this._ccfg = opt.cellcfg;
+    this._ccfg = typeof opt.cellcfg === 'function' ? opt.cellcfg : null;
     this._data = opt.data || [];
     this._size = {
       row: (ref$ = import$({
@@ -387,6 +387,7 @@
             range: true,
             src: 'user'
           });
+          this$.render();
         }
         if (code === 189 && (e.metaKey || e.ctrlKey)) {
           this$.slice();
@@ -903,7 +904,7 @@
             return n.appendChild(content.node);
           }
         } else {
-          if (!sheet._d3warning && !isNaN(parseFloat(content))) {
+          if (this._ccfg && !sheet._d3warning && !isNaN(parseFloat(content))) {
             fc = this._ccfg({
               type: 'format',
               col: (fr
