@@ -101,6 +101,48 @@ initabs()
     opacity: initial
 
 .sheet
+  .scroll-y, .scroll-x
+    position: absolute
+    z-index: 130
+    background: rgba(0,0,0,.04)
+    /* overlay scrollbar. it should never take space from the grid. */
+    &.idle
+      opacity: 0
+      pointer-events: none
+    .thumb
+      position: absolute
+      top: 0
+      left: 0
+      border-radius: 4px
+      background: rgba(0,0,0,.32)
+      transition: background .1s ease
+    &:hover .thumb, &.active .thumb
+      background: rgba(0,0,0,.52)
+  .scroll-y
+    top: 0
+    right: 0
+    bottom: 10px
+    width: 10px
+    cursor: default
+    .thumb
+      width: 100%
+  .scroll-x
+    left: 0
+    right: 10px
+    bottom: 0
+    height: 10px
+    cursor: default
+    .thumb
+      height: 100%
+
+  /* keep slider widgets clear of the scrollbars when both are enabled */
+  &.has-scrollbar
+    .slide-y
+      right: 12px
+    .slide-x
+      bottom: 12px
+
+.sheet
   .slide-y, .slide-x
     display: flex
     align-items: center

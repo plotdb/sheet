@@ -61,15 +61,23 @@ sheet = (opt={}) ->
   # TODO why we use `les` but not `sel`? figure it out and refactor this
   @les = {}
   @editing = {}
-  @dom = Object.fromEntries <[sheet inner caret range edit layout range-cut slide-y slide-x]>.map ->
+  @dom = Object.fromEntries <[sheet inner caret range edit layout range-cut slide-y slide-x scroll-y scroll-x]>.map ->
     n = document.createElement(\div)
       ..classList.add it
     [it, n]
   @dom.sheet.setAttribute \tabindex, -1
   @dom.textarea = document.createElement \textarea
   @root.appendChild(@dom.sheet)
-  <[inner caret range edit layout range-cut slide-y slide-x]>.map ~> @dom.sheet.appendChild @dom[it]
+  <[inner caret range edit layout range-cut slide-y slide-x scroll-y scroll-x]>.map ~> @dom.sheet.appendChild @dom[it]
   if !@opt.slider => @dom["slide-x"].style.display = @dom["slide-y"].style.display = \none
+  @scrollbar = !!@opt.scrollbar
+  <[x y]>.map ~>
+    n = document.createElement(\div)
+      ..classList.add \thumb
+    @dom["scroll-#it"].appendChild n
+    @dom["thumb-#it"] = n
+    if !@scrollbar => @dom["scroll-#it"].style.display = \none
+  if @scrollbar => @dom.sheet.classList.add \has-scrollbar
   @dom.edit.appendChild @dom.textarea
   @_init!
   @
@@ -122,7 +130,9 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         @les.node = p
       @render-selection!
     dom.addEventListener \mousemove, (e) ~>
-      if @_slider.y.on or @_slider.x.on => return
+      # dragging a slider / scrollbar should never touch selection, even if the pointer
+      # wanders off the widget and lands on a cell.
+      if @_slider.y.on or @_slider.x.on or @_scrolling => return
       if @editing.on or !(e.buttons and (p = parent (e.target), '.cell', dom)) => return
       idx = @index(p){row, col}
       @les.end =
@@ -266,6 +276,23 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       @dom[@_slider[n].n].addEventListener \mousedown, (e) ~> @_slider[n].hd e
       @dom[@_slider[n].n].addEventListener \click, (e) ~> @_slider[n].hc e
 
+    if @scrollbar =>
+      <[x y]>.map (n) ~>
+        @dom["scroll-#n"].addEventListener \mousedown, (e) ~>
+          e.preventDefault!
+          e.stopPropagation!
+          if e.target == @dom["thumb-#n"] => return @_scroll-drag n, e
+          # clicking on the track pages toward the clicked side.
+          [t, cl] = if n == \y => [\row, \clientY] else [\col, \clientX]
+          box = @dom["thumb-#n"].getBoundingClientRect!
+          info = @_scroll-info t
+          d = if e[cl] < box[if n == \y => \top else \left] => -1 else 1
+          @_scroll-to t, (@pos[t] + d * (info.vis >? 1)), info
+      # thumb size depends on how many cells are visible, which changes on resize.
+      if window.ResizeObserver? =>
+        @_ro = new ResizeObserver (~> @render-scrollbar!)
+        @_ro.observe @dom.sheet
+
     document.addEventListener \wheel, ((e) ~>
       # we should block wheel event only if target element is under sheet.
       # however, some scenarios may trigger swipe back gesture of browser:
@@ -309,6 +336,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       # that is, once users are scrolling in sheet, the event should not trigger default behavior.
       e.preventDefault!
     ), {passive: false}
+
+    @render-scrollbar!
 
   select: (o) ->
     if !arguments.length =>
@@ -385,6 +414,91 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       [0 til @frozen.row].map(~> @_size.row[it] or "max-content").join(' ') + ' ' +
       [@xif.row.2 til @dim.row].map(~> @_size.row[it + @pos.row - @xif.row.1] or "max-content").join(' ')
     )
+
+  # number of scrollable ( that is, non idx / fixed / frozen ) cells visible in viewport.
+  # it's not @dim - fix since @dim is the size of the rendered window, which may be
+  # larger than what the sheet element can actually show.
+  _viewport: ->
+    sbox = @dom.sheet.getBoundingClientRect!
+    inner = @dom.inner
+    ret = {row: 0, col: 0}
+    for y from @xif.row.2 til @dim.row =>
+      if !(n = inner.childNodes[y * @dim.col]) => break
+      if n.getBoundingClientRect!.top >= sbox.bottom => break
+      ret.row++
+    for x from @xif.col.2 til @dim.col =>
+      if !(n = inner.childNodes[x]) => break
+      if n.getBoundingClientRect!.left >= sbox.right => break
+      ret.col++
+    ret
+
+  # size of the actual data. note that we can't simply take @_data.length for rows, since
+  # rendering a cell out of range creates an empty row via the `[]` operator, which makes
+  # @_data grow as we scroll.
+  # note that @_data may be sparse ( scrolling far away leaves holes behind ), so we can't
+  # use Math.max.apply over a mapped array here - holes turn into undefined and give NaN.
+  _data-size: (t) ->
+    if t == \col =>
+      ret = 0
+      for r in @_data => if r and r.length > ret => ret = r.length
+      return ret
+    i = @_data.length
+    while i > 0 and !(@_data[i - 1] or []).length => i--
+    i
+
+  # scrolling is index based ( we move by cells, not by pixels ) so the scrollbar is too.
+  # the grid has no hard boundary when moving down / right - we can always scroll into
+  # empty cells - so we bound the scrollbar to the data plus one page. taking the current
+  # position into account instead would make the thumb shrink forever as we scroll.
+  # going beyond the bound is still allowed; the thumb just sticks to the end.
+  _scroll-info: (t) ->
+    vis = @_viewport![t]
+    total = @_data-size t
+    {vis, total, extent: total + vis, max: total}
+
+  _scroll-to: (t, v, info) ->
+    info ?= @_scroll-info t
+    v = Math.round(v) <? info.max >? 0
+    if v == @pos[t] => return
+    @goto (if t == \row => {row: v} else {col: v})
+
+  _scroll-metric: (n, info) ->
+    dim = if n == \y => \height else \width
+    len = @dom["scroll-#n"].getBoundingClientRect![dim]
+    if !(len > 0) or !(info.extent > 0) => return null
+    size = (len * (info.vis / info.extent)) >? 20 <? len
+    {dim, len, size, span: len - size}
+
+  _scroll-drag: (n, evt) ->
+    [t, cl] = if n == \y => [\row, \clientY] else [\col, \clientX]
+    info = @_scroll-info t
+    if !(m = @_scroll-metric n, info) => return
+    if m.span <= 0 or info.max <= 0 => return
+    # @pos may sit beyond the bound. clamp it so dragging back doesn't jump.
+    [base, start] = [evt[cl], (@pos[t] <? info.max)]
+    hm = (e) ~> @_scroll-to t, (start + ((e[cl] - base) / m.span) * info.max), info
+    hu = (e) ~>
+      @_scrolling = false
+      @dom["scroll-#n"].classList.remove \active
+      document.removeEventListener \mousemove, hm
+      document.removeEventListener \mouseup, hu
+    @_scrolling = true
+    @dom["scroll-#n"].classList.add \active
+    document.addEventListener \mousemove, hm
+    document.addEventListener \mouseup, hu
+
+  render-scrollbar: ->
+    if !@scrollbar => return
+    [[\row, \y, \top], [\col, \x, \left]].map ([t, n, side]) ~>
+      [track, thumb] = [@dom["scroll-#n"], @dom["thumb-#n"]]
+      info = @_scroll-info t
+      if !(m = @_scroll-metric n, info) =>
+        track.classList.add \idle
+        return
+      # nothing to scroll - keep the track but make it clear it's inactive.
+      track.classList.toggle \idle, (info.max <= 0)
+      thumb.style[m.dim] = "#{m.size}px"
+      thumb.style[side] = "#{(if info.max <= 0 => 0 else m.span * ((@pos[t] / info.max) <? 1))}px"
 
   add-cell: (x, y) ->
     div = document.createElement \div
@@ -485,6 +599,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         @_content {x: i, y: (@dim.row + j), n}
         inner.appendChild(n)
     @pos.row += mag
+    @render-scrollbar!
 
   _mu: (mag = 1) ->
     inner = @dom.inner
@@ -501,6 +616,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         n = document.createElement \div
         @_content {x: i, y: j + @xif.row.2, n}
         inner.insertBefore(n, inner.childNodes[i + (j - start) * @dim.col + (@dim.col * @xif.row.2)])
+    @render-scrollbar!
 
   _mr: (mag = 1) ->
     inner = @dom.inner
@@ -514,6 +630,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         inner.insertBefore(n, inner.childNodes[(i + 1) * @dim.col - 1])
     @pos.col += mag
     @regrid!
+    @render-scrollbar!
 
   _ml: (mag = 1) ->
     inner = @dom.inner
@@ -529,14 +646,17 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         @_content {x: j + @xif.col.2, y: i, n}
         inner.insertBefore(n, inner.childNodes[i * @dim.col + @xif.col.2 + j - start])
     @regrid!
+    @render-scrollbar!
 
   goto: (opt={row: 0, col: 0}) ->
     @pos <<< opt
+    @regrid!
     @render!
 
   render:  ->
     for y from 0 til @dim.row => for x from 0 til @dim.col => @_content {x, y}
     @render-selection!
+    @render-scrollbar!
 
   move: (opt = {}) ->
     if @editing.on => @edited!
