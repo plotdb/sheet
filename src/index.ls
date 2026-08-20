@@ -370,7 +370,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     [sr, er] = if p1.row < p2.row or !p2.row? => [p1.row, p2.row] else [p2.row, p1.row]
     if !o.defined? or o.defined =>
       if !ec? => ec = @_data-size \col
-      if !er? => er = @_data.length
+      if !er? => er = @_data-size \row
     return {sc, ec, sr, er}
 
   _to-text: ({sel}) ->

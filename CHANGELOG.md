@@ -6,6 +6,8 @@
  - add `scrollbar` option for optional overlay scrollbars
  - fix bug: `Math.max.apply` over `@_data` gives NaN once `@_data` becomes sparse, which
    happens after scrolling far away. this made `select all` produce a NaN column bound.
+ - fix bug: `select all` bound grows as we scroll, since rendering out of range cells
+   extends `@_data` with empty rows
  - upgrade dependencies
  - add context dev dependency
 

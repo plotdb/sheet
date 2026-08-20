@@ -712,7 +712,7 @@
           ec = this._dataSize('col');
         }
         if (er == null) {
-          er = this._data.length;
+          er = this._dataSize('row');
         }
       }
       return {
