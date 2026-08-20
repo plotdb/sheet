@@ -1,5 +1,11 @@
 # Change Logs
 
+## v0.7.2 (upcoming)
+
+ - upgrade dependencies
+ - add context dev dependency
+
+
 ## v0.7.1
 
  - fix bug: pasting HTML table with whitespace/newlines in cell content causes unexpected line breaks due to `white-space: pre`
