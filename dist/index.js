@@ -576,6 +576,9 @@
         }
         spos = this$.scrollPos;
         ref$ = [e.deltaX, e.deltaY], dx = ref$[0], dy = ref$[1];
+        if (e.shiftKey && Math.abs(dy) > Math.abs(dx)) {
+          ref$ = [dy, 0], dx = ref$[0], dy = ref$[1];
+        }
         ref$ = Math.abs(dx) > Math.abs(dy)
           ? [dx, 0]
           : [0, dy], dx = ref$[0], dy = ref$[1];

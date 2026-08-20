@@ -287,6 +287,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       if !inscope => return false
       spos = @scroll-pos
       [dx, dy] = [e.deltaX, e.deltaY]
+      # shift + wheel means horizontal scrolling. some browsers ( e.g., chrome on macOS )
+      # already translate it into deltaX for us, so we only do it when it's not translated.
+      # this matters for mouse with vertical wheel only, which is common on windows.
+      if e.shiftKey and Math.abs(dy) > Math.abs(dx) => [dx, dy] = [dy, 0]
       [dx, dy] = if Math.abs(dx) > Math.abs(dy) => [dx, 0] else [0, dy]
       [ox, oy] = [spos.x, spos.y]
       spos.x += dx / 30

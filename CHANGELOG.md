@@ -2,6 +2,7 @@
 
 ## v0.7.2 (upcoming)
 
+ - support horizontal scrolling with shift + wheel, for mouse with vertical wheel only
  - upgrade dependencies
  - add context dev dependency
 
