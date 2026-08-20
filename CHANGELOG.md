@@ -1,6 +1,6 @@
 # Change Logs
 
-## v0.7.2 (upcoming)
+## v0.7.2
 
  - support horizontal scrolling with shift + wheel, for mouse with vertical wheel only
  - add `scrollbar` option for optional overlay scrollbars
