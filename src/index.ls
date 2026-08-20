@@ -369,7 +369,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     [sc, ec] = if p1.col < p2.col or !p2.col? => [p1.col, p2.col] else [p2.col, p1.col]
     [sr, er] = if p1.row < p2.row or !p2.row? => [p1.row, p2.row] else [p2.row, p1.row]
     if !o.defined? or o.defined =>
-      if !ec? => ec = Math.max.apply Math, @_data.map(->it.length)
+      if !ec? => ec = @_data-size \col
       if !er? => er = @_data.length
     return {sc, ec, sr, er}
 

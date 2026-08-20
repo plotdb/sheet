@@ -709,9 +709,7 @@
         : [p2.row, p1.row], sr = ref$[0], er = ref$[1];
       if (o.defined == null || o.defined) {
         if (ec == null) {
-          ec = Math.max.apply(Math, this._data.map(function(it){
-            return it.length;
-          }));
+          ec = this._dataSize('col');
         }
         if (er == null) {
           er = this._data.length;

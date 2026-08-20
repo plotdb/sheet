@@ -4,6 +4,8 @@
 
  - support horizontal scrolling with shift + wheel, for mouse with vertical wheel only
  - add `scrollbar` option for optional overlay scrollbars
+ - fix bug: `Math.max.apply` over `@_data` gives NaN once `@_data` becomes sparse, which
+   happens after scrolling far away. this made `select all` produce a NaN column bound.
  - upgrade dependencies
  - add context dev dependency
 
