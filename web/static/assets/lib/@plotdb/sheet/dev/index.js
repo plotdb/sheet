@@ -709,10 +709,10 @@
         : [p2.row, p1.row], sr = ref$[0], er = ref$[1];
       if (o.defined == null || o.defined) {
         if (ec == null) {
-          ec = this._dataSize('col');
+          ec = this._dataSize('col') - 1;
         }
         if (er == null) {
-          er = this._dataSize('row');
+          er = this._dataSize('row') - 1;
         }
       }
       return {

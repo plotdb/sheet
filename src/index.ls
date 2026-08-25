@@ -369,8 +369,10 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     [sc, ec] = if p1.col < p2.col or !p2.col? => [p1.col, p2.col] else [p2.col, p1.col]
     [sr, er] = if p1.row < p2.row or !p2.row? => [p1.row, p2.row] else [p2.row, p1.row]
     if !o.defined? or o.defined =>
-      if !ec? => ec = @_data-size \col
-      if !er? => er = @_data-size \row
+      # `sc to ec` / `sr to er` are inclusive, so we need the last index rather than the
+      # size. an empty sheet gives -1 here, which makes those loops no-op as it should.
+      if !ec? => ec = (@_data-size \col) - 1
+      if !er? => er = (@_data-size \row) - 1
     return {sc, ec, sr, er}
 
   _to-text: ({sel}) ->
