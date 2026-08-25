@@ -1,5 +1,13 @@
 # Change Logs
 
+## v0.7.3
+
+ - fix bug: copying a whole row / column / `select all` includes one extra empty row
+   and column, since `_bound` fills in sizes where inclusive indices are expected.
+   deleting a whole row used to grow the data by one column every time for the same
+   reason.
+
+
 ## v0.7.2
 
  - support horizontal scrolling with shift + wheel, for mouse with vertical wheel only
