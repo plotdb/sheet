@@ -1,6 +1,6 @@
 # Change Logs
 
-## v0.7.3 (upcoming)
+## v0.7.3
 
  - fix bug: copying a whole row / column / `select all` includes one extra empty row
    and column, since `_bound` fills in sizes where inclusive indices are expected.
