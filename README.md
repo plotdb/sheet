@@ -57,6 +57,12 @@ initialize:
      - `enableScrolling` is for mouse / trackpad scrolling behavior
  - `data`: initial data, as array of arrays
  - `slider`: default false. show slider widgets if true.
+ - `scrollbar`: default false. show overlay scrollbars if true.
+   - scrolling is index based ( we move by cells, not by pixels ), so is the scrollbar.
+   - the grid has no hard boundary when moving down / right, so the scrollbar is bound to
+     the data plus one page. scrolling beyond it is still allowed - the thumb just sticks
+     to the end. the scrollbar hides itself when there is nothing to scroll.
+   - dragging the thumb moves the view; clicking on the track pages toward the clicked side.
  - `cellcfg(opt)`: custom cell definition function. return value based on the given `opt`, which contains:
    - `row`: row of the cell to query
    - `col`: col of the cell to query

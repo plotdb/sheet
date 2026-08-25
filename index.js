@@ -134,7 +134,7 @@
     };
     this.les = {};
     this.editing = {};
-    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x'].map(function(it){
+    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x', 'scroll-y', 'scroll-x'].map(function(it){
       var x$, n;
       x$ = n = document.createElement('div');
       x$.classList.add(it);
@@ -143,11 +143,25 @@
     this.dom.sheet.setAttribute('tabindex', -1);
     this.dom.textarea = document.createElement('textarea');
     this.root.appendChild(this.dom.sheet);
-    ['inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x'].map(function(it){
+    ['inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x', 'scroll-y', 'scroll-x'].map(function(it){
       return this$.dom.sheet.appendChild(this$.dom[it]);
     });
     if (!this.opt.slider) {
       this.dom["slide-x"].style.display = this.dom["slide-y"].style.display = 'none';
+    }
+    this.scrollbar = !!this.opt.scrollbar;
+    ['x', 'y'].map(function(it){
+      var x$, n;
+      x$ = n = document.createElement('div');
+      x$.classList.add('thumb');
+      this$.dom["scroll-" + it].appendChild(n);
+      this$.dom["thumb-" + it] = n;
+      if (!this$.scrollbar) {
+        return this$.dom["scroll-" + it].style.display = 'none';
+      }
+    });
+    if (this.scrollbar) {
+      this.dom.sheet.classList.add('has-scrollbar');
     }
     this.dom.edit.appendChild(this.dom.textarea);
     this._init();
@@ -248,7 +262,7 @@
       });
       dom.addEventListener('mousemove', function(e){
         var p, ref$, idx;
-        if (this$._slider.y.on || this$._slider.x.on) {
+        if (this$._slider.y.on || this$._slider.x.on || this$._scrolling) {
           return;
         }
         if (this$.editing.on || !(e.buttons && (p = parent(e.target, '.cell', dom)))) {
@@ -558,7 +572,32 @@
           return this$._slider[n].hc(e);
         });
       });
-      return document.addEventListener('wheel', function(e){
+      if (this.scrollbar) {
+        ['x', 'y'].map(function(n){
+          return this$.dom["scroll-" + n].addEventListener('mousedown', function(e){
+            var ref$, t, cl, box, info, d;
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.target === this$.dom["thumb-" + n]) {
+              return this$._scrollDrag(n, e);
+            }
+            ref$ = n === 'y'
+              ? ['row', 'clientY']
+              : ['col', 'clientX'], t = ref$[0], cl = ref$[1];
+            box = this$.dom["thumb-" + n].getBoundingClientRect();
+            info = this$._scrollInfo(t);
+            d = e[cl] < box[n === 'y' ? 'top' : 'left'] ? -1 : 1;
+            return this$._scrollTo(t, this$.pos[t] + d * ((ref$ = info.vis) > 1 ? ref$ : 1), info);
+          });
+        });
+        if (window.ResizeObserver != null) {
+          this._ro = new ResizeObserver(function(){
+            return this$.renderScrollbar();
+          });
+          this._ro.observe(this.dom.sheet);
+        }
+      }
+      document.addEventListener('wheel', function(e){
         var inscope, spos, ref$, dx, dy, ox, oy;
         inscope = this$.eventInScope(e);
         if (this$.opt.enableScrolling != null && !this$.opt.enableScrolling) {
@@ -576,6 +615,9 @@
         }
         spos = this$.scrollPos;
         ref$ = [e.deltaX, e.deltaY], dx = ref$[0], dy = ref$[1];
+        if (e.shiftKey && Math.abs(dy) > Math.abs(dx)) {
+          ref$ = [dy, 0], dx = ref$[0], dy = ref$[1];
+        }
         ref$ = Math.abs(dx) > Math.abs(dy)
           ? [dx, 0]
           : [0, dy], dx = ref$[0], dy = ref$[1];
@@ -598,6 +640,7 @@
       }, {
         passive: false
       });
+      return this.renderScrollbar();
     },
     select: function(o){
       var ret, that;
@@ -666,12 +709,10 @@
         : [p2.row, p1.row], sr = ref$[0], er = ref$[1];
       if (o.defined == null || o.defined) {
         if (ec == null) {
-          ec = Math.max.apply(Math, this._data.map(function(it){
-            return it.length;
-          }));
+          ec = this._dataSize('col');
         }
         if (er == null) {
-          er = this._data.length;
+          er = this._dataSize('row');
         }
       }
       return {
@@ -782,6 +823,143 @@
       }.call(this)).map(function(it){
         return this$._size.row[it + this$.pos.row - this$.xif.row[1]] || "max-content";
       }).join(' ');
+    },
+    _viewport: function(){
+      var sbox, inner, ret, i$, to$, y, n, x;
+      sbox = this.dom.sheet.getBoundingClientRect();
+      inner = this.dom.inner;
+      ret = {
+        row: 0,
+        col: 0
+      };
+      for (i$ = this.xif.row[2], to$ = this.dim.row; i$ < to$; ++i$) {
+        y = i$;
+        if (!(n = inner.childNodes[y * this.dim.col])) {
+          break;
+        }
+        if (n.getBoundingClientRect().top >= sbox.bottom) {
+          break;
+        }
+        ret.row++;
+      }
+      for (i$ = this.xif.col[2], to$ = this.dim.col; i$ < to$; ++i$) {
+        x = i$;
+        if (!(n = inner.childNodes[x])) {
+          break;
+        }
+        if (n.getBoundingClientRect().left >= sbox.right) {
+          break;
+        }
+        ret.col++;
+      }
+      return ret;
+    },
+    _dataSize: function(t){
+      var ret, i$, ref$, len$, r, i;
+      if (t === 'col') {
+        ret = 0;
+        for (i$ = 0, len$ = (ref$ = this._data).length; i$ < len$; ++i$) {
+          r = ref$[i$];
+          if (r && r.length > ret) {
+            ret = r.length;
+          }
+        }
+        return ret;
+      }
+      i = this._data.length;
+      while (i > 0 && !(this._data[i - 1] || []).length) {
+        i--;
+      }
+      return i;
+    },
+    _scrollInfo: function(t){
+      var vis, total;
+      vis = this._viewport()[t];
+      total = this._dataSize(t);
+      return {
+        vis: vis,
+        total: total,
+        extent: total + vis,
+        max: total
+      };
+    },
+    _scrollTo: function(t, v, info){
+      var ref$, ref1$, ref2$;
+      info == null && (info = this._scrollInfo(t));
+      v = (ref$ = (ref1$ = Math.round(v)) < (ref2$ = info.max) ? ref1$ : ref2$) > 0 ? ref$ : 0;
+      if (v === this.pos[t]) {
+        return;
+      }
+      return this.goto(t === 'row'
+        ? {
+          row: v
+        }
+        : {
+          col: v
+        });
+    },
+    _scrollMetric: function(n, info){
+      var dim, len, size, ref$, ref1$;
+      dim = n === 'y' ? 'height' : 'width';
+      len = this.dom["scroll-" + n].getBoundingClientRect()[dim];
+      if (!(len > 0) || !(info.extent > 0)) {
+        return null;
+      }
+      size = (ref$ = (ref1$ = len * (info.vis / info.extent)) > 20 ? ref1$ : 20) < len ? ref$ : len;
+      return {
+        dim: dim,
+        len: len,
+        size: size,
+        span: len - size
+      };
+    },
+    _scrollDrag: function(n, evt){
+      var ref$, t, cl, info, m, ref1$, base, start, hm, hu, this$ = this;
+      ref$ = n === 'y'
+        ? ['row', 'clientY']
+        : ['col', 'clientX'], t = ref$[0], cl = ref$[1];
+      info = this._scrollInfo(t);
+      if (!(m = this._scrollMetric(n, info))) {
+        return;
+      }
+      if (m.span <= 0 || info.max <= 0) {
+        return;
+      }
+      ref$ = [evt[cl], (ref$ = this.pos[t]) < (ref1$ = info.max) ? ref$ : ref1$], base = ref$[0], start = ref$[1];
+      hm = function(e){
+        return this$._scrollTo(t, start + ((e[cl] - base) / m.span) * info.max, info);
+      };
+      hu = function(e){
+        this$._scrolling = false;
+        this$.dom["scroll-" + n].classList.remove('active');
+        document.removeEventListener('mousemove', hm);
+        return document.removeEventListener('mouseup', hu);
+      };
+      this._scrolling = true;
+      this.dom["scroll-" + n].classList.add('active');
+      document.addEventListener('mousemove', hm);
+      return document.addEventListener('mouseup', hu);
+    },
+    renderScrollbar: function(){
+      var this$ = this;
+      if (!this.scrollbar) {
+        return;
+      }
+      return [['row', 'y', 'top'], ['col', 'x', 'left']].map(function(arg$){
+        var t, n, side, ref$, track, thumb, info, m;
+        t = arg$[0], n = arg$[1], side = arg$[2];
+        ref$ = [this$.dom["scroll-" + n], this$.dom["thumb-" + n]], track = ref$[0], thumb = ref$[1];
+        info = this$._scrollInfo(t);
+        if (!(m = this$._scrollMetric(n, info))) {
+          track.classList.add('idle');
+          return;
+        }
+        track.classList.toggle('idle', info.max <= 0);
+        thumb.style[m.dim] = m.size + "px";
+        return thumb.style[side] = (info.max <= 0
+          ? 0
+          : m.span * ((ref$ = this$.pos[t] / info.max) < 1 ? ref$ : 1)) + "px";
+      });
     },
     addCell: function(x, y){
       var div;
@@ -957,10 +1135,11 @@
           inner.appendChild(n);
         }
       }
-      return this.pos.row += mag;
+      this.pos.row += mag;
+      return this.renderScrollbar();
     },
     _mu: function(mag){
-      var inner, start, ref$, i$, j, j$, to$, i, lresult$, n, results$ = [];
+      var inner, start, ref$, i$, j, j$, to$, i, n;
       mag == null && (mag = 1);
       inner = this.dom.inner;
       if (this.pos.row <= 0) {
@@ -984,7 +1163,6 @@
       this.pos.row -= mag;
       for (i$ = start; i$ < mag; ++i$) {
         j = i$;
-        lresult$ = [];
         for (j$ = 0, to$ = this.dim.col; j$ < to$; ++j$) {
           i = j$;
           n = document.createElement('div');
@@ -993,11 +1171,10 @@
             y: j + this.xif.row[2],
             n: n
           });
-          lresult$.push(inner.insertBefore(n, inner.childNodes[i + (j - start) * this.dim.col + this.dim.col * this.xif.row[2]]));
+          inner.insertBefore(n, inner.childNodes[i + (j - start) * this.dim.col + this.dim.col * this.xif.row[2]]);
         }
-        results$.push(lresult$);
       }
-      return results$;
+      return this.renderScrollbar();
     },
     _mr: function(mag){
       var inner, start, ref$, i$, j, j$, to$, i, n;
@@ -1020,7 +1197,8 @@
         }
       }
       this.pos.col += mag;
-      return this.regrid();
+      this.regrid();
+      return this.renderScrollbar();
     },
     _ml: function(mag){
       var inner, start, ref$, i$, j, j$, to$, i, n;
@@ -1049,7 +1227,8 @@
           inner.insertBefore(n, inner.childNodes[i * this.dim.col + this.xif.col[2] + j - start]);
         }
       }
-      return this.regrid();
+      this.regrid();
+      return this.renderScrollbar();
     },
     goto: function(opt){
       opt == null && (opt = {
@@ -1057,6 +1236,7 @@
         col: 0
       });
       import$(this.pos, opt);
+      this.regrid();
       return this.render();
     },
     render: function(){
@@ -1071,7 +1251,8 @@
           });
         }
       }
-      return this.renderSelection();
+      this.renderSelection();
+      return this.renderScrollbar();
     },
     move: function(opt){
       var node, idx, box, sbox, ref$, ns;

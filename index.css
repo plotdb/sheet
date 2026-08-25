@@ -115,6 +115,59 @@
   height: initial;
   opacity: initial;
 }
+.sheet .scroll-y,
+.sheet .scroll-x {
+  position: absolute;
+  z-index: 130;
+  background: rgba(0,0,0,0.04);
+/* overlay scrollbar. it should never take space from the grid. */
+}
+.sheet .scroll-y.idle,
+.sheet .scroll-x.idle {
+  opacity: 0;
+  pointer-events: none;
+}
+.sheet .scroll-y .thumb,
+.sheet .scroll-x .thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.32);
+  transition: background 0.1s ease;
+}
+.sheet .scroll-y:hover .thumb,
+.sheet .scroll-x:hover .thumb,
+.sheet .scroll-y.active .thumb,
+.sheet .scroll-x.active .thumb {
+  background: rgba(0,0,0,0.52);
+}
+.sheet .scroll-y {
+  top: 0;
+  right: 0;
+  bottom: 10px;
+  width: 10px;
+  cursor: default;
+}
+.sheet .scroll-y .thumb {
+  width: 100%;
+}
+.sheet .scroll-x {
+  left: 0;
+  right: 10px;
+  bottom: 0;
+  height: 10px;
+  cursor: default;
+}
+.sheet .scroll-x .thumb {
+  height: 100%;
+}
+.sheet.has-scrollbar .slide-y {
+  right: 12px;
+}
+.sheet.has-scrollbar .slide-x {
+  bottom: 12px;
+}
 .sheet .slide-y,
 .sheet .slide-x {
   display: flex;

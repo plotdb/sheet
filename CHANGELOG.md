@@ -1,5 +1,17 @@
 # Change Logs
 
+## v0.7.2
+
+ - support horizontal scrolling with shift + wheel, for mouse with vertical wheel only
+ - add `scrollbar` option for optional overlay scrollbars
+ - fix bug: `Math.max.apply` over `@_data` gives NaN once `@_data` becomes sparse, which
+   happens after scrolling far away. this made `select all` produce a NaN column bound.
+ - fix bug: `select all` bound grows as we scroll, since rendering out of range cells
+   extends `@_data` with empty rows
+ - upgrade dependencies
+ - add context dev dependency
+
+
 ## v0.7.1
 
  - fix bug: pasting HTML table with whitespace/newlines in cell content causes unexpected line breaks due to `white-space: pre`
