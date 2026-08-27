@@ -71,6 +71,7 @@ sheet = (opt={}) ->
   <[inner caret range edit layout range-cut slide-y slide-x scroll-y scroll-x]>.map ~> @dom.sheet.appendChild @dom[it]
   if !@opt.slider => @dom["slide-x"].style.display = @dom["slide-y"].style.display = \none
   @scrollbar = !!@opt.scrollbar
+  @enable-scrolling = if @opt.enable-scrolling? => !!@opt.enable-scrolling else true
   <[x y]>.map ~>
     n = document.createElement(\div)
       ..classList.add \thumb
@@ -78,6 +79,11 @@ sheet = (opt={}) ->
     @dom["thumb-#it"] = n
     if !@scrollbar => @dom["scroll-#it"].style.display = \none
   if @scrollbar => @dom.sheet.classList.add \has-scrollbar
+  # `.sheet` is a scroll container even at `overflow: hidden`, so the `overscroll-behavior`
+  # guarding against swipe back also stops a scroll started over it from reaching the page.
+  # while we handle the wheel ourselves that is what we want, but once scrolling is off the
+  # sheet has no business holding on to the gesture. see index.styl.
+  if !@enable-scrolling => @dom.sheet.classList.add \no-scrolling
   @dom.edit.appendChild @dom.textarea
   @_init!
   @
@@ -306,7 +312,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       #  - always preventDefault for horizontal scrolling if document.body is the target.
       # this may affect the host document so we make it configurable by user, and by default enabled.
       inscope = @event-in-scope(e)
-      if @opt.enable-scrolling? and !@opt.enable-scrolling => return
+      if !@enable-scrolling => return
       if (!(@opt.scroll-lock?) or @opt.scroll-lock) => # if scroll-lock is enabled
         if Math.abs(e.deltaX) > Math.abs(e.deltaY) => # and it's horizontal scrolling
           if inscope or e.target == document.body => # and is in interested region
