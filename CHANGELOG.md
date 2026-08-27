@@ -1,6 +1,6 @@
 # Change Logs
 
-## v0.7.4 (upcoming)
+## v0.7.4
 
  - fix bug: a sheet with neither an index nor a fixed row/col renders every track
    collapsed, since `regrid` emits `repeat(0, max-content)` - `repeat()` takes an
