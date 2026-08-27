@@ -1,6 +1,6 @@
 # Change Logs
 
-## v0.7.5 (upcoming)
+## v0.7.5
 
  - fix bug: `enableScrolling: false` stops the wheel handler but the sheet still swallows
    the scroll. `.sheet` is a scroll container even at `overflow: hidden`, and the
