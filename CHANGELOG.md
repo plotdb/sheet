@@ -1,5 +1,16 @@
 # Change Logs
 
+## v0.7.4
+
+ - fix bug: a sheet with neither an index nor a fixed row/col renders every track
+   collapsed, since `regrid` emits `repeat(0, max-content)` - `repeat()` takes an
+   integer of at least 1, so the whole `grid-template-*` declaration is dropped.
+ - fix bug: an all empty row collapses, since an empty cell has no line box and
+   `.cell` had no `min-height` to fall back on. only visible without an index column,
+   whose row number used to be what kept such rows open.
+ - add a no index / no fixed example to the demo page.
+
+
 ## v0.7.3
 
  - fix bug: copying a whole row / column / `select all` includes one extra empty row

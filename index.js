@@ -787,42 +787,33 @@
       };
       return this.regrid();
     },
-    regrid: function(){
+    _template: function(t){
       var this$ = this;
-      this.dom.inner.style.gridTemplateColumns = ("repeat(" + this.xif.col[1] + ", max-content) ") + (function(){
-        var i$, to$, results$ = [];
-        for (i$ = 0, to$ = this.frozen.col; i$ < to$; ++i$) {
-          results$.push(i$);
-        }
-        return results$;
-      }.call(this)).map(function(it){
-        return this$._size.col[it] || "max-content";
-      }).join(' ') + ' ' + (function(){
-        var i$, to$, results$ = [];
-        for (i$ = this.xif.col[2], to$ = this.dim.col; i$ < to$; ++i$) {
-          results$.push(i$);
-        }
-        return results$;
-      }.call(this)).map(function(it){
-        return this$._size.col[it + this$.pos.col - this$.xif.col[1]] || "max-content";
+      return [
+        this.xif[t][1] > 0 ? "repeat(" + this.xif[t][1] + ", max-content)" : '', (function(){
+          var i$, to$, results$ = [];
+          for (i$ = 0, to$ = this.frozen[t]; i$ < to$; ++i$) {
+            results$.push(i$);
+          }
+          return results$;
+        }.call(this)).map(function(it){
+          return this$._size[t][it] || "max-content";
+        }).join(' '), (function(){
+          var i$, to$, results$ = [];
+          for (i$ = this.xif[t][2], to$ = this.dim[t]; i$ < to$; ++i$) {
+            results$.push(i$);
+          }
+          return results$;
+        }.call(this)).map(function(it){
+          return this$._size[t][it + this$.pos[t] - this$.xif[t][1]] || "max-content";
+        }).join(' ')
+      ].filter(function(it){
+        return it;
       }).join(' ');
-      return this.dom.inner.style.gridTemplateRows = ("repeat(" + this.xif.row[1] + ", max-content) ") + (function(){
-        var i$, to$, results$ = [];
-        for (i$ = 0, to$ = this.frozen.row; i$ < to$; ++i$) {
-          results$.push(i$);
-        }
-        return results$;
-      }.call(this)).map(function(it){
-        return this$._size.row[it] || "max-content";
-      }).join(' ') + ' ' + (function(){
-        var i$, to$, results$ = [];
-        for (i$ = this.xif.row[2], to$ = this.dim.row; i$ < to$; ++i$) {
-          results$.push(i$);
-        }
-        return results$;
-      }.call(this)).map(function(it){
-        return this$._size.row[it + this$.pos.row - this$.xif.row[1]] || "max-content";
-      }).join(' ');
+    },
+    regrid: function(){
+      this.dom.inner.style.gridTemplateColumns = this._template('col');
+      return this.dom.inner.style.gridTemplateRows = this._template('row');
     },
     _viewport: function(){
       var sbox, inner, ret, i$, to$, y, n, x;

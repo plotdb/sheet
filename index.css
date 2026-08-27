@@ -23,6 +23,9 @@
 /* use em may lead to nondeterminstic behavior in border rendering, due to rounding */
   padding: 1px 3px;
   min-width: 48px;
+/* an empty cell has no line box, so without this every all-empty row collapses.
+    matches line-height + padding + border, as box-sizing is border-box */
+  min-height: 29px;
   line-height: 26px;
   box-sizing: border-box;
   white-space: pre;
