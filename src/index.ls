@@ -335,11 +335,19 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       else if dx > 0 => @_mr dx
       else if dx < 0 => @_ml dx
       @render-selection!
-      # # if we want to overscroll
+      # the two lines below would hand the scroll back to the page once we run out of
+      # cells to move through. they stay off on purpose, and this is not unfinished work:
+      # reaching the edge of the sheet and having the page slip away underneath the same
+      # gesture is worse than simply stopping. while scrolling is enabled the gesture
+      # belongs to the sheet from beginning to end.
+      #
+      # if we want to overscroll
       # if @pos.row == 0 and e.deltaY < 0 => return
       # if @pos.col == 0 and e.deltaX < 0 => return
-      # despite the above hack, we still preventDefault here for default behavior.
-      # that is, once users are scrolling in sheet, the event should not trigger default behavior.
+      #
+      # so we still preventDefault here, unconditionally, and the page stays put.
+      # `enableScrolling: false` is the other half of this: it says the gesture is not
+      # ours at all, and then the page should have it - see the `no-scrolling` class.
       e.preventDefault!
     ), {passive: false}
 
