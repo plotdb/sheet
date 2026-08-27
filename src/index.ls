@@ -405,17 +405,23 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @_size = ({row: [], col: []} <<< it){row, col}
     @regrid!
 
+  # grid template for one axis: the index / fixed tracks, then the frozen ones, then the
+  # scrolling rest. note that `repeat(0, ...)` is invalid CSS and takes the whole
+  # declaration down with it, leaving every track auto sized - so the first segment is
+  # emitted only when it holds anything, which is not the case for an axis with neither
+  # an index nor a fixed track. padding it to `repeat(1, ...)` is not a fix: the track
+  # count must match the number of cells per line, and a spare track at the front shifts
+  # every cell one place over and wraps the line.
+  _template: (t) ->
+    [
+      (if @xif[t].1 > 0 => "repeat(#{@xif[t].1}, max-content)" else '')
+      [0 til @frozen[t]].map(~> @_size[t][it] or "max-content").join(' ')
+      [@xif[t].2 til @dim[t]].map(~> @_size[t][it + @pos[t] - @xif[t].1] or "max-content").join(' ')
+    ].filter(-> it).join(' ')
+
   regrid: ->
-    @dom.inner.style.gridTemplateColumns = (
-      "repeat(#{@xif.col.1}, max-content) " +
-      [0 til @frozen.col].map(~> @_size.col[it] or "max-content").join(' ') + ' ' +
-      [@xif.col.2 til @dim.col].map(~> @_size.col[it + @pos.col - @xif.col.1] or "max-content").join(' ')
-    )
-    @dom.inner.style.gridTemplateRows = (
-      "repeat(#{@xif.row.1}, max-content) " +
-      [0 til @frozen.row].map(~> @_size.row[it] or "max-content").join(' ') + ' ' +
-      [@xif.row.2 til @dim.row].map(~> @_size.row[it + @pos.row - @xif.row.1] or "max-content").join(' ')
-    )
+    @dom.inner.style.gridTemplateColumns = @_template \col
+    @dom.inner.style.gridTemplateRows = @_template \row
 
   # number of scrollable ( that is, non idx / fixed / frozen ) cells visible in viewport.
   # it's not @dim - fix since @dim is the size of the rendered window, which may be

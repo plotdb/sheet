@@ -30,6 +30,10 @@ block body
       .btn.btn-sm.btn-outline-secondary(ld="cur") Show Current Selection
     .aspect-ratio.ratio-1by1
       #root.shadow-sm.border.border-secondary.rounded
+    h6.mt-4.mb-1 No Index / No Fixed
+    p.text-sm.text-muted.mb-2 `idx` and `fixed` both zero, so the sheet has no gutters at all and the data provides its own header row / column. `frozen` keeps them in view.
+    .aspect-ratio.ratio-2by1
+      #plain.shadow-sm.border.border-secondary.rounded
   .dropdown-menu.shadow-sm(ld="menu")
     .dropdown-item(ld="del") Del Row/Col
     .dropdown-item(ld="ins") Ins Row/Col
@@ -108,6 +112,22 @@ block script
       m.classList.toggle \show, false
       evt.preventDefault!
       evt.stopPropagation!
+
+    # with neither an index nor a fixed row/col there is nothing to put in the leading
+    # `repeat()` of the grid template - the case that used to collapse every track.
+    # the trailing empty rows are the other thing to eyeball here: they hold their
+    # height only because `.cell` carries a `min-height`, an empty cell has no line box.
+    new sheet do
+      root: '#plain'
+      idx: {row: false, col: false}
+      frozen: {row: 1, col: 1}
+      size: {col: ['8em']}
+      data: [
+        ['', 'John', 'Joe', 'David', 'Mary']
+        ['Cand 1', 90, 60, 80, 70]
+        ['Cand 2', 80, 50, 70, 60]
+        ['Cand 3', 70, 40, 60, 50]
+      ]
 
     /*
     c.innerHTML = """
