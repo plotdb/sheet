@@ -1328,7 +1328,7 @@
       return this.renderSelection();
     },
     edit: function(arg$){
-      var node, quick, idx, ref$, lbox, box, rbox, sx, sy, v;
+      var node, quick, idx, raw, ref$, lbox, box, rbox, sx, sy, v;
       node = arg$.node, quick = arg$.quick;
       if (!this._editing) {
         return;
@@ -1344,11 +1344,17 @@
       })) {
         return;
       }
+      raw = (this._data[idx.row] || [])[idx.col];
+      raw = raw == null
+        ? ''
+        : typeof raw === 'object'
+          ? node.textContent || ''
+          : '' + raw;
       ref$ = this.editing;
       ref$.node = node;
       ref$.quick = quick;
       ref$.on = true;
-      this.dom.layout.textContent = node.textContent;
+      this.dom.layout.textContent = raw;
       lbox = this.dom.layout.getBoundingClientRect();
       box = node.getBoundingClientRect();
       rbox = this.dom.sheet.getBoundingClientRect();
@@ -1362,9 +1368,7 @@
       ref$ = this.dom.textarea.style;
       ref$.width = Math.max(lbox.width, box.width + 1) + "px";
       ref$.height = Math.max(lbox.height, box.height + 1) + "px";
-      this.dom.textarea.value = v = quick
-        ? ''
-        : node.textContent || '';
+      this.dom.textarea.value = v = quick ? '' : raw;
       this.dom.textarea.focus();
       return this.dom.textarea.setSelectionRange(v.length, v.length);
     },

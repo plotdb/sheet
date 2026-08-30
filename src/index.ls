@@ -724,8 +724,18 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if !idx or idx.col < 0 or idx.row < 0 => return
     if @_ccfg and @_ccfg {row: idx.row, col: idx.col, type: \readonly} => return
 
+    # a cell may render something other than what it stores ( a formatted number, for one ),
+    # so editing must start from the raw value in @_data instead of what's on screen.
+    # objects ( advanced content ) have no textual form - fall back to what's rendered.
+    raw = (@_data[idx.row] or [])[idx.col]
+    raw = (
+      if !raw? => ''
+      else if typeof(raw) == \object => (node.textContent or '')
+      else '' + raw
+    )
+
     @editing <<< {node, quick, on: true}
-    @dom.layout.textContent = node.textContent
+    @dom.layout.textContent = raw
     lbox = @dom.layout.getBoundingClientRect!
     box = node.getBoundingClientRect!
     rbox = @dom.sheet.getBoundingClientRect!
@@ -739,7 +749,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @dom.textarea.style <<<
       width: "#{Math.max(lbox.width, box.width + 1)}px"
       height: "#{Math.max(lbox.height, box.height + 1)}px"
-    @dom.textarea.value = v = (if quick => '' else (node.textContent or ''))
+    @dom.textarea.value = v = (if quick => '' else raw)
     @dom.textarea.focus!
     @dom.textarea.setSelectionRange v.length, v.length
 

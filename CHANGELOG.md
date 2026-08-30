@@ -1,5 +1,15 @@
 # Change Logs
 
+## master
+
+ - fix bug: editing a cell whose rendered text differs from what it stores ( a number
+   with a `format` from `cellcfg`, for one ) puts the rendered text into the editor, so
+   committing writes that back as the value. `1234567` shown as `1,234,567` becomes the
+   string `1,234,567`, which then renders as `NaN`. editing now starts from the raw
+   value in `@_data`. cells holding advanced content ( an object ) keep falling back to
+   what is rendered, there being no other textual form.
+
+
 ## v0.7.5
 
  - fix bug: `enableScrolling: false` stops the wheel handler but the sheet still swallows
