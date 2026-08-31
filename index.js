@@ -68,6 +68,7 @@
       : opt.root;
     this.evtHandler = {};
     this._ccfg = typeof opt.cellcfg === 'function' ? opt.cellcfg : null;
+    this._dsp = typeof opt.display === 'function' ? opt.display : null;
     this._data = opt.data || [];
     this._size = {
       row: (ref$ = import$({
@@ -1016,88 +1017,115 @@
         });
       }
     },
+    _coord: function(x, y){
+      var ref$, fc, fr, ret, axis;
+      ref$ = [x < this.xif.col[2], y < this.xif.row[2]], fc = ref$[0], fr = ref$[1];
+      ret = {
+        x: x,
+        y: y,
+        col: (fc
+          ? 0
+          : this.pos.col) + x - this.xif.col[1],
+        row: (fr
+          ? 0
+          : this.pos.row) + y - this.xif.row[1],
+        frozen: {
+          col: fc,
+          row: fr
+        }
+      };
+      if (x < this.xif.col[0] || y < this.xif.row[0]) {
+        axis = x >= this.xif.col[0]
+          ? 'col'
+          : y >= this.xif.row[0] ? 'row' : null;
+        return ret.type = 'idx', ret.axis = axis, ret.className = "cell idx", ret;
+      }
+      if (x < this.xif.col[1] || y < this.xif.row[1]) {
+        return ret.type = 'fixed', ret.className = "cell fixed", ret;
+      }
+      return import$(ret, {
+        type: 'cell',
+        className: fc && fr
+          ? "cell frozen fixed"
+          : fc || fr ? "cell frozen" : "cell"
+      });
+    },
+    _format: function(v, arg$){
+      var row, col, fc;
+      row = arg$.row, col = arg$.col;
+      if (!this._ccfg || sheet._d3warning || isNaN(parseFloat(v))) {
+        return v;
+      }
+      if (!(fc = this._ccfg({
+        type: 'format',
+        row: row,
+        col: col
+      }))) {
+        return v;
+      }
+      if ((typeof d3 != 'undefined' && d3 !== null) && d3.format) {
+        return d3.format(fc)(v);
+      }
+      console.warn("[@plotdb/sheet] cell format provided yet d3.format not available. skip formatting.");
+      sheet._d3warning = true;
+      return v;
+    },
+    _display: function(raw, arg$){
+      var row, col, v;
+      row = arg$.row, col = arg$.col;
+      v = !this._dsp
+        ? raw
+        : this._dsp({
+          raw: raw,
+          row: row,
+          col: col
+        });
+      return this._format(v, {
+        row: row,
+        col: col
+      });
+    },
     _content: function(arg$){
-      var x, y, n, v, ref$, key$, content, className, fr, clsext, clsopt, fc;
+      var x, y, n, c, content, ref$, key$, clsext, clsopt;
       x = arg$.x, y = arg$.y, n = arg$.n;
       if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
         return;
       }
-      ref$ = x < this.xif.col[0] && y < this.xif.col[0]
-        ? ["", "cell idx"]
-        : x < this.xif.col[0]
-          ? (v = y < this.xif.row[1]
+      c = this._coord(x, y);
+      content = c.type === 'idx'
+        ? c.axis === 'row'
+          ? y < this.xif.row[1]
             ? " "
-            : y < this.xif.row[2]
-              ? y - this.xif.row[1] + 1
-              : y - this.xif.row[1] + this.pos.row + 1, [v, "cell idx"])
-          : y < this.xif.row[0]
-            ? (v = x < this.xif.col[1]
-              ? " "
-              : x < this.xif.col[2]
-                ? idxToLabel(x - this.xif.col[1])
-                : idxToLabel(x - this.xif.col[1] + this.pos.col), [v, "cell idx"])
-            : x < this.xif.col[1]
-              ? [null, "cell fixed"]
-              : y < this.xif.row[1]
-                ? [null, "cell fixed"]
-                : x < this.xif.col[2] && y < this.xif.row[2]
-                  ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]], "cell frozen fixed"]
-                  : x < this.xif.col[2]
-                    ? [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[x - this.xif.col[1]], "cell frozen"]
-                    : y < this.xif.row[2]
-                      ? [((ref$ = this._data)[key$ = y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]], "cell frozen"]
-                      : [((ref$ = this._data)[key$ = this.pos.row + y - this.xif.row[1]] || (ref$[key$] = []))[this.pos.col + x - this.xif.col[1]], "cell"], content = ref$[0], className = ref$[1];
+            : c.row + 1
+          : c.axis === 'col' ? x < this.xif.col[1]
+            ? " "
+            : idxToLabel(c.col) : ""
+        : c.type === 'fixed'
+          ? ""
+          : this._display(((ref$ = this._data)[key$ = c.row] || (ref$[key$] = []))[c.col], c);
       if (!(content != null)) {
         content = "";
       }
-      fr = /frozen/.exec(className);
-      clsext = x >= this.xif.col[0] && y >= this.xif.row[0] ? (this.cls.col[(fr
-        ? 0
-        : this.pos.col) + x - this.xif.col[1]] || '') + ' ' + (this.cls.row[(fr
-        ? 0
-        : this.pos.row) + y - this.xif.row[1]] || '') : '';
-      clsopt = !this._ccfg
+      clsext = c.type === 'idx'
+        ? ''
+        : (this.cls.col[c.col] || '') + ' ' + (this.cls.row[c.row] || '');
+      clsopt = (!this._ccfg
         ? ''
         : this._ccfg({
           type: 'class',
-          col: (fr
-            ? 0
-            : this.pos.col) + x - this.xif.col[1],
-          row: (fr
-            ? 0
-            : this.pos.row) + y - this.xif.row[1]
-        }) || '';
-      n.className = [className, clsext, clsopt].filter(function(it){
+          row: c.row,
+          col: c.col
+        })) || '';
+      n.className = [c.className, clsext, clsopt].filter(function(it){
         return it.trim();
       }).join(' ').trim();
-      if (content !== null) {
-        if (typeof content === 'object') {
-          if (content.type === 'dom') {
-            n.textContent = "";
-            return n.appendChild(content.node);
-          }
-        } else {
-          if (this._ccfg && !sheet._d3warning && !isNaN(parseFloat(content))) {
-            fc = this._ccfg({
-              type: 'format',
-              col: (fr
-                ? 0
-                : this.pos.col) + x - this.xif.col[1],
-              row: (fr
-                ? 0
-                : this.pos.row) + y - this.xif.row[1]
-            });
-            if (fc) {
-              if ((typeof d3 != 'undefined' && d3 !== null) && d3.format) {
-                content = d3.format(fc)(content);
-              } else {
-                console.warn("[@plotdb/sheet] cell format provided yet d3.format not available. skip formatting.");
-                sheet._d3warning = true;
-              }
-            }
-          }
-          return n.textContent = content;
+      if (typeof content === 'object') {
+        if (content.type === 'dom') {
+          n.textContent = "";
+          return n.appendChild(content.node);
         }
+      } else {
+        return n.textContent = content;
       }
     },
     _md: function(mag){
@@ -1328,7 +1356,7 @@
       return this.renderSelection();
     },
     edit: function(arg$){
-      var node, quick, idx, ref$, lbox, box, rbox, sx, sy, v;
+      var node, quick, idx, raw, ref$, lbox, box, rbox, sx, sy, v;
       node = arg$.node, quick = arg$.quick;
       if (!this._editing) {
         return;
@@ -1344,11 +1372,17 @@
       })) {
         return;
       }
+      raw = (this._data[idx.row] || [])[idx.col];
+      raw = raw == null
+        ? ''
+        : typeof raw === 'object'
+          ? node.textContent || ''
+          : '' + raw;
       ref$ = this.editing;
       ref$.node = node;
       ref$.quick = quick;
       ref$.on = true;
-      this.dom.layout.textContent = node.textContent;
+      this.dom.layout.textContent = raw;
       lbox = this.dom.layout.getBoundingClientRect();
       box = node.getBoundingClientRect();
       rbox = this.dom.sheet.getBoundingClientRect();
@@ -1362,9 +1396,7 @@
       ref$ = this.dom.textarea.style;
       ref$.width = Math.max(lbox.width, box.width + 1) + "px";
       ref$.height = Math.max(lbox.height, box.height + 1) + "px";
-      this.dom.textarea.value = v = quick
-        ? ''
-        : node.textContent || '';
+      this.dom.textarea.value = v = quick ? '' : raw;
       this.dom.textarea.focus();
       return this.dom.textarea.setSelectionRange(v.length, v.length);
     },
@@ -1385,32 +1417,22 @@
       return ref$ = this.editing, ref$.node = null, ref$.on = false, ref$;
     },
     index: function(node){
-      var idx, x, y, col, row;
+      var idx, x, c;
       idx = Array.from(this.dom.inner.childNodes).indexOf(node);
       if (idx < 0) {
         return null;
       }
       x = idx % this.dim.col;
-      y = (idx - x) / this.dim.col;
-      if (x < this.xif.col[1]) {
-        col = -1;
-      } else if (x < this.xif.col[2]) {
-        col = x - this.xif.col[1];
-      } else {
-        col = x - this.xif.col[1] + this.pos.col;
-      }
-      if (y < this.xif.row[1]) {
-        row = -1;
-      } else if (y < this.xif.row[2]) {
-        row = y - this.xif.row[1];
-      } else {
-        row = y - this.xif.row[1] + this.pos.row;
-      }
+      c = this._coord(x, (idx - x) / this.dim.col);
       return {
-        x: x,
-        y: y,
-        col: col,
-        row: row
+        x: c.x,
+        y: c.y,
+        col: c.x < this.xif.col[1]
+          ? -1
+          : c.col,
+        row: c.y < this.xif.row[1]
+          ? -1
+          : c.row
       };
     },
     cell: function(opt){

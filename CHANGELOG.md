@@ -1,5 +1,27 @@
 # Change Logs
 
+## v0.7.6
+
+ - support `display`, a function translating the value a cell stores into the value it
+   shows. `cellcfg`'s `format` applies to whatever it returns, and editing keeps working
+   on the stored value, so a cell can now hold one thing and show another.
+ - fix bug: the class from `cellcfg` and from the `class` option lands on the wrong cell
+   in a frozen row / column once the sheet is scrolled, since the coordinate used to look
+   it up treated a cell frozen on one axis as frozen on both. the idx band, which
+   addresses no data of its own, was given a scrolled coordinate as well.
+ - fix bug: a sheet with an index column but no index row leaves the first row label
+   blank, the corner test comparing both axes against the column offset.
+ - refactor: grid position to data coordinate now lives in one place ( `_coord` ) rather
+   than three, and rendering a value goes through `_display` rather than formatting
+   inline.
+ - fix bug: editing a cell whose rendered text differs from what it stores ( a number
+   with a `format` from `cellcfg`, for one ) puts the rendered text into the editor, so
+   committing writes that back as the value. `1234567` shown as `1,234,567` becomes the
+   string `1,234,567`, which then renders as `NaN`. editing now starts from the raw
+   value in `@_data`. cells holding advanced content ( an object ) keep falling back to
+   what is rendered, there being no other textual form.
+
+
 ## v0.7.5
 
  - fix bug: `enableScrolling: false` stops the wheel handler but the sheet still swallows
