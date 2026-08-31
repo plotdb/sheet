@@ -66,6 +66,12 @@ initialize:
      the data plus one page. scrolling beyond it is still allowed - the thumb just sticks
      to the end. the scrollbar hides itself when there is nothing to scroll.
    - dragging the thumb moves the view; clicking on the track pages toward the clicked side.
+ - `display(opt)`: custom function translating the value a cell stores into the value it
+   shows. `opt` contains `raw` ( the stored value, which may be undefined for an empty
+   cell ), `row` and `col`. return what the cell should show.
+   - the `format` from `cellcfg` applies to whatever this returns, so a computed value
+     still gets formatted.
+   - editing always works on the stored value, never on what is shown.
  - `cellcfg(opt)`: custom cell definition function. return value based on the given `opt`, which contains:
    - `row`: row of the cell to query
    - `col`: col of the cell to query
