@@ -185,3 +185,39 @@ initabs()
     &:before { content: "←" }
     &:after { content: "→" }
 
+
+/* click-to-interact guard: covers the grid until clicked, so a page scroll passing over
+the sheet reaches the page instead of being taken by us. the wheel hand-off itself is the
+`no-scrolling` class above - this is only what the user sees and clicks.
+z-index sits above every part of the grid ( idx cells at 100, scrollbars at 130 ), and
+`isolation` keeps the overlay inside the sheet's own stacking context, so it never paints
+over whatever the host page stacks above the sheet ( a sticky nav, typically ). */
+.sheet.has-guard
+  isolation: isolate
+.sheet
+  .sheet-guard
+    initabs()
+    z-index: 200
+    display: flex
+    width: 100%
+    height: 100%
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    outline: none
+    background: rgba(28,34,48,.16)
+    opacity: 0
+    pointer-events: none
+    transition: opacity .2s
+    .hint
+      font-size: .9375rem
+      font-weight: 600
+      color: #fff
+      background: rgba(20,25,40,.94)
+      border: 1px solid rgba(255,255,255,.14)
+      border-radius: 999px
+      padding: 9px 20px
+      box-shadow: 0 8px 24px rgba(20,25,40,.30)
+  &.guarded .sheet-guard
+    opacity: 1
+    pointer-events: auto

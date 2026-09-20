@@ -34,6 +34,13 @@ block body
     p.text-sm.text-muted.mb-2 `idx` and `fixed` both zero, so the sheet has no gutters at all and the data provides its own header row / column. `frozen` keeps them in view.
     .aspect-ratio.ratio-2by1
       #plain.shadow-sm.border.border-secondary.rounded
+    h6.mt-4.mb-1 Scroll Guard
+    p.text-sm.text-muted.mb-2 `guard` covers the sheet until it is clicked. while it is up the wheel belongs to the page, so scrolling past the sheet no longer gets stuck in it. leaving the sheet puts the guard back after `delay` ( 2s ), and coming back within that cancels it.
+    .aspect-ratio.ratio-2by1
+      #guarded.shadow-sm.border.border-secondary.rounded
+    p.text-sm.text-muted.mt-2 scroll the page with the pointer over the sheet above: the page moves, the grid does not. click it and the wheel is the sheet's. the button below toggles the same state through the `guard()` API.
+    .d-flex.g-2.mb-4
+      .btn.btn-sm.btn-outline-secondary(ld="guard") Toggle Guard
   .dropdown-menu.shadow-sm(ld="menu")
     .dropdown-item(ld="del") Del Row/Col
     .dropdown-item(ld="ins") Ins Row/Col
@@ -59,6 +66,7 @@ block script
         all: -> s.select {}
         del: -> s.slice!
         ins: -> s.insert!
+        guard: -> g.guard(!g.guard!)
         cur: ->
           app.selection = s.select!
           ldcv.selection.toggle!
@@ -128,6 +136,20 @@ block script
         ['Cand 2', 80, 50, 70, 60]
         ['Cand 3', 70, 40, 60, 50]
       ]
+
+    # `guard` is what keeps a sheet from swallowing a page scroll that merely passes over
+    # it. it is off by default - pass `true` for the stock overlay, or an object to say
+    # what it reads and how long it waits before coming back.
+    g = new sheet do
+      root: '#guarded'
+      scrollbar: true
+      guard:
+        text: "click to interact"
+        delay: 2000
+      idx: {row: true, col: true}
+      frozen: {row: 1, col: 1}
+      data: [0 til 40].map (r) -> [0 til 12].map (c) -> "r#{r}c#{c}"
+    g.on \guard, -> console.log "guard", it
 
     /*
     c.innerHTML = """

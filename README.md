@@ -66,6 +66,17 @@ initialize:
      the data plus one page. scrolling beyond it is still allowed - the thumb just sticks
      to the end. the scrollbar hides itself when there is nothing to scroll.
    - dragging the thumb moves the view; clicking on the track pages toward the clicked side.
+ - `guard`: default false. show a click-to-interact guard over the sheet if set.
+   - the sheet takes the wheel whenever the pointer is over it, and keeps the gesture to
+     the end - so a page scroll that happens to pass over the sheet gets stuck in it. the
+     guard is the way out: until it is clicked the wheel goes to the page, not to us.
+   - pass `true` for the default look ( a dim overlay with a centered hint ), or an object:
+     - `text`: hint text. default `click to interact`.
+     - `delay`: how long after the pointer leaves the sheet the guard comes back, in ms.
+       default 2000. re-entering within the delay cancels it.
+     - `render(node)`: fill the guard node yourself. `text` is ignored when given.
+   - a tap outside the sheet re-arms it too, there being no `mouseleave` on touch.
+   - the guard node is `.sheet-guard`, and the sheet gets a `guarded` class while armed.
  - `cellcfg(opt)`: custom cell definition function. return value based on the given `opt`, which contains:
    - `row`: row of the cell to query
    - `col`: col of the cell to query
@@ -83,6 +94,9 @@ initialize:
  - `goto({row, col})`: set grid view starting from coordinate {row, col}
  - `render()`: force to re-render visible cells
  - `editing(v)`: set edit status to v, or return edit status if v is not provided.
+ - `guard(v)`: arm ( `true` ) or disarm ( `false` ) the guard, or return whether it is
+   armed if `v` is not provided. does nothing when the `guard` option is off.
+   - the `guard` event fires with the new state on every change.
  - `data(d)`: replace data completely with `d` and re-render.
    - return current data if `d` is omitted.
    - `d` is in the same format with the constructor `data` option

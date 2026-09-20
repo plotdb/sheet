@@ -84,6 +84,20 @@ sheet = (opt={}) ->
   # while we handle the wheel ourselves that is what we want, but once scrolling is off the
   # sheet has no business holding on to the gesture. see index.styl.
   if !@enable-scrolling => @dom.sheet.classList.add \no-scrolling
+  # click-to-interact guard. it covers the grid and hands the wheel back to the page until
+  # clicked, so a page scroll passing over the sheet isn't swallowed by it. see index.styl.
+  @_guard = if !@opt.guard => null else if typeof(@opt.guard) == \object => @opt.guard else {}
+  if @_guard =>
+    @dom.guard = document.createElement(\div)
+      ..classList.add \sheet-guard
+      ..setAttribute \tabindex, 0
+    if typeof(@_guard.render) == \function => @_guard.render @dom.guard
+    else
+      @dom.guard.appendChild document.createElement(\div)
+        ..classList.add \hint
+        ..textContent = (@_guard.text or "click to interact")
+    @dom.sheet.classList.add \has-guard
+    @dom.sheet.appendChild @dom.guard
   @dom.edit.appendChild @dom.textarea
   @_init!
   @
@@ -313,6 +327,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       # this may affect the host document so we make it configurable by user, and by default enabled.
       inscope = @event-in-scope(e)
       if !@enable-scrolling => return
+      # while the guard is armed the gesture is not ours at all - not even the scroll lock.
+      if @_guard-armed => return
       if (!(@opt.scroll-lock?) or @opt.scroll-lock) => # if scroll-lock is enabled
         if Math.abs(e.deltaX) > Math.abs(e.deltaY) => # and it's horizontal scrolling
           if inscope or e.target == document.body => # and is in interested region
@@ -352,6 +368,46 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     ), {passive: false}
 
     @render-scrollbar!
+    @_init-guard!
+
+  # guard is armed from the start and disarmed by a click on it. leaving the sheet re-arms
+  # it after `delay`, so the pointer merely crossing it on the way elsewhere doesn't lock
+  # the sheet back up mid-interaction. touch gets no mouseleave, hence the tap-outside path.
+  _init-guard: ->
+    if !@_guard => return
+    delay = if @_guard.delay? => @_guard.delay else 2000
+    disarm = (e) ~>
+      e.preventDefault!
+      e.stopPropagation!
+      @guard false
+    rearm = ~>
+      if @_guard-timer => clearTimeout @_guard-timer
+      @_guard-timer = setTimeout (~> @guard true), delay
+    @dom.guard.addEventListener \click, disarm
+    @dom.guard.addEventListener \keydown, (e) ~>
+      if e.keyCode == 13 or e.keyCode == 32 => disarm e
+    @dom.sheet.addEventListener \mouseleave, rearm
+    @dom.sheet.addEventListener \mouseenter, ~>
+      if !@_guard-timer => return
+      clearTimeout @_guard-timer
+      @_guard-timer = null
+    document.addEventListener \pointerdown, ((e) ~>
+      if @guard! or @event-in-scope(e) => return
+      rearm!
+    ), {passive: true}
+    @guard true
+
+  guard: (v) ->
+    if !(v?) => return !!@_guard-armed
+    if !@_guard => return
+    if @_guard-timer =>
+      clearTimeout @_guard-timer
+      @_guard-timer = null
+    @_guard-armed = v = !!v
+    @dom.sheet.classList.toggle \guarded, v
+    # an armed guard gives the wheel to the page, the same way `enableScrolling: false` does.
+    @dom.sheet.classList.toggle \no-scrolling, (v or !@enable-scrolling)
+    @fire \guard, v
 
   select: (o) ->
     if !arguments.length =>
