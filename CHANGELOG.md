@@ -1,6 +1,6 @@
 # Change Logs
 
-## master
+## v0.7.6
 
  - add `guard` option: a click-to-interact overlay over the sheet. the sheet takes the
    wheel for as long as the pointer is over it and never hands the gesture back, so a
