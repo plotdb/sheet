@@ -32,9 +32,9 @@ sheet 本身是 `@_data` 的薄 view，寫入與渲染路徑集中，對 addon �
 
 ## 需要的核心接點
 
- - `_content` — 目前直接把 `@_data` 的值寫進 `textContent`。需要
-   display value 與 raw value 分離的一層。
- - `edit` — 已修正為讀 `@_data` 的原始值 ( 待進版 )。公式的編輯行為直接受益，
+ - `_content` — 已於 v0.7.6 拆出 `_coord` 與 `_display`。座標換算集中於 `_coord`，
+   raw 到顯示值的轉換集中於 `_display`，並開放 `display` 這個 option 作為擴充點。
+ - `edit` — 已於 v0.7.6 修正為讀 `@_data` 的原始值。公式的編輯行為直接受益，
    不必再處理一次。
  - `set` — 唯一的寫入點，且會 fire `change`。重算掛在這裡最乾淨。
  - `sort` / `insert` / `slice` / `data()` — 直接動 `@_data`，繞過 `set`。
@@ -65,8 +65,8 @@ sheet 這邊只加最小的擴充點：一個 `opt.formula` 開關，加上一�
 
 ## 工作項目
 
- - [x] `edit` 讀原始值而非渲染後的文字 ( 已完成，待進版 )
- - [ ] `_content` 拆出 display value 的擴充點
+ - [x] `edit` 讀原始值而非渲染後的文字 ( v0.7.6 )
+ - [x] `_content` 拆出 display value 的擴充點 ( v0.7.6 )
  - [ ] plugin 介面與 `opt.formula` 開關
  - [ ] `sort` / `insert` / `slice` / `data()` 的 structural 通知
  - [ ] parser 與 AST

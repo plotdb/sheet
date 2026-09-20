@@ -77,6 +77,12 @@ initialize:
      - `render(node)`: fill the guard node yourself. `text` is ignored when given.
    - a tap outside the sheet re-arms it too, there being no `mouseleave` on touch.
    - the guard node is `.sheet-guard`, and the sheet gets a `guarded` class while armed.
+ - `display(opt)`: custom function translating the value a cell stores into the value it
+   shows. `opt` contains `raw` ( the stored value, which may be undefined for an empty
+   cell ), `row` and `col`. return what the cell should show.
+   - the `format` from `cellcfg` applies to whatever this returns, so a computed value
+     still gets formatted.
+   - editing always works on the stored value, never on what is shown.
  - `cellcfg(opt)`: custom cell definition function. return value based on the given `opt`, which contains:
    - `row`: row of the cell to query
    - `col`: col of the cell to query

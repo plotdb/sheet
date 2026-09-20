@@ -40,6 +40,7 @@ sheet = (opt={}) ->
   @root = if typeof(opt.root) == \string => document.querySelector(opt.root) else opt.root
   @evt-handler = {}
   @_ccfg = if typeof(opt.cellcfg) == \function => opt.cellcfg else null
+  @_dsp = if typeof(opt.display) == \function => opt.display else null
   @_data = opt.data or []
   @_size = ({row: [], col: []} <<< opt.size){row, col}
   @cls = ({row: [], col: []} <<< opt.class){row, col}
@@ -602,65 +603,69 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     if touched => @fire \change, {row, col, data, range: !!range}
 
   # re-render cell with the content they suppose to have
+  # which data a rendered cell shows depends on where we are and what is frozen, so this
+  # is the one place that translation lives. `row` / `col` are the data coordinate the
+  # cell addresses - the idx band has none of its own, yet still needs one to know which
+  # row / col it labels, so we give it the coordinate of the line it sits on.
+  _coord: (x, y) ->
+    # a frozen cell stays put on its axis, so what it shows doesn't shift with @pos.
+    [fc, fr] = [x < @xif.col.2, y < @xif.row.2]
+    ret =
+      x: x, y: y
+      col: (if fc => 0 else @pos.col) + x - @xif.col.1
+      row: (if fr => 0 else @pos.row) + y - @xif.row.1
+      frozen: {col: fc, row: fr}
+    if x < @xif.col.0 or y < @xif.row.0 =>
+      axis = if x >= @xif.col.0 => \col else if y >= @xif.row.0 => \row else null
+      return ret <<< {type: \idx, axis: axis, className: "cell idx"}
+    if x < @xif.col.1 or y < @xif.row.1 => return ret <<< {type: \fixed, className: "cell fixed"}
+    ret <<< do
+      type: \cell
+      className: if fc and fr => "cell frozen fixed" else if fc or fr => "cell frozen" else "cell"
+
+  # apply the `format` from cellcfg. numbers only, for now.
+  _format: (v, {row, col}) ->
+    if !@_ccfg or sheet._d3warning or isNaN(parseFloat v) => return v
+    if !(fc = @_ccfg {type: \format, row: row, col: col}) => return v
+    if d3? and d3.format => return d3.format(fc)(v)
+    console.warn "[@plotdb/sheet] cell format provided yet d3.format not available. skip formatting."
+    sheet._d3warning = true
+    return v
+
+  # a cell may show something other than the value it stores. this is the one place that
+  # translation happens, so whatever does so - number formatting today, formulas later -
+  # has a single place to hook into, and everything that needs the shown value ( editing
+  # excluded, which wants the raw one ) gets the same answer.
+  # `display` runs first and `format` applies to whatever it returns, so a computed value
+  # still gets formatted. note that `raw` may be undefined for a cell holding no data.
+  _display: (raw, {row, col}) ->
+    v = if !@_dsp => raw else @_dsp {raw: raw, row: row, col: col}
+    @_format v, {row, col}
+
+  # re-render cell with the content they suppose to have
   _content: ({x, y, n}) ->
     if !n and !(n = @dom.inner.childNodes[x + y * @dim.col]) => return
-    [content, className] = if x < @xif.col.0 and y < @xif.col.0 => ["","cell idx"]
-    else if x < @xif.col.0 =>
-      v = if y < @xif.row.1 => " "
-      else if y < @xif.row.2 => y - @xif.row.1 + 1
-      else y - @xif.row.1 + @pos.row + 1
-      [v,"cell idx"]
-    else if y < @xif.row.0 =>
-      v = if x < @xif.col.1 => " "
-      else if x < @xif.col.2 => idx-to-label(x - @xif.col.1)
-      else idx-to-label(x - @xif.col.1 + @pos.col)
-      [v,"cell idx"]
-    else if x < @xif.col.1 => [null, "cell fixed"]
-    else if y < @xif.row.1 => [null, "cell fixed"]
-    else if x < @xif.col.2 and y < @xif.row.2 =>
-      [@_data[][y - @xif.row.1][x - @xif.col.1], "cell frozen fixed"]
-    else if x < @xif.col.2 =>
-      [@_data[][@pos.row + y - @xif.row.1][x - @xif.col.1], "cell frozen"]
-    else if y < @xif.row.2 =>
-      [@_data[][y - @xif.row.1][@pos.col + x - @xif.col.1], "cell frozen"]
-    else [@_data[][@pos.row + y - @xif.row.1][@pos.col + x - @xif.col.1], "cell"]
+    c = @_coord x, y
+    content = if c.type == \idx =>
+      # cells in the fixed band carry no label - there is no line number for them.
+      if c.axis == \row => (if y < @xif.row.1 => " " else c.row + 1)
+      else if c.axis == \col => (if x < @xif.col.1 => " " else idx-to-label c.col)
+      else ""
+    else if c.type == \fixed => ""
+    else @_display @_data[][c.row][c.col], c
     if !(content?) => content = ""
 
-    fr = /frozen/.exec(className)
-    clsext = if x >= @xif.col.0 and y >= @xif.row.0 =>
-      (
-        (@cls.col[(if fr => 0 else @pos.col) + x - @xif.col.1] or '') + ' ' +
-        (@cls.row[(if fr => 0 else @pos.row) + y - @xif.row.1] or '')
-      )
-    else ''
-    clsopt = if !@_ccfg => ''
-    else @_ccfg({
-      type: \class
-      col: (if fr => 0 else @pos.col) + x - @xif.col.1
-      row: (if fr => 0 else @pos.row) + y - @xif.row.1
-    }) or ''
-    n.className = [ className, clsext, clsopt ].filter(->it.trim!).join(' ').trim!
+    clsext = if c.type == \idx => '' else
+      ((@cls.col[c.col] or '') + ' ' + (@cls.row[c.row] or ''))
+    clsopt = (if !@_ccfg => '' else @_ccfg {type: \class, row: c.row, col: c.col}) or ''
+    n.className = [ c.className, clsext, clsopt ].filter(->it.trim!).join(' ').trim!
 
-    if content != null =>
-      # TODO support advanced content
-      if typeof(content) == \object =>
-        if content.type == \dom =>
-          n.textContent = ""
-          n.appendChild content.node
-      else
-        # we support format for number only, for now
-        if @_ccfg and !sheet._d3warning and !isNaN(parseFloat(content)) =>
-          fc = @_ccfg({
-            type: \format
-            col: (if fr => 0 else @pos.col) + x - @xif.col.1
-            row: (if fr => 0 else @pos.row) + y - @xif.row.1
-          })
-          if fc =>
-            if d3? and d3.format => content = d3.format(fc)(content)
-            else
-              console.warn "[@plotdb/sheet] cell format provided yet d3.format not available. skip formatting."
-              sheet._d3warning = true
-        n.textContent = content
+    # TODO support advanced content
+    if typeof(content) == \object =>
+      if content.type == \dom =>
+        n.textContent = ""
+        n.appendChild content.node
+    else n.textContent = content
 
   # move down
   _md: (mag = 1) ->
@@ -819,17 +824,13 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     idx = Array.from(@dom.inner.childNodes).indexOf(node)
     if idx < 0 => return null
     x = idx % @dim.col
-    y = (idx - x) / @dim.col
-
-    if x < @xif.col.1 => col = -1
-    else if x < @xif.col.2 => col = x - @xif.col.1
-    else col = x - @xif.col.1 + @pos.col
-
-    if y < @xif.row.1 => row = -1
-    else if y < @xif.row.2 => row = y - @xif.row.1
-    else row = y - @xif.row.1 + @pos.row
-
-    return {x, y, col, row}
+    c = @_coord x, ((idx - x) / @dim.col)
+    # the idx / fixed band addresses no data on its axis. we mark that with -1.
+    return {
+      x: c.x, y: c.y
+      col: (if c.x < @xif.col.1 => -1 else c.col)
+      row: (if c.y < @xif.row.1 => -1 else c.row)
+    }
 
   cell: (opt = {}) ->
     r = opt.roughly
