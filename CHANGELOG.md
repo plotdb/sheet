@@ -1,5 +1,17 @@
 # Change Logs
 
+## v0.7.7
+
+ - add `guard` option: a click-to-interact overlay over the sheet. the sheet takes the
+   wheel for as long as the pointer is over it and never hands the gesture back, so a
+   page scroll passing over a sheet gets stuck in it. while the guard is armed the wheel
+   is not ours at all and the page scrolls; clicking it lets the sheet have the wheel,
+   and leaving the sheet re-arms it after a delay ( 2s by default, cancelled by coming
+   back ). a tap outside re-arms it on touch, where there is no `mouseleave`. the look is
+   the default dim overlay with a centered hint, or whatever `render` draws. the new
+   `guard(v)` method arms / disarms it, and the `guard` event reports the change.
+
+
 ## v0.7.6
 
  - support `display`, a function translating the value a cell stores into the value it

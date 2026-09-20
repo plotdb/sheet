@@ -60,7 +60,7 @@
     return val + base;
   };
   sheet = function(opt){
-    var ref$, this$ = this;
+    var ref$, x$, y$, this$ = this;
     opt == null && (opt = {});
     this.opt = opt;
     this.root = typeof opt.root === 'string'
@@ -167,6 +167,25 @@
     }
     if (!this.enableScrolling) {
       this.dom.sheet.classList.add('no-scrolling');
+    }
+    this._guard = !this.opt.guard
+      ? null
+      : typeof this.opt.guard === 'object'
+        ? this.opt.guard
+        : {};
+    if (this._guard) {
+      x$ = this.dom.guard = document.createElement('div');
+      x$.classList.add('sheet-guard');
+      x$.setAttribute('tabindex', 0);
+      if (typeof this._guard.render === 'function') {
+        this._guard.render(this.dom.guard);
+      } else {
+        y$ = this.dom.guard.appendChild(document.createElement('div'));
+        y$.classList.add('hint');
+        y$.textContent = this._guard.text || "click to interact";
+      }
+      this.dom.sheet.classList.add('has-guard');
+      this.dom.sheet.appendChild(this.dom.guard);
     }
     this.dom.edit.appendChild(this.dom.textarea);
     this._init();
@@ -608,6 +627,9 @@
         if (!this$.enableScrolling) {
           return;
         }
+        if (this$._guardArmed) {
+          return;
+        }
         if (!(this$.opt.scrollLock != null) || this$.opt.scrollLock) {
           if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
             if (inscope || e.target === document.body) {
@@ -645,7 +667,67 @@
       }, {
         passive: false
       });
-      return this.renderScrollbar();
+      this.renderScrollbar();
+      return this._initGuard();
+    },
+    _initGuard: function(){
+      var delay, disarm, rearm, this$ = this;
+      if (!this._guard) {
+        return;
+      }
+      delay = this._guard.delay != null ? this._guard.delay : 2000;
+      disarm = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        return this$.guard(false);
+      };
+      rearm = function(){
+        if (this$._guardTimer) {
+          clearTimeout(this$._guardTimer);
+        }
+        return this$._guardTimer = setTimeout(function(){
+          return this$.guard(true);
+        }, delay);
+      };
+      this.dom.guard.addEventListener('click', disarm);
+      this.dom.guard.addEventListener('keydown', function(e){
+        if (e.keyCode === 13 || e.keyCode === 32) {
+          return disarm(e);
+        }
+      });
+      this.dom.sheet.addEventListener('mouseleave', rearm);
+      this.dom.sheet.addEventListener('mouseenter', function(){
+        if (!this$._guardTimer) {
+          return;
+        }
+        clearTimeout(this$._guardTimer);
+        return this$._guardTimer = null;
+      });
+      document.addEventListener('pointerdown', function(e){
+        if (this$.guard() || this$.eventInScope(e)) {
+          return;
+        }
+        return rearm();
+      }, {
+        passive: true
+      });
+      return this.guard(true);
+    },
+    guard: function(v){
+      if (!(v != null)) {
+        return !!this._guardArmed;
+      }
+      if (!this._guard) {
+        return;
+      }
+      if (this._guardTimer) {
+        clearTimeout(this._guardTimer);
+        this._guardTimer = null;
+      }
+      this._guardArmed = v = !!v;
+      this.dom.sheet.classList.toggle('guarded', v);
+      this.dom.sheet.classList.toggle('no-scrolling', v || !this.enableScrolling);
+      return this.fire('guard', v);
     },
     select: function(o){
       var ret, that;
