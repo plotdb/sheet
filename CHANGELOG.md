@@ -1,5 +1,16 @@
 # Change Logs
 
+## v0.8.0
+
+ - add `options` to `cellcfg`: a cell returning a list of options ( `{value, label}` or
+   strings ) becomes a pick list. it stores the value and shows the label, and editing
+   opens the list below the cell - typing narrows it down, up / down picks, enter or a
+   click commits, esc cancels. typed or pasted text naming an option by value or label
+   is stored as its value; anything else is kept and marked with an `invalid` class.
+ - user input ( editing, pasting ) now goes through `set` with `src`, so a committed edit
+   also honours `readonly`.
+
+
 ## v0.7.7
 
  - add `guard` option: a click-to-interact overlay over the sheet. the sheet takes the

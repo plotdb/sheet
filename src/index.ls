@@ -62,14 +62,14 @@ sheet = (opt={}) ->
   # TODO why we use `les` but not `sel`? figure it out and refactor this
   @les = {}
   @editing = {}
-  @dom = Object.fromEntries <[sheet inner caret range edit layout range-cut slide-y slide-x scroll-y scroll-x]>.map ->
+  @dom = Object.fromEntries <[sheet inner caret range edit layout range-cut slide-y slide-x scroll-y scroll-x options]>.map ->
     n = document.createElement(\div)
       ..classList.add it
     [it, n]
   @dom.sheet.setAttribute \tabindex, -1
   @dom.textarea = document.createElement \textarea
   @root.appendChild(@dom.sheet)
-  <[inner caret range edit layout range-cut slide-y slide-x scroll-y scroll-x]>.map ~> @dom.sheet.appendChild @dom[it]
+  <[inner caret range edit layout range-cut slide-y slide-x scroll-y scroll-x options]>.map ~> @dom.sheet.appendChild @dom[it]
   if !@opt.slider => @dom["slide-x"].style.display = @dom["slide-y"].style.display = \none
   @scrollbar = !!@opt.scrollbar
   @enable-scrolling = if @opt.enable-scrolling? => !!@opt.enable-scrolling else true
@@ -112,6 +112,18 @@ sheet.prototype = Object.create(Object.prototype) <<< do
 
     # to prevent grid selection
     @dom.textarea.addEventListener \mousedown, (e) -> e.stopPropagation!
+    # picking an option must neither reach the grid ( which would commit what is typed and
+    # move the selection ) nor take the focus away from the textarea that holds the keys.
+    @dom.options.addEventListener \mousedown, (e) ~>
+      e.stopPropagation!
+      e.preventDefault!
+      if !(n = parent e.target, '.option', @dom.options) => return
+      @editing.hi = +n.dataset.idx
+      @edited!
+      @render-selection!
+    @dom.textarea.addEventListener \input, (e) ~>
+      if !@editing.on or !@editing.opts => return
+      @_opt-filter @dom.textarea.value
     @dom.sheet.addEventListener \contextmenu, (e) ~>
       @fire \menu.on, {evt: e, node: e.target}
       if @_menu-off => return
@@ -217,6 +229,15 @@ sheet.prototype = Object.create(Object.prototype) <<< do
         @render!
       if code == 189 and (e.metaKey or e.ctrlKey) => @slice!
       if code == 187 and (e.metaKey or e.ctrlKey) => @insert!
+      # up / down walk the option list instead of the grid while it is open.
+      if @editing.on and @editing.opts and code in [38 40] =>
+        e.stopPropagation!
+        e.preventDefault!
+        if (len = @editing.list.length) =>
+          @editing.hi = if @editing.hi < 0 => (if code == 40 => 0 else len - 1)
+          else (@editing.hi + (if code == 40 => 1 else -1) + len) % len
+          @_opt-render!
+        return
 
       opt = switch code
       | 37 => {y:  0, x: -1}
@@ -328,6 +349,8 @@ sheet.prototype = Object.create(Object.prototype) <<< do
       # this may affect the host document so we make it configurable by user, and by default enabled.
       inscope = @event-in-scope(e)
       if !@enable-scrolling => return
+      # a long option list scrolls on its own.
+      if @dom.options.contains e.target => return
       # while the guard is armed the gesture is not ours at all - not even the scroll lock.
       if @_guard-armed => return
       if (!(@opt.scroll-lock?) or @opt.scroll-lock) => # if scroll-lock is enabled
@@ -587,6 +610,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   set: ({row, col, data, range, src}) ->
     if !range =>
       if src and @_ccfg and @_ccfg({row, col, type: \readonly}) => return
+      if src => data = @_resolve data, {row, col}
       touched = true
       @_data[][row][col] = data
       @_content {y: row - @pos.row + @xif.row.1, x: col - @pos.col + @xif.col.1}
@@ -598,6 +622,7 @@ sheet.prototype = Object.create(Object.prototype) <<< do
           data[r][c] = @_data[][r + row][c + col]
           continue
         touched = true
+        data[r][c] = @_resolve data[r][c], {row: row + r, col: col + c}
         @_data[][r + row][c + col] = data[r][c]
         @_content {y: r + row - @pos.row + @xif.row.1, x: c + col - @pos.col + @xif.col.1}
     if touched => @fire \change, {row, col, data, range: !!range}
@@ -638,9 +663,36 @@ sheet.prototype = Object.create(Object.prototype) <<< do
   # excluded, which wants the raw one ) gets the same answer.
   # `display` runs first and `format` applies to whatever it returns, so a computed value
   # still gets formatted. note that `raw` may be undefined for a cell holding no data.
+  # a cell with options shows the label of the option it holds, and that is final - neither
+  # `display` nor `format` touches it. a value matching no option falls through to them.
   _display: (raw, {row, col}) ->
+    if (opts = @_options {row, col}) and (o = @_match opts, raw, true) => return o.label
     v = if !@_dsp => raw else @_dsp {raw: raw, row: row, col: col}
     @_format v, {row, col}
+
+  # options from cellcfg, normalized to [{value, label}]. null for a cell without any.
+  _options: ({row, col}) ->
+    if !@_ccfg => return null
+    if !(Array.isArray(o = @_ccfg {type: \options, row: row, col: col}) and o.length) => return null
+    o.map ->
+      if it? and typeof(it) == \object => {value: it.value, label: (if it.label? => it.label else it.value)}
+      else {value: it, label: it}
+
+  # option for `v`: by value, then by label, then either one ignoring case and surrounding
+  # space - which is what a value typed or pasted from elsewhere tends to look like.
+  # stored data is matched by value only ( `strict` ), it is supposed to be one.
+  _match: (opts, v, strict) ->
+    if !(v?) or typeof(v) == \object or (s = '' + v) == '' => return null
+    if (o = opts.find -> '' + it.value == s) or strict => return o
+    if (o = opts.find -> '' + it.label == s) => return o
+    s = s.trim!toLowerCase!
+    opts.find -> ('' + it.value).toLowerCase! == s or ('' + it.label).toLowerCase! == s
+
+  # what user input ( typing, pasting ) stores in a cell with options: the value of the
+  # option it names. anything else is kept as is - it renders with an `invalid` class.
+  _resolve: (v, c) ->
+    if !(opts = @_options c) or !(o = @_match opts, v) => return v
+    o.value
 
   # re-render cell with the content they suppose to have
   _content: ({x, y, n}) ->
@@ -658,7 +710,11 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     clsext = if c.type == \idx => '' else
       ((@cls.col[c.col] or '') + ' ' + (@cls.row[c.row] or ''))
     clsopt = (if !@_ccfg => '' else @_ccfg {type: \class, row: c.row, col: c.col}) or ''
-    n.className = [ c.className, clsext, clsopt ].filter(->it.trim!).join(' ').trim!
+    clsopts = if c.type != \cell or !(opts = @_options c) => ''
+    else
+      raw = @_data[c.row][c.col]
+      "has-options" + (if !(raw?) or raw == '' or @_match(opts, raw, true) => '' else ' invalid')
+    n.className = [ c.className, clsext, clsopt, clsopts ].filter(->it.trim!).join(' ').trim!
 
     # TODO support advanced content
     if typeof(content) == \object =>
@@ -789,13 +845,17 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     # so editing must start from the raw value in @_data instead of what's on screen.
     # objects ( advanced content ) have no textual form - fall back to what's rendered.
     raw = (@_data[idx.row] or [])[idx.col]
+    # with options we edit by label - the value is only what gets stored.
+    opts = @_options idx
+    cur = if opts => @_match opts, raw, true else null
     raw = (
       if !raw? => ''
+      else if cur => '' + cur.label
       else if typeof(raw) == \object => (node.textContent or '')
       else '' + raw
     )
 
-    @editing <<< {node, quick, on: true}
+    @editing <<< {node, quick, on: true, opts: opts}
     @dom.layout.textContent = raw
     lbox = @dom.layout.getBoundingClientRect!
     box = node.getBoundingClientRect!
@@ -813,12 +873,58 @@ sheet.prototype = Object.create(Object.prototype) <<< do
     @dom.textarea.value = v = (if quick => '' else raw)
     @dom.textarea.focus!
     @dom.textarea.setSelectionRange v.length, v.length
+    if opts =>
+      # nothing is picked until the user says so: clicking away right after opening the
+      # list keeps the cell as it was, rather than storing whichever option comes first.
+      @editing <<< list: opts, hi: (if cur => opts.indexOf(cur) else -1)
+      @_opt-render!
+
+  # narrow the option list down to what is typed. the best match gets picked, so typing
+  # `g` then enter is all it takes.
+  _opt-filter: (txt) ->
+    e = @editing
+    s = (txt or '').trim!toLowerCase!
+    has = (o, f) -> ('' + o.label).toLowerCase![f](s) or ('' + o.value).toLowerCase![f](s)
+    e.list = if !s => e.opts else e.opts.filter -> has it, \includes
+    e.hi = if !s => -1 else
+      i = e.list.findIndex -> ('' + it.label).toLowerCase! == s or ('' + it.value).toLowerCase! == s
+      if i >= 0 => i else if (i = e.list.findIndex -> has it, \startsWith) >= 0 => i else if e.list.length => 0 else -1
+    @_opt-render!
+
+  _opt-render: ->
+    [e, n] = [@editing, @dom.options]
+    n.textContent = ''
+    if !(e.on and e.opts and e.list.length) => return n.classList.toggle \show, false
+    e.list.map (o, i) ~>
+      n.appendChild document.createElement(\div)
+        ..className = "option" + (if i == e.hi => " active" else "")
+        ..dataset.idx = i
+        ..textContent = o.label
+    n.classList.toggle \show, true
+    # below the cell, or above it if the sheet ends before the list does.
+    box = e.node.getBoundingClientRect!
+    rbox = @dom.sheet.getBoundingClientRect!
+    [sx, sy] = [@dom.sheet.scrollLeft, @dom.sheet.scrollTop]
+    n.style <<< left: "#{box.x - rbox.x + sx - 2}px", minWidth: "#{box.width + 4}px"
+    h = n.offsetHeight
+    below = rbox.bottom - box.bottom
+    n.style.top = if below < h and box.top - rbox.top > below => "#{box.top - rbox.top + sy - h - 2}px"
+    else "#{box.bottom - rbox.top + sy + 2}px"
+    # keep the picked one in view. not scrollIntoView, which may scroll the page as well.
+    if (a = n.childNodes[e.hi]) =>
+      if a.offsetTop < n.scrollTop => n.scrollTop = a.offsetTop
+      else if a.offsetTop + a.offsetHeight > n.scrollTop + n.clientHeight =>
+        n.scrollTop = a.offsetTop + a.offsetHeight - n.clientHeight
 
   edited: (opt = {}) ->
     if !@editing.on => return
-    if !opt.cancel => @set {row: @les.start.row, col: @les.start.col, data: (v = (@dom.textarea.value or ''))}
+    if !opt.cancel =>
+      e = @editing
+      v = if e.opts and e.hi >= 0 and e.list[e.hi] => e.list[e.hi].value else (@dom.textarea.value or '')
+      @set {row: @les.start.row, col: @les.start.col, data: v, src: \user}
     @dom.edit.classList.toggle \show, false
-    @editing <<< node: null, on: false
+    @editing <<< node: null, on: false, opts: null, list: null, hi: -1
+    @_opt-render!
 
   index: (node) ->
     idx = Array.from(@dom.inner.childNodes).indexOf(node)

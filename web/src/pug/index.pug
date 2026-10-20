@@ -41,6 +41,10 @@ block body
     p.text-sm.text-muted.mt-2 scroll the page with the pointer over the sheet above: the page moves, the grid does not. click it and the wheel is the sheet's. the button below toggles the same state through the `guard()` API.
     .d-flex.g-2.mb-4
       .btn.btn-sm.btn-outline-secondary(ld="guard") Toggle Guard
+    h6.mt-4.mb-1 Options
+    p.text-sm.text-muted.mb-2 `options` in cellcfg turns the last column into a pick list: it stores `G` / `R` and shows the label. edit it ( double click, enter or just type ) to get the list - up / down and enter to pick, esc to cancel. pasting labels or values both store the value, anything else is kept and marked invalid. the header row gets no options.
+    .aspect-ratio.ratio-2by1
+      #options.shadow-sm.border.border-secondary.rounded
   .dropdown-menu.shadow-sm(ld="menu")
     .dropdown-item(ld="del") Del Row/Col
     .dropdown-item(ld="ins") Ins Row/Col
@@ -150,6 +154,23 @@ block script
       frozen: {row: 1, col: 1}
       data: [0 til 40].map (r) -> [0 til 12].map (c) -> "r#{r}c#{c}"
     g.on \guard, -> console.log "guard", it
+
+    # `options` makes a cell a pick list. strings work too, standing for both value and label.
+    o = new sheet do
+      root: '#options'
+      frozen: {row: 1}
+      size: {col: ['10em', '10em', '7em', '8em']}
+      cellcfg: ({row, col, type}) ->
+        if type == \options and col == 3 and row > 0 =>
+          return [{value: \G, label: "集團"}, {value: \R, label: "關係企業"}]
+        return null
+      data: [
+        ["中文名稱", "英文名稱", "統編", "集團或關係企業"]
+        ["甲公司", "A Corp", "12345678", \G]
+        ["乙公司", "B Corp", "23456789", \R]
+        ["丙公司", "C Corp", "34567890", \X]
+      ]
+    o.on \change, -> console.log \options, JSON.stringify(it)
 
     /*
     c.innerHTML = """

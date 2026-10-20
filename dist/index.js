@@ -135,7 +135,7 @@
     };
     this.les = {};
     this.editing = {};
-    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x', 'scroll-y', 'scroll-x'].map(function(it){
+    this.dom = Object.fromEntries(['sheet', 'inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x', 'scroll-y', 'scroll-x', 'options'].map(function(it){
       var x$, n;
       x$ = n = document.createElement('div');
       x$.classList.add(it);
@@ -144,7 +144,7 @@
     this.dom.sheet.setAttribute('tabindex', -1);
     this.dom.textarea = document.createElement('textarea');
     this.root.appendChild(this.dom.sheet);
-    ['inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x', 'scroll-y', 'scroll-x'].map(function(it){
+    ['inner', 'caret', 'range', 'edit', 'layout', 'range-cut', 'slide-y', 'slide-x', 'scroll-y', 'scroll-x', 'options'].map(function(it){
       return this$.dom.sheet.appendChild(this$.dom[it]);
     });
     if (!this.opt.slider) {
@@ -221,6 +221,23 @@
       this.regrid();
       this.dom.textarea.addEventListener('mousedown', function(e){
         return e.stopPropagation();
+      });
+      this.dom.options.addEventListener('mousedown', function(e){
+        var n;
+        e.stopPropagation();
+        e.preventDefault();
+        if (!(n = parent(e.target, '.option', this$.dom.options))) {
+          return;
+        }
+        this$.editing.hi = +n.dataset.idx;
+        this$.edited();
+        return this$.renderSelection();
+      });
+      this.dom.textarea.addEventListener('input', function(e){
+        if (!this$.editing.on || !this$.editing.opts) {
+          return;
+        }
+        return this$._optFilter(this$.dom.textarea.value);
       });
       this.dom.sheet.addEventListener('contextmenu', function(e){
         this$.fire('menu.on', {
@@ -384,7 +401,7 @@
         }
       });
       this.dom.textarea.addEventListener('keydown', function(e){
-        var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, opt, lbox, box;
+        var code, ref$, sc, ec, sr, er, data, res$, i$, row, lresult$, j$, col, len, opt, lbox, box;
         code = e.keyCode;
         if (e.keyCode === 86 && (e.metaKey || e.ctrlKey)) {
           return;
@@ -432,6 +449,21 @@
         }
         if (code === 187 && (e.metaKey || e.ctrlKey)) {
           this$.insert();
+        }
+        if (this$.editing.on && this$.editing.opts && (code === 38 || code === 40)) {
+          e.stopPropagation();
+          e.preventDefault();
+          if (len = this$.editing.list.length) {
+            this$.editing.hi = this$.editing.hi < 0
+              ? code === 40
+                ? 0
+                : len - 1
+              : (this$.editing.hi + (code === 40
+                ? 1
+                : -1) + len) % len;
+            this$._optRender();
+          }
+          return;
         }
         opt = (function(){
           switch (code) {
@@ -625,6 +657,9 @@
         var inscope, spos, ref$, dx, dy, ox, oy;
         inscope = this$.eventInScope(e);
         if (!this$.enableScrolling) {
+          return;
+        }
+        if (this$.dom.options.contains(e.target)) {
           return;
         }
         if (this$._guardArmed) {
@@ -1060,6 +1095,12 @@
         })) {
           return;
         }
+        if (src) {
+          data = this._resolve(data, {
+            row: row,
+            col: col
+          });
+        }
         touched = true;
         ((ref$ = this._data)[row] || (ref$[row] = []))[col] = data;
         this._content({
@@ -1082,6 +1123,10 @@
               continue;
             }
             touched = true;
+            data[r][c] = this._resolve(data[r][c], {
+              row: row + r,
+              col: col + c
+            });
             ((ref$ = this._data)[key$ = r + row] || (ref$[key$] = []))[c + col] = data[r][c];
             this._content({
               y: r + row - this.pos.row + this.xif.row[1],
@@ -1153,8 +1198,14 @@
       return v;
     },
     _display: function(raw, arg$){
-      var row, col, v;
+      var row, col, opts, o, v;
       row = arg$.row, col = arg$.col;
+      if ((opts = this._options({
+        row: row,
+        col: col
+      })) && (o = this._match(opts, raw, true))) {
+        return o.label;
+      }
       v = !this._dsp
         ? raw
         : this._dsp({
@@ -1167,8 +1218,64 @@
         col: col
       });
     },
+    _options: function(arg$){
+      var row, col, o;
+      row = arg$.row, col = arg$.col;
+      if (!this._ccfg) {
+        return null;
+      }
+      if (!(Array.isArray(o = this._ccfg({
+        type: 'options',
+        row: row,
+        col: col
+      })) && o.length)) {
+        return null;
+      }
+      return o.map(function(it){
+        if (it != null && typeof it === 'object') {
+          return {
+            value: it.value,
+            label: it.label != null
+              ? it.label
+              : it.value
+          };
+        } else {
+          return {
+            value: it,
+            label: it
+          };
+        }
+      });
+    },
+    _match: function(opts, v, strict){
+      var s, o;
+      if (!(v != null) || typeof v === 'object' || (s = '' + v) === '') {
+        return null;
+      }
+      if ((o = opts.find(function(it){
+        return '' + it.value === s;
+      })) || strict) {
+        return o;
+      }
+      if (o = opts.find(function(it){
+        return '' + it.label === s;
+      })) {
+        return o;
+      }
+      s = s.trim().toLowerCase();
+      return opts.find(function(it){
+        return ('' + it.value).toLowerCase() === s || ('' + it.label).toLowerCase() === s;
+      });
+    },
+    _resolve: function(v, c){
+      var opts, o;
+      if (!(opts = this._options(c)) || !(o = this._match(opts, v))) {
+        return v;
+      }
+      return o.value;
+    },
     _content: function(arg$){
-      var x, y, n, c, content, ref$, key$, clsext, clsopt;
+      var x, y, n, c, content, ref$, key$, clsext, clsopt, clsopts, opts, raw;
       x = arg$.x, y = arg$.y, n = arg$.n;
       if (!n && !(n = this.dom.inner.childNodes[x + y * this.dim.col])) {
         return;
@@ -1198,7 +1305,10 @@
           row: c.row,
           col: c.col
         })) || '';
-      n.className = [c.className, clsext, clsopt].filter(function(it){
+      clsopts = c.type !== 'cell' || !(opts = this._options(c))
+        ? ''
+        : (raw = this._data[c.row][c.col], "has-options" + (!(raw != null) || raw === '' || this._match(opts, raw, true) ? '' : ' invalid'));
+      n.className = [c.className, clsext, clsopt, clsopts].filter(function(it){
         return it.trim();
       }).join(' ').trim();
       if (typeof content === 'object') {
@@ -1438,7 +1548,7 @@
       return this.renderSelection();
     },
     edit: function(arg$){
-      var node, quick, idx, raw, ref$, lbox, box, rbox, sx, sy, v;
+      var node, quick, idx, raw, opts, cur, ref$, lbox, box, rbox, sx, sy, v;
       node = arg$.node, quick = arg$.quick;
       if (!this._editing) {
         return;
@@ -1455,15 +1565,20 @@
         return;
       }
       raw = (this._data[idx.row] || [])[idx.col];
+      opts = this._options(idx);
+      cur = opts ? this._match(opts, raw, true) : null;
       raw = raw == null
         ? ''
-        : typeof raw === 'object'
-          ? node.textContent || ''
-          : '' + raw;
+        : cur
+          ? '' + cur.label
+          : typeof raw === 'object'
+            ? node.textContent || ''
+            : '' + raw;
       ref$ = this.editing;
       ref$.node = node;
       ref$.quick = quick;
       ref$.on = true;
+      ref$.opts = opts;
       this.dom.layout.textContent = raw;
       lbox = this.dom.layout.getBoundingClientRect();
       box = node.getBoundingClientRect();
@@ -1480,23 +1595,104 @@
       ref$.height = Math.max(lbox.height, box.height + 1) + "px";
       this.dom.textarea.value = v = quick ? '' : raw;
       this.dom.textarea.focus();
-      return this.dom.textarea.setSelectionRange(v.length, v.length);
+      this.dom.textarea.setSelectionRange(v.length, v.length);
+      if (opts) {
+        ref$ = this.editing;
+        ref$.list = opts;
+        ref$.hi = cur
+          ? opts.indexOf(cur)
+          : -1;
+        return this._optRender();
+      }
+    },
+    _optFilter: function(txt){
+      var e, s, has, i;
+      e = this.editing;
+      s = (txt || '').trim().toLowerCase();
+      has = function(o, f){
+        return ('' + o.label).toLowerCase()[f](s) || ('' + o.value).toLowerCase()[f](s);
+      };
+      e.list = !s
+        ? e.opts
+        : e.opts.filter(function(it){
+          return has(it, 'includes');
+        });
+      e.hi = !s
+        ? -1
+        : (i = e.list.findIndex(function(it){
+          return ('' + it.label).toLowerCase() === s || ('' + it.value).toLowerCase() === s;
+        }), i >= 0
+          ? i
+          : (i = e.list.findIndex(function(it){
+            return has(it, 'startsWith');
+          })) >= 0
+            ? i
+            : e.list.length
+              ? 0
+              : -1);
+      return this._optRender();
+    },
+    _optRender: function(){
+      var ref$, e, n, box, rbox, sx, sy, h, below, a;
+      ref$ = [this.editing, this.dom.options], e = ref$[0], n = ref$[1];
+      n.textContent = '';
+      if (!(e.on && e.opts && e.list.length)) {
+        return n.classList.toggle('show', false);
+      }
+      e.list.map(function(o, i){
+        var x$;
+        x$ = n.appendChild(document.createElement('div'));
+        x$.className = "option" + (i === e.hi ? " active" : "");
+        x$.dataset.idx = i;
+        x$.textContent = o.label;
+        return x$;
+      });
+      n.classList.toggle('show', true);
+      box = e.node.getBoundingClientRect();
+      rbox = this.dom.sheet.getBoundingClientRect();
+      ref$ = [this.dom.sheet.scrollLeft, this.dom.sheet.scrollTop], sx = ref$[0], sy = ref$[1];
+      ref$ = n.style;
+      ref$.left = (box.x - rbox.x + sx - 2) + "px";
+      ref$.minWidth = (box.width + 4) + "px";
+      h = n.offsetHeight;
+      below = rbox.bottom - box.bottom;
+      n.style.top = below < h && box.top - rbox.top > below
+        ? (box.top - rbox.top + sy - h - 2) + "px"
+        : (box.bottom - rbox.top + sy + 2) + "px";
+      if (a = n.childNodes[e.hi]) {
+        if (a.offsetTop < n.scrollTop) {
+          return n.scrollTop = a.offsetTop;
+        } else if (a.offsetTop + a.offsetHeight > n.scrollTop + n.clientHeight) {
+          return n.scrollTop = a.offsetTop + a.offsetHeight - n.clientHeight;
+        }
+      }
     },
     edited: function(opt){
-      var v, ref$;
+      var e, v, ref$;
       opt == null && (opt = {});
       if (!this.editing.on) {
         return;
       }
       if (!opt.cancel) {
+        e = this.editing;
+        v = e.opts && e.hi >= 0 && e.list[e.hi]
+          ? e.list[e.hi].value
+          : this.dom.textarea.value || '';
         this.set({
           row: this.les.start.row,
           col: this.les.start.col,
-          data: v = this.dom.textarea.value || ''
+          data: v,
+          src: 'user'
         });
       }
       this.dom.edit.classList.toggle('show', false);
-      return ref$ = this.editing, ref$.node = null, ref$.on = false, ref$;
+      ref$ = this.editing;
+      ref$.node = null;
+      ref$.on = false;
+      ref$.opts = null;
+      ref$.list = null;
+      ref$.hi = -1;
+      return this._optRender();
     },
     index: function(node){
       var idx, x, c;

@@ -91,6 +91,45 @@ initabs()
       display: block /* eliminate small gap between .edit and textarea */
       border: none
       outline: none
+  /* cells with options ( see `options` in cellcfg ): a hint they take a pick, and a
+  mark on those holding something no option stands for. */
+  .cell.has-options
+    padding-right: 14px
+    &:after
+      content: "▾"
+      position: absolute
+      top: 0
+      right: 3px
+      line-height: inherit
+      font-size: .75em
+      color: #aaa
+  .cell.invalid
+    color: #d33
+    background: #fff3f3
+  .options
+    initabs()
+    z-index: 125
+    display: none
+    max-height: 12em
+    overflow-y: auto
+    overscroll-behavior: contain
+    box-sizing: border-box
+    padding: 2px 0
+    background: #fff
+    border: 1px solid #bbb
+    border-radius: 3px
+    box-shadow: 0 4px 12px rgba(0,0,0,.12)
+    .option
+      padding: 0 10px
+      line-height: 26px
+      white-space: nowrap
+      cursor: pointer
+      user-select: none
+      &:hover
+        background: #f1f2f3
+      &.active
+        background: #27f
+        color: #fff
   .layout
     display: inline-block
     initabs()

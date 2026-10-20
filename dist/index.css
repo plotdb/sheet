@@ -9,6 +9,8 @@
 /* with `enableScrolling: false` we no longer take the wheel, so the page should get it.
   the horizontal axis keeps `contain` - that is the axis the swipe back gesture lives on,
   and nothing here scrolls horizontally either way. */
+/* cells with options ( see `options` in cellcfg ): a hint they take a pick, and a
+  mark on those holding something no option stands for. */
 }
 .sheet.no-scrolling {
   overscroll-behavior-y: auto;
@@ -102,6 +104,52 @@
   display: block /* eliminate small gap between .edit and textarea */;
   border: none;
   outline: none;
+}
+.sheet .cell.has-options {
+  padding-right: 14px;
+}
+.sheet .cell.has-options:after {
+  content: "▾";
+  position: absolute;
+  top: 0;
+  right: 3px;
+  line-height: inherit;
+  font-size: 0.75em;
+  color: #aaa;
+}
+.sheet .cell.invalid {
+  color: #d33;
+  background: #fff3f3;
+}
+.sheet .options {
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 125;
+  display: none;
+  max-height: 12em;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  padding: 2px 0;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.sheet .options .option {
+  padding: 0 10px;
+  line-height: 26px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.sheet .options .option:hover {
+  background: #f1f2f3;
+}
+.sheet .options .option.active {
+  background: #27f;
+  color: #fff;
 }
 .sheet .layout {
   display: inline-block;

@@ -91,6 +91,17 @@ initialize:
      - `readonly`: return true if the given cell should be readonly.
      - `format`: return cell format for number. Use `d3-format` syntax.
        - depends on `d3.format`. if not available, no formatting will be applied.
+     - `options`: return a list of options to make the cell a pick list, or nothing for a
+       plain cell. each option is either `{value, label}` or a string, standing for both.
+       - the cell stores `value` and shows `label`. `display` and `format` don't apply to
+         a cell showing an option label.
+       - editing ( double click, enter, or simply typing ) opens the list below the cell.
+         typing narrows it down, up / down picks, enter or a click commits, esc cancels.
+       - typed and pasted text naming an option, by value or by label ( case and
+         surrounding space ignored ), is stored as its value. anything else is kept as is,
+         and the cell gets an `invalid` class - checking the data is up to you.
+       - cells with options get a `has-options` class.
+       - this is per cell, so returning nothing for a header row keeps it a plain cell.
 
 
 ## API
